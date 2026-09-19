@@ -549,7 +549,12 @@ button { font: inherit; color: inherit; }
   font-size: 1rem;
 }
 .ajuste input[type="range"] { height: 40px; accent-color: var(--acento); }
-.interruptor { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+/* Más específico que ".ajuste label { display: block }", que si no gana por
+   especificidad y deja la casilla pegada al texto en vez de a la derecha. */
+.ajuste label.interruptor,
+.interruptor {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+}
 .interruptor input { width: 30px; height: 30px; accent-color: var(--acento); }
 
 .aviso {
@@ -728,6 +733,187 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   color: var(--tinta);
 }
 .campo-codigo:focus { outline: none; border-color: var(--acento); }
+
+/* ==================================================== nivel avanzado ==== */
+
+/* Falsos amigos: las dos lenguas enfrentadas, para que el contraste se vea
+   además de oírse. */
+.contraste { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0 6px; }
+.contraste .btn { flex-direction: column; gap: 4px; min-height: 96px; padding: 12px 8px; }
+.contraste .bandera { font-size: 1.6rem; }
+.contraste .chico { font-size: .72rem; font-weight: 700; opacity: .7; }
+.contraste b { font-family: var(--lectura); font-size: 1.3rem; }
+.lado-en { --boton-borde: #6a63cf; }
+.lado-es { --boton-borde: var(--acento); }
+
+.aviso-ingles {
+  display: flex; gap: 12px; align-items: flex-start; text-align: left;
+  margin: 16px auto 0; max-width: 46ch;
+  padding: 14px 16px;
+  border: 2px dashed var(--c5);
+  border-radius: var(--radio-s);
+  background: color-mix(in srgb, var(--c5) 8%, var(--superficie));
+}
+.aviso-ingles p { margin: 0 0 10px; font-weight: 600; font-size: .95rem; line-height: 1.45; }
+.aviso-ingles .btn { min-height: 48px; font-size: .95rem; padding: 8px 14px; }
+
+.campo-dictado { text-transform: lowercase; letter-spacing: .04em; margin-top: 14px; }
+
+/* ------------------------------------------------------------ cuentos -- */
+.nivel-titulo {
+  margin: 22px 0 10px; font-size: 1.05rem; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--tinta-suave);
+}
+.rejilla-cuentos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.cuento-btn {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 16px 10px;
+  border: 3px solid var(--u); border-radius: 22px;
+  background: var(--superficie); box-shadow: 0 5px 0 var(--u);
+  cursor: pointer; transition: transform .08s ease; touch-action: manipulation;
+}
+.cuento-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--u); }
+.cuento-btn.leido { border-color: var(--exito); box-shadow: 0 5px 0 var(--exito); }
+.cuento-emo { font-size: 2.4rem; line-height: 1; }
+.cuento-titulo { font-weight: 800; text-align: center; line-height: 1.25; }
+.cuento-dato { font-size: .78rem; font-weight: 700; color: var(--tinta-suave); }
+
+/* ------------------------------------------------------- comprensión -- */
+.pregunta-texto {
+  font-family: var(--lectura);
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
+  font-weight: 700; line-height: 1.5; margin: 10px 0 0;
+}
+.opciones-pregunta { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.opcion {
+  font-family: var(--lectura);
+  font-size: clamp(1.1rem, 4.6vw, 1.4rem);
+  font-weight: 600; line-height: 1.4; text-align: left;
+  padding: 18px 20px;
+  border: 3px solid var(--borde); border-radius: 20px;
+  background: var(--superficie); color: var(--tinta);
+  box-shadow: 0 4px 0 var(--borde);
+  cursor: pointer; transition: transform .08s ease; touch-action: manipulation;
+}
+.opcion:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--borde); }
+.opcion.bien { border-color: var(--exito); background: var(--exito-suave); color: var(--exito); box-shadow: 0 4px 0 var(--exito); }
+.opcion.mal { border-color: var(--error); background: var(--error-suave); color: var(--error); box-shadow: 0 4px 0 var(--error); animation: tiembla .35s; }
+
+.moraleja {
+  margin-top: 20px; padding: 20px 18px;
+  border-radius: 22px;
+  border: 3px solid var(--estrella);
+  background: color-mix(in srgb, var(--estrella) 12%, var(--superficie));
+  text-align: center;
+}
+.moraleja-icono { font-size: 2.2rem; line-height: 1; }
+.moraleja-titulo {
+  margin: 6px 0 4px; font-size: .8rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-suave);
+}
+.moraleja-texto {
+  margin: 0; font-family: var(--lectura);
+  font-size: clamp(1.1rem, 4.8vw, 1.45rem); font-weight: 700; line-height: 1.5;
+}
+
+/* --------------------------------------------------------- velocidad -- */
+.marca { margin: 4px 0 12px; }
+.ppm-numero {
+  display: block; font-size: 3.2rem; font-weight: 800; line-height: 1;
+  color: var(--u, var(--acento)); font-variant-numeric: tabular-nums;
+}
+.ppm-texto { display: block; font-size: .8rem; font-weight: 700; color: var(--tinta-suave); }
+.ppm-mejora { display: block; margin-top: 6px; font-weight: 800; color: var(--exito); }
+
+/* ------------------------------------------------- panel del adulto --- */
+.cifras { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0 6px; }
+.cifra {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 12px 4px; border-radius: var(--radio-s);
+  background: var(--superficie); border: 2px solid var(--borde);
+}
+.cifra b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.cifra span { font-size: .68rem; font-weight: 700; color: var(--tinta-suave); text-align: center; line-height: 1.2; }
+
+/* Una barra por lectura: se ve de un vistazo si va ganando velocidad. */
+.barras {
+  display: flex; align-items: flex-end; gap: 4px;
+  height: 84px; margin: 12px 0 6px; padding: 6px;
+  border-radius: var(--radio-s); background: var(--superficie-2);
+}
+.barra-ppm { flex: 1; border-radius: 4px 4px 0 0; background: var(--c3); min-height: 8px; }
+.barra-ppm:last-child { background: var(--acento); }
+
+.lista-fallos { margin: 0; padding: 0; list-style: none; }
+.lista-fallos li {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--borde);
+  font-weight: 700;
+}
+.lista-fallos li:last-child { border-bottom: 0; }
+.lista-fallos b { color: var(--error); font-variant-numeric: tabular-nums; }
+
+/* ================================================ varios niños ========== */
+
+/* Bienvenida: la única pantalla escrita para que la lea un adulto. */
+.bienvenida { text-align: center; padding: 24px 0 40px; }
+.bienvenida .logo { font-size: clamp(3.4rem, 16vw, 5rem); line-height: 1; }
+.bienvenida h1 { margin: 6px 0 10px; font-size: clamp(1.8rem, 7vw, 2.4rem); }
+.bienvenida .ajuste { text-align: left; }
+
+.campo-nombre {
+  width: 100%;
+  padding: 16px;
+  font-family: var(--lectura);
+  font-size: 1.4rem;
+  text-align: center;
+  border: 3px solid var(--borde);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+  color: var(--tinta);
+}
+.campo-nombre:focus { outline: none; border-color: var(--acento); }
+
+.avatares { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.avatar {
+  width: 56px; height: 56px;
+  font-size: 1.8rem; line-height: 1;
+  border: 3px solid var(--borde); border-radius: 50%;
+  background: var(--superficie);
+  cursor: pointer; transition: transform .08s ease;
+  touch-action: manipulation;
+}
+.avatar:active { transform: scale(.92); }
+.avatar.elegido {
+  border-color: var(--acento);
+  background: color-mix(in srgb, var(--acento) 16%, var(--superficie));
+  transform: scale(1.08);
+}
+
+/* Lista de niños del aparato */
+.perfil {
+  position: relative;
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  margin-bottom: 10px; padding: 14px 16px;
+  border: 3px solid var(--borde); border-radius: var(--radio);
+  background: var(--superficie); color: var(--tinta);
+  text-align: left; cursor: pointer;
+  touch-action: manipulation;
+}
+.perfil.activo { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 10%, var(--superficie)); }
+.perfil-emo { font-size: 2rem; line-height: 1; }
+.perfil-datos { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.perfil-datos b { font-size: 1.1rem; }
+.perfil-datos span { font-size: .82rem; font-weight: 700; color: var(--tinta-suave); }
+.perfil .hecha { position: static; width: 26px; height: 26px; border-width: 0; }
+
+/* La chapa de la esquina: quién está leyendo y cuántas estrellas lleva. */
+.marcador-perfil { cursor: pointer; max-width: 58vw; }
+.perfil-mini { font-size: 1.15rem; }
+.perfil-nombre {
+  max-width: 7ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 
 </style>
 <link rel="manifest" href="manifest.webmanifest">
@@ -1011,6 +1197,15 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   var rateScale = 1;   // el ajuste global de velocidad multiplica los anteriores
 
   function isSpanish(v) { return /^es(\b|[-_])/i.test(v.lang || ''); }
+  function isEnglish(v) { return /^en(\b|[-_])/i.test(v.lang || ''); }
+
+  /*
+   * Para enseñar los falsos amigos del alfabeto hace falta decir la misma
+   * letra en inglés y en español, una detrás de otra. Guardamos aparte una
+   * voz inglesa; si el aparato no tiene ninguna, quien llama se entera y
+   * enseña sólo el lado español en vez de pronunciarlo con acento español.
+   */
+  var vozInglesa = null;
 
   /* Puntuación de una voz: preferimos español de España y voces locales. */
   function score(v) {
@@ -1034,6 +1229,9 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     var saved = preferredURI && voices.filter(function (v) { return v.voiceURI === preferredURI; })[0];
     chosen = saved || voices.slice().sort(function (a, b) { return score(b) - score(a); })[0] || null;
+
+    var inglesas = all.filter(isEnglish);
+    vozInglesa = inglesas.filter(function (v) { return v.localService; })[0] || inglesas[0] || null;
 
     listeners.forEach(function (fn) { try { fn(voices, chosen); } catch (e) {} });
   }
@@ -1161,9 +1359,30 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     loadVoices();
   }
 
+  /* Pronuncia algo CON VOZ INGLESA. Devuelve false si no hay ninguna. */
+  function sayEnglish(text, opts) {
+    opts = opts || {};
+    if (!supported || !vozInglesa || !text) return Promise.resolve(false);
+    if (opts.interrupt !== false) cancel();
+    return new Promise(function (resolve) {
+      var u = new global.SpeechSynthesisUtterance(String(text));
+      u.voice = vozInglesa;
+      u.lang = vozInglesa.lang;
+      u.rate = Math.max(0.1, Math.min(2, (opts.rate || 0.75) * rateScale));
+      u.pitch = 1;
+      var listo = false;
+      function fin() { if (!listo) { listo = true; clearTimeout(guarda); resolve(true); } }
+      u.onend = fin; u.onerror = fin;
+      var guarda = setTimeout(fin, 4000 + String(text).length * 120);
+      try { synth.speak(u); startKeepAlive(); } catch (e) { fin(); }
+    });
+  }
+
   global.Voz = {
     soportado: supported,
     hablar: say,
+    hablarEnIngles: sayEnglish,
+    hayVozInglesa: function () { return !!vozInglesa; },
     secuencia: sequence,
     parar: cancel,
     preparar: prime,
@@ -1310,14 +1529,80 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     vienesDeOtro:   ['¿Vienes de otro aparato?', '從別的裝置來的嗎？'],
     pegaCodigo:     ['Escribe aquí el código', '在這裡輸入代碼'],
     continuarAqui:  ['Continuar aquí', '在這裡繼續'],
-    traspasoAyuda:  ['Apunta este código o manda el enlace al otro aparato. Allí recuperas las unidades hechas y las estrellas.',
-                     '記下這個代碼，或把連結傳到另一台裝置。在那裡就能找回已完成的課程和星星。'],
+    traspasoAyuda:  ['El código se puede dictar: lleva las unidades, los cuentos y las estrellas.',
+                     '這個代碼可以唸給別人：包含課程、故事和星星。'],
+    enlaceLlevaTodo:['El enlace lleva además la velocidad de lectura y lo que le cuesta, para que el repaso siga sabiendo qué traerle.',
+                     '連結還包含閱讀速度和容易出錯的地方，這樣複習才知道該練什麼。'],
     traspasoOjo:    ['Los ajustes no viajan: la voz de cada aparato es distinta.',
                      '設定不會一起帶過去：每台裝置的語音不一樣。'],
     codigoMal:      ['Ese código no vale. Míralo otra vez.', '這個代碼無效，請再檢查一次。'],
     codigoPisa:     ['Esto sustituirá el progreso de este aparato. ¿Seguro?',
                      '這會取代這台裝置上的進度。確定嗎？'],
-    codigoBien:     ['¡Listo! Progreso recuperado.', '好了！進度已經找回來。']
+    codigoBien:     ['¡Listo! Progreso recuperado.', '好了！進度已經找回來。'],
+    copiarCodigo:   ['Copiar el código', '複製代碼'],
+
+    /* Nivel avanzado */
+    pasoIngles:     ['Escucha las dos y nota la diferencia', '兩種都聽，注意不一樣的地方'],
+    pasoInventadas: ['Lee estas palabras inventadas', '讀這些編出來的詞'],
+    pasoPares:      ['Escucha y toca la que he dicho', '聽，然後點我說的那個'],
+    pasoDictado:    ['Escribe la palabra que oigas', '把聽到的詞寫出來'],
+    enIngles:       ['En inglés', '英文裡'],
+    enEspanol:      ['En español', '西班牙語裡'],
+    sinVozInglesa:  ['Este aparato no tiene voz inglesa, así que te lo explico sin el ejemplo.',
+                     '這台裝置沒有英文語音，只用文字說明。'],
+    escribeAqui:    ['Escribe aquí', '在這裡寫'],
+    revisar:        ['Revisar', '檢查'],
+    ortografia:     ['Suena bien, pero se escribe distinto', '發音對了，但拼法不一樣'],
+    enQueCambian:   ['En qué cambian', '差別在哪裡'],
+
+    /* Cuentos */
+    biblioteca:     ['Cuentos', '故事'],
+    nivel:          ['Nivel', '等級'],
+    moraleja:       ['Lo que nos enseña', '這個故事告訴我們'],
+    preguntaTitulo: ['¿Lo has entendido?', '你看懂了嗎？'],
+    leerYCronometrar: ['Léelo tú y te cronometro', '你來讀，我幫你計時'],
+    yaTermine:      ['Ya he terminado', '我讀完了'],
+    ppm:            ['palabras por minuto', '每分鐘幾個字'],
+    intento:        ['Intento', '第幾次'],
+    mejorMarca:     ['¡Tu mejor marca!', '你的最佳紀錄！'],
+    masRapido:      ['Más rápido que antes', '比上次快'],
+    otraVezMasRapido: ['Léelo otra vez, te saldrá más rápido', '再讀一次，會更快'],
+
+    /* Panel del adulto */
+    comoVa:         ['Cómo va', '學習情況'],
+    diasSeguidos:   ['Días seguidos', '連續天數'],
+    diasTotales:    ['Días practicando', '練習天數'],
+    dondeFalla:     ['Dónde falla más', '最常出錯的地方'],
+    velocidad2:     ['Velocidad de lectura', '閱讀速度'],
+    mejorPpm:       ['Mejor marca', '最佳紀錄'],
+    sinDatos:       ['Todavía no hay datos. Cuando lea en voz alta, aparecerán aquí.',
+                     '還沒有資料。等他大聲讀過之後就會出現。'],
+    repasoFlojo:    ['Repaso de lo que falla', '複習容易錯的地方'],
+
+    /* Bienvenida y varios niños en el mismo aparato */
+    holaBienvenida: ['¡Hola!', '你好！'],
+    queEsEsto:      ['Esta app enseña a leer español desde cero, con la voz y el micrófono del navegador. Es para niños que ya hablan español pero nunca lo han leído.',
+                     '這個應用程式用瀏覽器的語音和麥克風，從零開始教你讀西班牙語。適合已經會說西班牙語、但還不會讀的小朋友。'],
+    comoTeLlamas:   ['¿Cómo te llamas?', '你叫什麼名字？'],
+    tuNombre:       ['Tu nombre', '你的名字'],
+    eligeDibujo:    ['Elige tu dibujo', '選一個圖案'],
+    leesChino:      ['¿Sabes leer chino?', '你會讀中文嗎？'],
+    leesChinoAyuda: ['Pondré las instrucciones también en chino tradicional.',
+                     '我會把說明也用繁體中文寫出來。'],
+    letrasIngles:   ['¿Te sabes las letras en inglés?', '你會英文字母嗎？'],
+    letrasInglesAyuda: ['Te avisaré cuando una letra suene distinto en español.',
+                        '當字母在西班牙語裡發音不同時，我會提醒你。'],
+    vamos:          ['¡Vamos!', '開始吧！'],
+    quienJuega:     ['Quién está leyendo', '誰在讀'],
+    cambiarNino:    ['Cambiar de niño', '換一個小朋友'],
+    anadirNino:     ['Añadir otro niño', '新增小朋友'],
+    borrarNino:     ['Borrar este niño', '刪除這個小朋友'],
+    borrarNinoOjo:  ['Se borrará todo su progreso. ¿Seguro?', '他的進度會全部刪除。確定嗎？'],
+    sinNombre:      ['Sin nombre', '沒有名字'],
+    compartir:      ['Compartir la app', '分享這個應用程式'],
+    compartida:     ['¡Enlace copiado!', '連結已複製！'],
+    paraPadres:     ['Para los padres', '給家長'],
+    avisosIngles:   ['Avisos sobre el inglés', '英文對照提示']
   };
 
   var idioma = 0;   // 0 = español, 1 = chino como apoyo
@@ -1789,6 +2074,42 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         }
       ],
       frases: []
+    },
+
+    {
+      id: 'inventadas', tipo: 'inventadas', color: 5, emoji: '👽',
+      titulo: 'Palabras inventadas', letra: '👽', nombre: 'palabras inventadas',
+      fonema: 'leer sin adivinar',
+      truco: 'Estas palabras no existen: me las he inventado. Por eso no puedes acordarte de ellas ni adivinarlas por su forma. Sólo salen si las lees letra a letra. Es el ejercicio que de verdad demuestra que sabes leer.',
+      trucoZh: '這些詞是我編出來的，不存在。所以你不能靠記憶或看形狀猜出來，只能一個字母一個字母地讀。這才真正證明你會讀。',
+      silabas: [], palabras: [], frases: []
+    },
+
+    {
+      id: 'pares', tipo: 'pares', color: 6, emoji: '👀',
+      titulo: 'Parecidas pero distintas', letra: 'pato · pata', nombre: 'pares parecidos',
+      fonema: 'mirar dentro de la palabra',
+      truco: 'Estas parejas se parecen muchísimo: cambian en una letra, o en el orden. Si miras sólo la forma de fuera, caes. Hay que mirar dentro.',
+      trucoZh: '這些詞長得很像，只差一個字母或順序不同。只看外形會看錯，要看清楚裡面。',
+      silabas: [], palabras: [], frases: []
+    },
+
+    {
+      id: 'dictado', tipo: 'dictado', color: 7, emoji: '✍️',
+      titulo: 'Escribe lo que oigas', letra: '✍️', nombre: 'dictado',
+      fonema: 'del sonido a la letra',
+      truco: 'Ahora al revés: oyes una palabra y la escribes. Escribir obliga a poner las letras en su orden, una detrás de otra. Es la otra mitad de leer.',
+      trucoZh: '現在反過來：聽到一個詞，把它寫出來。寫字必須把字母按順序排好，這是閱讀的另一半。',
+      silabas: [], palabras: [], frases: []
+    },
+
+    {
+      id: 'ingles', tipo: 'ingles', color: 0, emoji: '🔀',
+      titulo: 'El inglés y el español', letra: 'A a', nombre: 'los falsos amigos',
+      fonema: 'la misma letra, otro sonido',
+      truco: 'Tú aprendiste las letras en inglés, y eso ayuda, pero también engaña: muchas suenan distinto en español. Vamos a oír las dos, una detrás de otra, para que no se te mezclen.',
+      trucoZh: '你是從英文學會字母的，這有幫助，但也會混淆：很多字母在西班牙語裡發音不同。我們把兩種發音接連聽一遍，就不會弄混了。',
+      silabas: [], palabras: [], frases: []
     }
   ];
 
@@ -1826,6 +2147,288 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 })(window);
 
 
+/* ===== js/avanzado.js ===== */
+/*!
+ * avanzado.js — Material para cuando ya descifra: el tramo que va de
+ * "pronunciar letras" a "leer".
+ *
+ * Cuatro bloques, cada uno atacando un problema distinto:
+ *
+ *   ingles         Los falsos amigos del alfabeto. Quien aprendió las letras
+ *                  en inglés arrastra sus valores: la "i" que allí se llama
+ *                  /ai/ y aquí suena /i/. Es la interferencia más probable en
+ *                  alguien que llega al español sabiendo el abecedario inglés,
+ *                  y se corrige oyendo las dos cosas seguidas.
+ *
+ *   inventadas     Palabras que no existen pero podrían. No se pueden adivinar
+ *                  por su forma ni recordar de memoria: o se descifran letra a
+ *                  letra o no salen. Es la prueba de fuego de la lectura
+ *                  alfabética, y el antídoto contra leer por silueta — un
+ *                  hábito natural en quien viene de una escritura donde cada
+ *                  signo se reconoce entero.
+ *
+ *   pares          Palabras reales que se diferencian en una letra o en su
+ *                  orden. Obligan a mirar DENTRO de la palabra.
+ *
+ *   cuentos        Textos con sentido y moraleja, con una pregunta al final.
+ *                  La pregunta no es adorno: si descifró bien, la acierta sin
+ *                  esfuerzo, porque ya habla español. Si falla, es que leyó
+ *                  mal. Es un detector de decodificación disfrazado de cuento.
+ */
+(function (global) {
+  'use strict';
+
+  /* ------------------------------------------------ falsos amigos ------- */
+  /*
+   * en / es: la misma letra en las dos lenguas.
+   * muestraEn se pronuncia con voz inglesa y muestraEs con voz española,
+   * una detrás de otra, para que el contraste se oiga en lugar de leerse.
+   */
+  var ingles = [
+    { letra: 'a', muestraEn: 'name', muestraEs: 'ala',
+      nota: 'En inglés la A dice su nombre, /ei/. En español siempre suena a, abriendo la boca.' },
+    { letra: 'e', muestraEn: 'he', muestraEs: 'eso',
+      nota: 'En inglés la E suena /ii/. En español suena e, cortita.' },
+    { letra: 'i', muestraEn: 'ice', muestraEs: 'isla',
+      nota: 'Ésta es la que más lía: en inglés la I suena /ai/. En español suena i, siempre.' },
+    { letra: 'o', muestraEn: 'no', muestraEs: 'oso',
+      nota: 'En inglés la O se alarga y se cierra. En español es una o redonda y limpia.' },
+    { letra: 'u', muestraEn: 'use', muestraEs: 'uva',
+      nota: 'En inglés la U suena /iu/. En español suena u, como un beso.' },
+    { letra: 'h', muestraEn: 'hat', muestraEs: 'hola',
+      nota: 'En inglés la H sopla. En español no suena nada: hola se lee ola.' },
+    { letra: 'j', muestraEn: 'jam', muestraEs: 'jamón',
+      nota: 'En inglés la J suena /dch/. En español sale del fondo de la garganta.' },
+    { letra: 'v', muestraEn: 'very', muestraEs: 'vaca',
+      nota: 'En inglés la V se hace con los dientes en el labio. En español suena igual que la be.' },
+    { letra: 'g', muestraEn: 'giant', muestraEs: 'gigante',
+      nota: 'Con e y con i, la G inglesa suena /dch/. La española suena como la jota.' },
+    { letra: 'z', muestraEn: 'zoo', muestraEs: 'zapato',
+      nota: 'La Z inglesa zumba. La española no zumba: es una ese, o la lengua entre los dientes.' },
+    { letra: 'qu', muestraEn: 'queen', muestraEs: 'queso',
+      nota: 'En inglés qu suena /kw/, con u. En español la u no se oye: que suena ke.' },
+    { letra: 'r', muestraEn: 'red', muestraEs: 'rosa',
+      nota: 'La R inglesa no toca el paladar. La española vibra: rrr.' },
+    { letra: 'll', muestraEn: 'tall', muestraEs: 'llave',
+      nota: 'Dos eles en inglés siguen siendo una ele. En español suenan como la ye.' },
+    { letra: 'ñ', muestraEn: 'canyon', muestraEs: 'niño',
+      nota: 'Esta letra no existe en inglés. Es la eñe, y sólo la tiene el español.' }
+  ];
+
+  /* ------------------------------------------- palabras inventadas ------ */
+  /*
+   * Ninguna existe en español, pero todas podrían existir: respetan sus
+   * reglas. Van de menos a más: sílabas abiertas, luego trabadas, luego
+   * inversas y diptongos.
+   */
+  var inventadas = [
+    { nivel: 1, lista: ['lomi', 'tefa', 'sapu', 'mune', 'dopi', 'bimo', 'chena', 'ñapo',
+                        'yuti', 'zalo', 'gupe', 'jeta'] },
+    { nivel: 2, lista: ['prata', 'clemo', 'brito', 'flude', 'grusa', 'trepo', 'plina',
+                        'dracu', 'glefa', 'cruti'] },
+    { nivel: 3, lista: ['alpo', 'ferti', 'urnal', 'espru', 'mondri', 'calcuz', 'tarbo',
+                        'pieta', 'nauri', 'quebio', 'fuinda', 'zarpel'] }
+  ];
+
+  /* ------------------------------------------------- pares mínimos ------ */
+  /*
+   * Palabras de verdad que se distinguen por una letra, o por el orden.
+   * "diferencia" dice qué hay que mirar, para poder explicarlo si falla.
+   */
+  var pares = [
+    { a: ['pato', '🦆'], b: ['pata', '🐾'], diferencia: 'la última vocal' },
+    { a: ['gato', '🐈'], b: ['gota', '💧'], diferencia: 'el orden de las letras' },
+    { a: ['pero', '🤔'], b: ['perro', '🐕'], diferencia: 'una erre o dos' },
+    { a: ['caro', '💰'], b: ['carro', '🚗'], diferencia: 'una erre o dos' },
+    { a: ['casa', '🏠'], b: ['caza', '🏹'], diferencia: 'cómo se escribe, no cómo suena' },
+    { a: ['mano', '🖐️'], b: ['mono', '🐒'], diferencia: 'la vocal de en medio' },
+    { a: ['lago', '🏞️'], b: ['algo', '❓'], diferencia: 'el orden: la a va antes o después' },
+    { a: ['sal', '🧂'], b: ['las', '👉'], diferencia: 'el orden de las letras' },
+    { a: ['sol', '☀️'], b: ['los', '👉'], diferencia: 'el orden de las letras' },
+    { a: ['bota', '👢'], b: ['boca', '👄'], diferencia: 'una consonante' },
+    { a: ['rata', '🐀'], b: ['rana', '🐸'], diferencia: 'una consonante' },
+    { a: ['cama', '🛏️'], b: ['cana', '👵'], diferencia: 'una consonante' },
+    { a: ['dedo', '☝️'], b: ['dado', '🎲'], diferencia: 'la vocal de en medio' },
+    { a: ['lobo', '🐺'], b: ['lomo', '🥓'], diferencia: 'una consonante' },
+    { a: ['plato', '🍽️'], b: ['plano', '🗺️'], diferencia: 'una consonante' },
+    { a: ['mesa', '🍽️'], b: ['misa', '⛪'], diferencia: 'la primera vocal' },
+    { a: ['vaso', '🥛'], b: ['paso', '👣'], diferencia: 'la primera consonante' },
+    { a: ['coro', '🎶'], b: ['corro', '🏃'], diferencia: 'una erre o dos' },
+    { a: ['para', '🛑'], b: ['parra', '🍇'], diferencia: 'una erre o dos' },
+    { a: ['rosa', '🌹'], b: ['ropa', '👕'], diferencia: 'una consonante' }
+  ];
+
+  /* ------------------------------------------------------- dictado ------ */
+  /* Escribir obliga a poner las letras en orden: no hay atajo visual. */
+  var dictado = [
+    { nivel: 1, lista: ['casa', 'mesa', 'pato', 'luna', 'dedo', 'sopa', 'gato', 'nube',
+                        'vaca', 'foca'] },
+    { nivel: 2, lista: ['jirafa', 'camisa', 'pelota', 'tomate', 'moneda', 'muñeca',
+                        'chocolate', 'guitarra', 'zapato', 'llave'] },
+    { nivel: 3, lista: ['bicicleta', 'cocodrilo', 'pingüino', 'elefante', 'teléfono',
+                        'mariposa', 'estrella', 'plátano', 'ventana', 'mochila'] }
+  ];
+
+  /* -------------------------------------------------------- cuentos ----- */
+  /*
+   * Historias cortas con moraleja. Cada una trae una pregunta con tres
+   * respuestas escritas: hay que leerlas también, así que la pregunta es
+   * parte del ejercicio y no un añadido.
+   *
+   * Los niveles crecen en longitud y en dificultad de frase, no en vocabulario
+   * raro: quien lee esto ya habla español, lo que entrena es descifrar.
+   */
+  var cuentos = [
+    {
+      id: 'hormiga', nivel: 1, titulo: 'La hormiga y la miga', emoji: '🐜',
+      lineas: [
+        'Una hormiga pequeña encuentra una miga de pan.',
+        'La miga es más grande que ella.',
+        'La empuja y la empuja, pero no puede sola.',
+        'Entonces llama a sus amigas.',
+        'Entre todas la llevan al hormiguero.'
+      ],
+      moraleja: 'Lo que no puedes solo, lo puedes con ayuda.',
+      pregunta: {
+        texto: '¿Cómo llevan la miga al hormiguero?',
+        opciones: ['Entre todas las hormigas', 'La hormiga sola', 'La empuja el viento'],
+        correcta: 0
+      }
+    },
+    {
+      id: 'sol-viento', nivel: 1, titulo: 'El sol y el viento', emoji: '☀️',
+      lineas: [
+        'El viento dice que es más fuerte que el sol.',
+        'Los dos miran a un hombre con abrigo.',
+        'El viento sopla muy fuerte, pero el hombre se tapa más.',
+        'Luego el sol calienta poco a poco.',
+        'El hombre tiene calor y se quita el abrigo solo.'
+      ],
+      moraleja: 'Con calma se consigue lo que a la fuerza no.',
+      pregunta: {
+        texto: '¿Quién consigue que el hombre se quite el abrigo?',
+        opciones: ['El sol', 'El viento', 'Nadie'],
+        correcta: 0
+      }
+    },
+    {
+      id: 'pajaro', nivel: 1, titulo: 'El pájaro y la jaula', emoji: '🐦',
+      lineas: [
+        'Un pájaro vive en una jaula de oro.',
+        'Tiene comida todos los días y nadie le molesta.',
+        'Un día ve por la ventana a otro pájaro volando.',
+        'El de la jaula canta bonito, pero no puede volar.',
+        'El de fuera pasa frío, pero va donde quiere.'
+      ],
+      moraleja: 'No todo lo que brilla vale más que ser libre.',
+      pregunta: {
+        texto: '¿Qué tiene el pájaro de fuera que no tiene el de la jaula?',
+        opciones: ['Puede ir donde quiere', 'Come todos los días', 'Una jaula de oro'],
+        correcta: 0
+      }
+    },
+    {
+      id: 'zorro-uvas', nivel: 2, titulo: 'El zorro y las uvas', emoji: '🦊',
+      lineas: [
+        'Un zorro pasea por el campo y ve unas uvas en lo alto de una parra.',
+        'Salta una vez y no llega. Salta otra vez y tampoco.',
+        'Lo intenta muchas veces, hasta que se cansa.',
+        'Entonces se va diciendo: esas uvas seguro que están verdes.',
+        'Pero las uvas estaban maduras. El zorro sólo saltaba poco.'
+      ],
+      moraleja: 'A veces decimos que algo no nos gusta porque no lo conseguimos.',
+      pregunta: {
+        texto: '¿Por qué el zorro dice que las uvas están verdes?',
+        opciones: ['Porque no consigue cogerlas', 'Porque las ha probado', 'Porque son verdes'],
+        correcta: 0
+      }
+    },
+    {
+      id: 'leon-raton', nivel: 2, titulo: 'El león y el ratón', emoji: '🦁',
+      lineas: [
+        'Un ratón despierta sin querer a un león dormido.',
+        'El león lo coge con la pata y va a comérselo.',
+        'El ratón le pide perdón y le promete ayudarle algún día.',
+        'El león se ríe: ¿cómo va a ayudarme un ratón tan pequeño?',
+        'Pero lo suelta.',
+        'Semanas después, el león cae en una red de cuerdas.',
+        'El ratón llega, muerde las cuerdas y lo deja libre.'
+      ],
+      moraleja: 'Nadie es tan pequeño como para no poder ayudar.',
+      pregunta: {
+        texto: '¿Cómo salva el ratón al león?',
+        opciones: ['Muerde las cuerdas de la red', 'Llama a otros leones', 'Le da de comer'],
+        correcta: 0
+      }
+    },
+    {
+      id: 'lechera', nivel: 2, titulo: 'La niña y la leche', emoji: '🥛',
+      lineas: [
+        'Una niña lleva un cubo de leche sobre la cabeza.',
+        'Mientras anda, va pensando en todo lo que hará.',
+        'Con la leche compraré huevos, y de los huevos saldrán pollitos.',
+        'Con los pollitos compraré un vestido y todos me mirarán.',
+        'De tanto pensarlo da un salto de alegría.',
+        'El cubo cae al suelo y la leche se derrama entera.'
+      ],
+      moraleja: 'Primero se hacen las cosas y después se sueña con ellas.',
+      pregunta: {
+        texto: '¿Por qué se cae el cubo?',
+        opciones: ['Porque la niña da un salto', 'Porque tropieza con una piedra', 'Porque pesa mucho'],
+        correcta: 0
+      }
+    },
+    {
+      id: 'roble-junco', nivel: 3, titulo: 'El roble y el junco', emoji: '🌳',
+      lineas: [
+        'Junto al río crecen un roble enorme y un junco delgado.',
+        'El roble se burla del junco: yo soy fuerte y tú te doblas con cualquier cosa.',
+        'El junco no contesta nada.',
+        'Una noche llega una tormenta terrible.',
+        'El viento empuja con toda su fuerza.',
+        'El roble aguanta firme, muy firme, hasta que se parte por la mitad.',
+        'El junco se dobla hasta tocar el agua, y cuando pasa la tormenta se levanta otra vez.'
+      ],
+      moraleja: 'Saber doblarse a veces es más fuerte que no ceder nunca.',
+      pregunta: {
+        texto: '¿Qué le pasa al roble en la tormenta?',
+        opciones: ['Se parte por la mitad', 'Se dobla y se levanta', 'No le pasa nada'],
+        correcta: 0
+      }
+    },
+    {
+      id: 'dos-amigos', nivel: 3, titulo: 'Los dos amigos y el pozo', emoji: '👬',
+      lineas: [
+        'Dos amigos caminan por un camino muy largo y llegan a un pozo seco.',
+        'Uno se asoma demasiado y cae dentro.',
+        'Desde arriba, mucha gente le grita que suba, que es fácil, que lo intente más.',
+        'Él lo intenta una y otra vez, pero el pozo es hondo y resbala.',
+        'Entonces su amigo baja con él.',
+        'Los de arriba le dicen que está loco, que ahora están los dos atrapados.',
+        'Pero el amigo responde: yo ya estuve aquí antes y sé por dónde se sale.'
+      ],
+      moraleja: 'Ayudar de verdad no es gritar desde arriba.',
+      pregunta: {
+        texto: '¿Por qué su amigo baja al pozo?',
+        opciones: ['Porque conoce la salida', 'Porque también se cae', 'Porque quiere el agua'],
+        correcta: 0
+      }
+    }
+  ];
+
+  global.Avanzado = {
+    ingles: ingles,
+    inventadas: inventadas,
+    pares: pares,
+    dictado: dictado,
+    cuentos: cuentos,
+    cuentosDeNivel: function (n) {
+      return cuentos.filter(function (c) { return c.nivel === n; });
+    }
+  };
+})(window);
+
+
 /* ===== js/progress.js ===== */
 /*!
  * progreso.js — Guarda en el navegador lo que el niño ya ha aprendido.
@@ -1837,8 +2440,109 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 (function (global) {
   'use strict';
 
-  var CLAVE = 'lectura-es-v1';
+  /*
+   * Varios niños en el mismo aparato.
+   *
+   * Hasta ahora había un único progreso por navegador, que servía para una
+   * familia con un hijo. En cuanto un hermano o un amigo prueba la app, le
+   * machaca las estrellas al primero. Así que cada niño tiene su propio
+   * cajón, y la lista de quiénes hay vive aparte.
+   *
+   *   lectura-es-perfiles     { activo, lista: [{id, nombre, emoji}] }
+   *   lectura-es-v1:<id>      el progreso de ese niño
+   *
+   * Quien ya venía usando la app tenía sus datos en "lectura-es-v1" a secas:
+   * al abrirla se convierten en el primer perfil, sin perder nada.
+   */
+  var CLAVE_VIEJA = 'lectura-es-v1';
+  var CLAVE_PERFILES = 'lectura-es-perfiles';
   var memoria = null;
+  var perfiles = null;
+
+  function leerBruto(clave) {
+    try {
+      var raw = global.localStorage.getItem(clave);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+  function guardarBruto(clave, valor) {
+    try { global.localStorage.setItem(clave, JSON.stringify(valor)); } catch (e) {}
+  }
+
+  function nuevoId() {
+    return 'n' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36);
+  }
+
+  function cargarPerfiles() {
+    if (perfiles) return perfiles;
+    perfiles = leerBruto(CLAVE_PERFILES);
+
+    if (!perfiles || !perfiles.lista || !perfiles.lista.length) {
+      var viejo = leerBruto(CLAVE_VIEJA);
+      var id = nuevoId();
+      perfiles = { activo: id, lista: [{ id: id, nombre: '', emoji: '🙂', creado: Date.now() }] };
+      /* Rescatamos el progreso de quien ya usaba la app antes de los perfiles. */
+      if (viejo) {
+        guardarBruto(CLAVE_VIEJA + ':' + id, viejo);
+        try { global.localStorage.removeItem(CLAVE_VIEJA); } catch (e) {}
+      }
+      guardarBruto(CLAVE_PERFILES, perfiles);
+    }
+    if (!perfiles.lista.filter(function (p) { return p.id === perfiles.activo; })[0]) {
+      perfiles.activo = perfiles.lista[0].id;
+      guardarBruto(CLAVE_PERFILES, perfiles);
+    }
+    return perfiles;
+  }
+
+  function CLAVE() { return CLAVE_VIEJA + ':' + cargarPerfiles().activo; }
+
+  function perfilActivo() {
+    var ps = cargarPerfiles();
+    return ps.lista.filter(function (p) { return p.id === ps.activo; })[0];
+  }
+
+  function listaPerfiles() { return cargarPerfiles().lista.slice(); }
+
+  function crearPerfil(nombre, emoji) {
+    var ps = cargarPerfiles();
+    var p = { id: nuevoId(), nombre: (nombre || '').slice(0, 20), emoji: emoji || '🙂', creado: Date.now() };
+    ps.lista.push(p);
+    ps.activo = p.id;
+    guardarBruto(CLAVE_PERFILES, ps);
+    memoria = null;
+    return p;
+  }
+
+  function renombrarPerfil(id, nombre, emoji) {
+    var ps = cargarPerfiles();
+    ps.lista.forEach(function (p) {
+      if (p.id !== id) return;
+      if (typeof nombre === 'string') p.nombre = nombre.slice(0, 20);
+      if (emoji) p.emoji = emoji;
+    });
+    guardarBruto(CLAVE_PERFILES, ps);
+  }
+
+  function activarPerfil(id) {
+    var ps = cargarPerfiles();
+    if (!ps.lista.filter(function (p) { return p.id === id; })[0]) return false;
+    ps.activo = id;
+    guardarBruto(CLAVE_PERFILES, ps);
+    memoria = null;      // el siguiente leer() trae el cajón del nuevo niño
+    return true;
+  }
+
+  function borrarPerfil(id) {
+    var ps = cargarPerfiles();
+    if (ps.lista.length <= 1) return false;     // siempre queda alguien
+    ps.lista = ps.lista.filter(function (p) { return p.id !== id; });
+    try { global.localStorage.removeItem(CLAVE_VIEJA + ':' + id); } catch (e) {}
+    if (ps.activo === id) ps.activo = ps.lista[0].id;
+    guardarBruto(CLAVE_PERFILES, ps);
+    memoria = null;
+    return true;
+  }
 
   function vacio() {
     return {
@@ -1851,29 +2555,31 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         chino: false,
         desbloquearTodo: false,
         mayusculas: false,
-        micro: true
+        micro: true,
+        ingles: true      // ¿aprendió el abecedario en inglés? en Taiwán, casi siempre
       },
       ultimaUnidad: null,
+      fallos: {},        // qué se le atraganta: clave de diagnóstico → veces
+      lecturas: [],      // velocidad de lectura, las últimas sesiones
+      dias: [],          // días en los que ha practicado, para la racha
       creado: Date.now()
     };
   }
 
   function leer() {
     if (memoria) return memoria;
-    try {
-      var raw = global.localStorage.getItem(CLAVE);
-      memoria = raw ? JSON.parse(raw) : vacio();
-    } catch (e) {
-      memoria = vacio();
-    }
+    memoria = leerBruto(CLAVE()) || vacio();
     if (!memoria || memoria.version !== 1) memoria = vacio();
+    /* Campos añadidos después: se rellenan sin tocar la versión, para no
+       borrarle el progreso a quien ya venía usando la app. */
     if (!memoria.ajustes) memoria.ajustes = vacio().ajustes;
+    if (!memoria.fallos) memoria.fallos = {};
+    if (!memoria.lecturas) memoria.lecturas = [];
+    if (!memoria.dias) memoria.dias = [];
     return memoria;
   }
 
-  function guardar() {
-    try { global.localStorage.setItem(CLAVE, JSON.stringify(leer())); } catch (e) {}
-  }
+  function guardar() { guardarBruto(CLAVE(), leer()); }
 
   function unidad(id) {
     var d = leer();
@@ -1938,6 +2644,127 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     return d.ajustes[clave];
   }
 
+  /* ------------------------------------------------ cómo va llevándolo ---
+   *
+   * La app ya sabe QUÉ falla cada vez que el niño lee en voz alta — erre
+   * fuerte, sílaba comida, vocal cambiada — pero hasta ahora lo pintaba en
+   * pantalla y lo tiraba. Guardándolo, el repaso puede dejar de ser aleatorio
+   * y traerle justo lo suyo.
+   */
+
+  function hoy() {
+    var d = new Date();
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  }
+
+  /* Un día de práctica. Se llama al empezar cualquier actividad. */
+  function marcarDia() {
+    var d = leer();
+    var h = hoy();
+    if (d.dias[d.dias.length - 1] !== h) {
+      d.dias.push(h);
+      if (d.dias.length > 400) d.dias = d.dias.slice(-400);
+      guardar();
+    }
+  }
+
+  /* Días seguidos practicando, contando hacia atrás desde hoy o desde ayer. */
+  function racha() {
+    var d = leer();
+    if (!d.dias.length) return 0;
+    var vistos = {};
+    d.dias.forEach(function (x) { vistos[x] = true; });
+
+    var cursor = new Date();
+    if (!vistos[hoy()]) cursor.setDate(cursor.getDate() - 1);   // aún puede practicar hoy
+
+    var n = 0;
+    while (n < 400) {
+      var clave = cursor.getFullYear() + '-' + ('0' + (cursor.getMonth() + 1)).slice(-2) +
+                  '-' + ('0' + cursor.getDate()).slice(-2);
+      if (!vistos[clave]) break;
+      n++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return n;
+  }
+
+  /* Apunta un fallo de lectura. "clave" es el diagnóstico; "unidad", de dónde
+     salía la palabra, para poder repasar justo esa letra. */
+  function apuntarFallo(clave, idUnidad) {
+    if (!clave) return;
+    var d = leer();
+    d.fallos[clave] = (d.fallos[clave] || 0) + 1;
+    if (idUnidad) d.fallos['u:' + idUnidad] = (d.fallos['u:' + idUnidad] || 0) + 1;
+    guardar();
+  }
+
+  /* Un acierto rebaja el contador: lo superado deja de repasarse. */
+  function apuntarAcierto(idUnidad) {
+    if (!idUnidad) return;
+    var d = leer();
+    var k = 'u:' + idUnidad;
+    if (d.fallos[k]) {
+      d.fallos[k] -= 1;
+      if (d.fallos[k] <= 0) delete d.fallos[k];
+      guardar();
+    }
+  }
+
+  /* Unidades ordenadas de la que más se le atraganta a la que menos. */
+  function unidadesFlojas() {
+    var d = leer();
+    return Object.keys(d.fallos)
+      .filter(function (k) { return k.indexOf('u:') === 0; })
+      .map(function (k) { return { id: k.slice(2), veces: d.fallos[k] }; })
+      .sort(function (a, b) { return b.veces - a.veces; });
+  }
+
+  /* Diagnósticos más repetidos, para el resumen del adulto. */
+  function erroresTipicos() {
+    var d = leer();
+    return Object.keys(d.fallos)
+      .filter(function (k) { return k.indexOf('u:') !== 0; })
+      .map(function (k) { return { clave: k, veces: d.fallos[k] }; })
+      .sort(function (a, b) { return b.veces - a.veces; });
+  }
+
+  /* Velocidad de una lectura, en palabras por minuto. */
+  function apuntarLectura(datos) {
+    var d = leer();
+    d.lecturas.push({
+      texto: datos.texto, ppm: Math.round(datos.ppm), nota: datos.nota,
+      intento: datos.intento || 1, fecha: hoy()
+    });
+    if (d.lecturas.length > 60) d.lecturas = d.lecturas.slice(-60);
+    guardar();
+    return d.lecturas;
+  }
+
+  function lecturas() { return leer().lecturas.slice(); }
+
+  /* Todo lo que necesita el panel del adulto, ya masticado. */
+  function estadisticas(unidades) {
+    var d = leer();
+    var lec = d.lecturas;
+    var mejor = lec.reduce(function (a, l) { return Math.max(a, l.ppm); }, 0);
+    var ultimas = lec.slice(-5);
+    return {
+      completas: unidades.filter(function (u) { return unidadCompleta(u.id); }).length,
+      total: unidades.length,
+      estrellas: d.estrellas,
+      racha: racha(),
+      dias: d.dias.length,
+      lecturas: lec.length,
+      ppmMejor: mejor,
+      ppmMedia: ultimas.length
+        ? Math.round(ultimas.reduce(function (a, l) { return a + l.ppm; }, 0) / ultimas.length) : 0,
+      historial: lec.slice(-12),
+      flojas: unidadesFlojas().slice(0, 5),
+      errores: erroresTipicos().slice(0, 5)
+    };
+  }
+
   /* ---------------------------------------------- pasar de dispositivo ---
    *
    * El progreso vive en el localStorage, que es de este navegador y de este
@@ -1945,12 +2772,22 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
    * CORTO: catorce caracteres que se pueden dictar por teléfono o mandar por
    * mensaje, en vez de un pegote de texto.
    *
-   * Qué viaja: qué unidades están terminadas y cuántas estrellas hay.
-   * Qué NO viaja, a propósito: los ajustes. La voz elegida no existe en el
-   * otro aparato (cada sistema trae las suyas), así que copiarla daría
-   * problemas en lugar de ahorrarlos.
+   * Hay DOS formas, porque no sirven para lo mismo:
    *
-   * Formato de los bits: [versión:3][nº unidades:6][una por unidad][estrellas:12][control:7]
+   *   CÓDIGO CORTO (17 caracteres) — para dictar por teléfono o apuntar en un
+   *   papel. Lleva las unidades terminadas, los cuentos leídos y las
+   *   estrellas: lo que se ve en pantalla.
+   *
+   *   ENLACE COMPLETO — para mandar por mensaje. Como ahí la longitud no
+   *   molesta, lleva además la velocidad de lectura y los diagnósticos que
+   *   alimentan el repaso adaptativo. Meter eso en el código corto lo
+   *   triplicaría y dejaría de poder dictarse.
+   *
+   * Lo que NO viaja en ninguna de las dos, a propósito: la voz elegida, que
+   * no existe en el otro aparato porque cada sistema trae las suyas.
+   *
+   * Bits del código corto:
+   *   [versión:3][nº unidades:6][una por unidad][nº cuentos:5][uno por cuento][estrellas:12][control:7]
    */
 
   /* Base32 de Crockford: sin I, L, O ni U, para que nadie confunda un 1 con
@@ -1971,11 +2808,16 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     return suma;
   }
 
-  function exportarCodigo(unidades) {
+  function exportarCodigo(unidades, cuentos) {
+    cuentos = cuentos || [];
     var bits = [];
-    meterBits(1, 3, bits);
+    meterBits(2, 3, bits);                 // versión 2: añade los cuentos
     meterBits(unidades.length, 6, bits);
     unidades.forEach(function (u) { bits.push(unidadCompleta(u.id) ? 1 : 0); });
+    meterBits(Math.min(31, cuentos.length), 5, bits);
+    cuentos.slice(0, 31).forEach(function (id) {
+      bits.push(unidadCompleta('cuento:' + id) ? 1 : 0);
+    });
     meterBits(Math.min(4095, leer().estrellas), 12, bits);
     meterBits(control(bits, bits.length), 7, bits);
 
@@ -2003,35 +2845,146 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       meterBits(v, 5, bits);
     }
 
-    if (sacarBits(bits, 0, 3) !== 1) return { ok: false, error: 'version' };
+    /* La versión 1 no traía cuentos; se sigue aceptando. */
+    var version = sacarBits(bits, 0, 3);
+    if (version !== 1 && version !== 2) return { ok: false, error: 'version' };
     var n = sacarBits(bits, 3, 6);
-    var total = 3 + 6 + n + 12 + 7;
-    if (!n || bits.length < total) return { ok: false, error: 'corto' };
+    if (!n) return { ok: false, error: 'corto' };
+
+    var c = 0, inicioCuentos = 0;
+    var total;
+    if (version === 1) {
+      total = 3 + 6 + n + 12 + 7;
+    } else {
+      if (bits.length < 9 + n + 5) return { ok: false, error: 'corto' };
+      c = sacarBits(bits, 9 + n, 5);
+      inicioCuentos = 9 + n + 5;
+      total = inicioCuentos + c + 12 + 7;
+    }
+    if (bits.length < total) return { ok: false, error: 'corto' };
     if (sacarBits(bits, total - 7, 7) !== control(bits, total - 7)) {
       return { ok: false, error: 'control' };
     }
 
     var completas = [];
     for (var k = 0; k < n; k++) completas.push(bits[9 + k] === 1);
-    return { ok: true, completas: completas, estrellas: sacarBits(bits, 9 + n, 12) };
+    var leidos = [];
+    for (var j = 0; j < c; j++) leidos.push(bits[inicioCuentos + j] === 1);
+
+    return {
+      ok: true, tipo: 'corto', completas: completas, cuentos: leidos,
+      estrellas: sacarBits(bits, total - 19, 12)
+    };
   }
 
-  /* Aplica un código ya validado. Sustituye el progreso, no lo mezcla. */
-  function importarCodigo(codigo, unidades) {
-    var r = leerCodigo(codigo);
+  /* ------------------------------------------- traspaso completo -------- */
+
+  /*
+   * El enlace puede ser largo, así que ahí cabe TODO: además de las unidades
+   * y los cuentos, la velocidad de lectura y los diagnósticos que hacen que
+   * el repaso traiga justo lo que falla. Perder eso al cambiar de tableta
+   * sería empezar de nuevo a medir cómo va.
+   */
+  var MARCA = 'F~';
+
+  function aBase64(texto) {
+    var b = global.btoa(unescape(encodeURIComponent(texto)));
+    return b.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function deBase64(texto) {
+    var b = texto.replace(/-/g, '+').replace(/_/g, '/');
+    while (b.length % 4) b += '=';
+    return decodeURIComponent(escape(global.atob(b)));
+  }
+
+  function exportarCompleto() {
+    var d = leer();
+    var hechas = Object.keys(d.unidades).filter(function (k) { return d.unidades[k].completa; });
+    var carga = {
+      v: 1,
+      u: hechas,
+      e: d.estrellas,
+      l: d.lecturas.slice(-40),
+      f: d.fallos,
+      d: d.dias.slice(-90),
+      a: {
+        velocidad: d.ajustes.velocidad, chino: d.ajustes.chino,
+        mayusculas: d.ajustes.mayusculas, micro: d.ajustes.micro,
+        ingles: d.ajustes.ingles, desbloquearTodo: d.ajustes.desbloquearTodo
+      }
+    };
+    try { return MARCA + aBase64(JSON.stringify(carga)); } catch (e) { return ''; }
+  }
+
+  function leerCompleto(texto) {
+    try {
+      var carga = JSON.parse(deBase64(String(texto).slice(MARCA.length)));
+      if (!carga || carga.v !== 1 || !carga.u) return { ok: false, error: 'control' };
+      return { ok: true, tipo: 'completo', carga: carga };
+    } catch (e) {
+      return { ok: false, error: 'control' };
+    }
+  }
+
+  function esCompleto(texto) {
+    return String(texto || '').trim().indexOf(MARCA) === 0;
+  }
+
+  /* Vale cualquiera de las dos formas: el código corto o el enlace completo. */
+  function leerTraspaso(texto) {
+    return esCompleto(texto) ? leerCompleto(texto) : leerCodigo(texto);
+  }
+
+  /* Aplica un traspaso ya validado. Sustituye el progreso, no lo mezcla. */
+  function importarCodigo(codigo, unidades, cuentos) {
+    cuentos = cuentos || [];
+    var r = leerTraspaso(codigo);
     if (!r.ok) return r;
 
     var d = leer();
-    var ajustes = d.ajustes;          // los ajustes de ESTE aparato se respetan
+    /* La voz se queda: la del otro aparato no existe aquí. */
+    var voz = d.ajustes.voz;
     var limpio = vacio();
-    limpio.ajustes = ajustes;
+    limpio.ajustes.voz = voz;
+
+    if (r.tipo === 'completo') {
+      var c = r.carga;
+      c.u.forEach(function (id) { limpio.unidades[id] = { pasos: {}, estrellas: 0, completa: true }; });
+      limpio.estrellas = c.e || 0;
+      limpio.lecturas = c.l || [];
+      limpio.fallos = c.f || {};
+      limpio.dias = c.d || [];
+      Object.keys(c.a || {}).forEach(function (k) {
+        if (c.a[k] !== undefined) limpio.ajustes[k] = c.a[k];
+      });
+      memoria = limpio;
+      guardar();
+      return {
+        ok: true, tipo: 'completo',
+        unidades: c.u.filter(function (x) { return x.indexOf('cuento:') !== 0; }).length,
+        cuentos: c.u.filter(function (x) { return x.indexOf('cuento:') === 0; }).length,
+        estrellas: limpio.estrellas, lecturas: limpio.lecturas.length
+      };
+    }
+
+    limpio.ajustes = d.ajustes;       // en el código corto los ajustes no viajan
     limpio.estrellas = r.estrellas;
     unidades.forEach(function (u, i) {
       if (r.completas[i]) limpio.unidades[u.id] = { pasos: {}, estrellas: 0, completa: true };
     });
+    (r.cuentos || []).forEach(function (leido, i) {
+      if (leido && cuentos[i]) {
+        limpio.unidades['cuento:' + cuentos[i]] = { pasos: {}, estrellas: 0, completa: true };
+      }
+    });
     memoria = limpio;
     guardar();
-    return { ok: true, unidades: r.completas.filter(Boolean).length, estrellas: r.estrellas };
+    return {
+      ok: true, tipo: 'corto',
+      unidades: r.completas.filter(Boolean).length,
+      cuentos: (r.cuentos || []).filter(Boolean).length,
+      estrellas: r.estrellas, lecturas: 0
+    };
   }
 
   function reiniciar() {
@@ -2058,8 +3011,25 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     disponible: disponible,
     siguienteUnidad: siguienteUnidad,
     ajuste: ajuste,
+    perfiles: listaPerfiles,
+    perfilActivo: perfilActivo,
+    crearPerfil: crearPerfil,
+    renombrarPerfil: renombrarPerfil,
+    activarPerfil: activarPerfil,
+    borrarPerfil: borrarPerfil,
+    marcarDia: marcarDia,
+    racha: racha,
+    apuntarFallo: apuntarFallo,
+    apuntarAcierto: apuntarAcierto,
+    unidadesFlojas: unidadesFlojas,
+    erroresTipicos: erroresTipicos,
+    apuntarLectura: apuntarLectura,
+    lecturas: lecturas,
+    estadisticas: estadisticas,
     exportarCodigo: exportarCodigo,
-    leerCodigo: leerCodigo,
+    exportarCompleto: exportarCompleto,
+    leerCodigo: leerTraspaso,
+    esCompleto: esCompleto,
     importarCodigo: importarCodigo,
     reiniciar: reiniciar,
     resumen: resumen,
@@ -2095,6 +3065,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   var soportado = !!SR;
   var rec = null;
   var activo = false;
+  var detener = null;   // cierra la escucha en curso y devuelve lo oído
   var permiso = 'desconocido';   // desconocido | concedido | denegado
   var enDispositivo = false;
 
@@ -2136,17 +3107,26 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     return new Promise(function (resolver) {
       var terminado = false;
       var textos = [];
+      var seguido = '';          // lo acumulado en modo continuo
       var errorFinal = null;
+      var arranque = 0;
 
       function acabar(err) {
         if (terminado) return;
         terminado = true;
         activo = false;
+        detener = null;
         clearTimeout(guarda);
         try { if (rec) rec.stop(); } catch (e) {}
         rec = null;
-        if (textos.length) { permiso = 'concedido'; resolver({ ok: true, textos: textos, error: null }); }
-        else resolver({ ok: false, textos: [], error: err || errorFinal || 'sin-voz' });
+        var segundos = arranque ? (Date.now() - arranque) / 1000 : 0;
+        if (seguido) textos = [seguido];
+        if (textos.length) {
+          permiso = 'concedido';
+          resolver({ ok: true, textos: textos, error: null, segundos: segundos });
+        } else {
+          resolver({ ok: false, textos: [], error: err || errorFinal || 'sin-voz', segundos: segundos });
+        }
       }
 
       try {
@@ -2157,8 +3137,14 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
       rec.lang = opciones.idioma || 'es-ES';
       rec.interimResults = true;
-      rec.continuous = false;
-      rec.maxAlternatives = 5;
+      /*
+       * Para una palabra o una frase basta con parar en la primera pausa.
+       * Para un cuento no: un niño que empieza se para entre línea y línea, y
+       * el reconocedor lo tomaría por final. En modo continuo seguimos
+       * escuchando hasta que él dice que ha terminado.
+       */
+      rec.continuous = !!opciones.continuo;
+      rec.maxAlternatives = opciones.continuo ? 1 : 5;
       /* Si el navegador sabe hacerlo en local, que no salga el audio. */
       try { if (enDispositivo) rec.processLocally = true; } catch (e) {}
 
@@ -2167,16 +3153,22 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         for (var i = ev.resultIndex; i < ev.results.length; i++) {
           var r = ev.results[i];
           if (r.isFinal) {
-            for (var j = 0; j < r.length; j++) {
-              var t = (r[j].transcript || '').trim();
-              if (t && textos.indexOf(t) === -1) textos.push(t);
+            if (opciones.continuo) {
+              /* Un texto largo llega a trozos: se van encadenando. */
+              seguido += (seguido ? ' ' : '') + (r[0].transcript || '').trim();
+            } else {
+              for (var j = 0; j < r.length; j++) {
+                var t = (r[j].transcript || '').trim();
+                if (t && textos.indexOf(t) === -1) textos.push(t);
+              }
             }
           } else {
             parcial += r[0].transcript;
           }
         }
-        if (parcial && opciones.onParcial) opciones.onParcial(parcial.trim());
-        if (textos.length && opciones.onParcial) opciones.onParcial(textos[0]);
+        if (opciones.onParcial) {
+          opciones.onParcial(((seguido ? seguido + ' ' : '') + parcial).trim() || textos[0] || '');
+        }
       };
 
       rec.onerror = function (ev) {
@@ -2194,6 +3186,8 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
       try {
         activo = true;
+        arranque = Date.now();
+        detener = function () { acabar(null); };
         rec.start();
         if (opciones.alEmpezar) opciones.alEmpezar();
       } catch (e) {
@@ -2224,6 +3218,8 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     enDispositivo: function () { return enDispositivo; },
     permiso: function () { return permiso; },
     escuchar: escuchar,
+    /* En modo continuo, el niño decide cuándo ha terminado de leer. */
+    terminar: function () { if (detener) detener(); },
     parar: parar,
     mensaje: function (codigo) { return MENSAJES[codigo] || 'Algo no ha ido bien con el micrófono.'; }
   };
@@ -3264,6 +4260,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   var Evaluar = global.Evaluar;
   var Modelo = global.Modelo;
   var PWA = global.PWA;
+  var Avanzado = global.Avanzado;
 
   var raiz;
   var vista = { nombre: 'portada' };
@@ -3291,6 +4288,8 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     });
     return n;
   }
+
+  var AVATARES = ['🙂', '🐼', '🐯', '🦊', '🐸', '🐧', '🦁', '🐨', '🐙', '🦄', '🐝', '🌟'];
 
   function mezclar(a) {
     var r = a.slice();
@@ -3432,6 +4431,166 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     return caja;
   }
 
+  /* ---------------------------------------------------------- bienvenida */
+
+  /*
+   * Primera pantalla, la única pensada para que la lea un adulto: explica qué
+   * es esto y pregunta lo que cambia la app para cada niño. Después no vuelve
+   * a aparecer.
+   *
+   * Las dos preguntas no son de adorno:
+   *   - Si lee chino, los enunciados salen también en chino tradicional, y
+   *     puede avanzar sin que nadie se los lea.
+   *   - Si se sabe el abecedario en inglés, avisamos de las letras que allí
+   *     suenan distinto, que es su fuente de error más probable. Si no lo
+   *     sabe, esos avisos sobran y sólo lían.
+   */
+  function verBienvenida(alTerminar) {
+    vista = { nombre: 'bienvenida' };
+    var perfil = Progreso.perfilActivo();
+    var elegido = perfil.emoji || '🙂';
+
+    var campo = el('input', {
+      type: 'text', class: 'campo-nombre', placeholder: T.t('tuNombre'),
+      maxlength: '20', autocomplete: 'off', value: perfil.nombre || ''
+    });
+
+    var fila = el('div', { class: 'avatares' });
+    AVATARES.forEach(function (e) {
+      var b = el('button', {
+        class: 'avatar' + (e === elegido ? ' elegido' : ''), text: e,
+        onclick: function () {
+          elegido = e;
+          [].forEach.call(fila.children, function (c) { c.classList.remove('elegido'); });
+          b.classList.add('elegido');
+        }
+      });
+      fila.appendChild(b);
+    });
+
+    function interruptorGrande(clave, ayuda, valor, alCambiar) {
+      var input = el('input', { type: 'checkbox', checked: valor ? 'checked' : null });
+      input.addEventListener('change', function () { alCambiar(input.checked); });
+      return el('div', { class: 'ajuste' }, [
+        el('label', { class: 'interruptor' }, [
+          el('span', {}, etiqueta(clave)),
+          input
+        ]),
+        el('p', { class: 'dato', text: T.t(ayuda) })
+      ]);
+    }
+
+    var leeChino = !!Progreso.ajuste('chino');
+    var sabeIngles = Progreso.ajuste('ingles') !== false;
+
+    pintar([
+      el('section', { class: 'bienvenida' }, [
+        el('div', { class: 'logo', text: '📖' }),
+        el('h1', {}, etiqueta('holaBienvenida')),
+        el('p', { class: 'truco', text: T.t('queEsEsto') }),
+
+        el('div', { class: 'ajuste' }, [
+          el('label', {}, etiqueta('comoTeLlamas')),
+          campo
+        ]),
+        el('div', { class: 'ajuste' }, [
+          el('label', {}, etiqueta('eligeDibujo')),
+          fila
+        ]),
+        interruptorGrande('leesChino', 'leesChinoAyuda', leeChino, function (v) {
+          leeChino = v;
+        }),
+        interruptorGrande('letrasIngles', 'letrasInglesAyuda', sabeIngles, function (v) {
+          sabeIngles = v;
+        }),
+
+        el('button', {
+          class: 'btn btn-principal btn-grande',
+          text: '▶️ ' + T.t('vamos'),
+          onclick: function () {
+            Progreso.renombrarPerfil(perfil.id, campo.value.trim(), elegido);
+            Progreso.ajuste('chino', leeChino);
+            Progreso.ajuste('ingles', sabeIngles);
+            T.usarChino(leeChino);
+            (alTerminar || verPortada)();
+          }
+        })
+      ])
+    ]);
+  }
+
+  /* Quién está leyendo: hermanos y amigos en la misma tableta. */
+  function verPerfiles() {
+    var hoja = el('div', { class: 'hoja' });
+    hoja.addEventListener('click', function (ev) { if (ev.target === hoja) hoja.remove(); });
+    var panel = el('div', { class: 'hoja-panel' });
+    var activo = Progreso.perfilActivo();
+
+    panel.appendChild(el('h2', { style: 'margin:0 0 12px' }, etiqueta('quienJuega')));
+
+    Progreso.perfiles().forEach(function (p) {
+      var res = (function () {
+        var antes = activo.id;
+        Progreso.activarPerfil(p.id);
+        var r = Progreso.resumen(Curriculo.unidades);
+        Progreso.activarPerfil(antes);
+        return r;
+      })();
+      panel.appendChild(el('button', {
+        class: 'perfil' + (p.id === activo.id ? ' activo' : ''),
+        onclick: function () {
+          Progreso.activarPerfil(p.id);
+          T.usarChino(!!Progreso.ajuste('chino'));
+          document.body.setAttribute('data-may', Progreso.ajuste('mayusculas') ? '1' : '0');
+          Voz.velocidad(Progreso.ajuste('velocidad') || 0.85);
+          hoja.remove();
+          verPortada();
+        }
+      }, [
+        el('span', { class: 'perfil-emo', text: p.emoji }),
+        el('span', { class: 'perfil-datos' }, [
+          el('b', { text: p.nombre || T.t('sinNombre') }),
+          el('span', { text: res.completas + '/' + res.total + ' · ★ ' + res.estrellas })
+        ]),
+        p.id === activo.id ? el('span', { class: 'hecha', text: '✓' }) : null
+      ]));
+    });
+
+    panel.appendChild(el('div', { class: 'ajuste' }, [
+      el('button', {
+        class: 'btn btn-grande', text: '➕ ' + T.t('anadirNino'),
+        onclick: function () {
+          Progreso.crearPerfil('', '🙂');
+          hoja.remove();
+          verBienvenida();
+        }
+      })
+    ]));
+
+    if (Progreso.perfiles().length > 1) {
+      panel.appendChild(el('div', { class: 'ajuste' }, [
+        el('button', {
+          class: 'btn btn-grande', style: 'border-color:var(--error);color:var(--error)',
+          text: '🗑️ ' + T.t('borrarNino') + ': ' + (activo.nombre || T.t('sinNombre')),
+          onclick: function () {
+            if (!global.confirm(T.t('borrarNinoOjo'))) return;
+            Progreso.borrarPerfil(activo.id);
+            hoja.remove();
+            verPortada();
+          }
+        })
+      ]));
+    }
+
+    panel.appendChild(el('div', { class: 'ajuste' }, [
+      el('button', { class: 'btn btn-principal btn-grande', text: T.t('cerrar'),
+        onclick: function () { hoja.remove(); } })
+    ]));
+
+    hoja.appendChild(panel);
+    document.body.appendChild(hoja);
+  }
+
   /* ------------------------------------------------------------- portada */
 
   function verPortada() {
@@ -3466,8 +4625,19 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       rejilla.appendChild(btn);
     });
 
+    var yo = Progreso.perfilActivo();
+    var chapa = el('button', {
+      class: 'marcador marcador-perfil', 'aria-label': T.t('cambiarNino'),
+      onclick: verPerfiles
+    }, [
+      el('span', { class: 'perfil-mini', text: yo.emoji || '🙂' }),
+      yo.nombre ? el('b', { class: 'perfil-nombre', text: yo.nombre }) : null,
+      el('span', { text: '★' }),
+      el('b', { text: String(Progreso.datos().estrellas) })
+    ]);
+
     pintar([
-      barra(T.t('appTitulo'), null, null),
+      barra(T.t('appTitulo'), null, chapa),
       el('section', { class: 'portada' }, [
         el('div', { class: 'logo', text: '📖' }),
         el('h2', {}, etiqueta('appTitulo')),
@@ -3482,13 +4652,16 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
           el('i', { style: 'width:' + res.porcentaje + '%' })
         ]),
         el('p', {
-          text: res.completas + ' / ' + res.total + ' · ★ ' + res.estrellas
+          text: res.completas + ' / ' + res.total + ' · ★ ' + res.estrellas +
+                (Progreso.racha() > 1 ? ' · 🔥 ' + Progreso.racha() : '')
         })
       ]),
       avisosVoz(),
       el('div', { class: 'acciones-rapidas' }, [
         el('button', { class: 'btn', onclick: verLector }, [el('span', { text: '🔤' })].concat(etiqueta('lectorLibre'))),
-        el('button', { class: 'btn', onclick: abrirRepaso }, [el('span', { text: '🔁' })].concat(etiqueta('repaso')))
+        el('button', { class: 'btn', onclick: abrirRepaso }, [el('span', { text: '🔁' })].concat(etiqueta('repaso'))),
+        el('button', { class: 'btn', onclick: verBiblioteca }, [el('span', { text: '📚' })].concat(etiqueta('biblioteca'))),
+        el('button', { class: 'btn', onclick: verComoVa }, [el('span', { text: '👨‍👩‍👦' })].concat(etiqueta('comoVa')))
       ]),
       rejilla,
       el('div', { class: 'acciones-rapidas' }, [
@@ -3522,6 +4695,10 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       pasos.push('silabas', 'quiz-silaba', 'vocal-inicial');
       return pasos;
     }
+    if (u.tipo === 'ingles') { pasos.push('ingles'); return pasos; }
+    if (u.tipo === 'inventadas') { pasos.push('inventadas'); return pasos; }
+    if (u.tipo === 'pares') { pasos.push('pares-oir', 'pares-leer'); return pasos; }
+    if (u.tipo === 'dictado') { pasos.push('dictado'); return pasos; }
     if (u.silabas && u.silabas.length) {
       pasos.push('silabas');
       pasos.push('quiz-silaba');
@@ -3537,6 +4714,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   }
 
   function abrirLeccion(indice) {
+    Progreso.marcarDia();
     var u = Curriculo.unidades[indice];
     leccion = {
       indice: indice,
@@ -3551,6 +4729,11 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     pintarPaso();
   }
 
+  /*
+   * El repaso ya no coge palabras al azar: la app lleva la cuenta de qué
+   * unidades se le atragantan al leer en voz alta, y esas pesan el doble.
+   * Lo que ya le sale bien deja de aparecer.
+   */
   function abrirRepaso() {
     var hasta = Progreso.siguienteUnidad(Curriculo.unidades);
     var palabras = Curriculo.palabrasHasta(Math.max(0, hasta));
@@ -3558,10 +4741,26 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       narrar('Todavía no hay palabras suficientes para repasar. Aprende una unidad más.');
       return;
     }
+
+    var flojas = Progreso.unidadesFlojas();
+    var titulo = T.t('repaso');
+    if (flojas.length) {
+      var deFlojas = [];
+      flojas.forEach(function (f) {
+        var u = Curriculo.unidades[Curriculo.indicePorId(f.id)];
+        if (u && u.palabras) deFlojas = deFlojas.concat(u.palabras);
+      });
+      if (deFlojas.length >= 3) {
+        /* Dos tercios de lo que falla, un tercio de repaso general. */
+        palabras = mezclar(deFlojas).slice(0, 8).concat(mezclar(palabras).slice(0, 4));
+        titulo = T.t('repasoFlojo');
+      }
+    }
+
     leccion = {
       indice: hasta,
       unidad: {
-        id: 'repaso', titulo: T.t('repaso'), color: 2, emoji: '🔁',
+        id: 'repaso', titulo: titulo, color: 2, emoji: '🔁',
         silabas: Curriculo.silabasHasta(hasta),
         palabras: mezclar(palabras).slice(0, 12),
         frases: []
@@ -3657,7 +4856,12 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       'elige-dibujo': pasoEligeDibujo,
       'leer-tu': pasoLeerTu,
       'frases': pasoFrases,
-      'texto': pasoTexto
+      'texto': pasoTexto,
+      'ingles': pasoIngles,
+      'inventadas': pasoInventadas,
+      'pares-oir': pasoParesOir,
+      'pares-leer': pasoParesLeer,
+      'dictado': pasoDictado
     }[paso] || pasoIntro)();
   }
 
@@ -3734,13 +4938,41 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
           el('b', { text: u.fonema })
         ]) : null,
         el('p', { class: 'truco', text: u.truco }),
-        T.usarChino() && u.trucoZh ? el('p', { class: 'truco zh', text: u.trucoZh }) : null
+        T.usarChino() && u.trucoZh ? el('p', { class: 'truco zh', text: u.trucoZh }) : null,
+        avisoIngles(u.letra)
       ]),
       el('div', { class: 'fila-botones' }, [
         el('button', { class: 'btn btn-audio', onclick: presentar, text: '🔊 ' + T.t('otraVez') }),
         botonSiguiente()
       ])
     ], 'pasoLetra', null, presentar);
+  }
+
+  /*
+   * Si esta letra suena distinto en inglés, avisamos AQUÍ, cuando se aprende,
+   * y no en una unidad suelta al final: la interferencia aparece el primer día
+   * en quien se sabe el abecedario en inglés.
+   */
+  function avisoIngles(letra) {
+    if (!Avanzado || !letra) return null;
+    if (Progreso.ajuste('ingles') === false) return null;   // no aprendió las letras en inglés
+    var f = Avanzado.ingles.filter(function (x) { return x.letra === letra; })[0];
+    if (!f) return null;
+    return el('div', { class: 'aviso-ingles' }, [
+      el('span', { text: '🇬🇧' }),
+      el('div', {}, [
+        el('p', { text: f.nota }),
+        el('button', {
+          class: 'btn', text: '🔊 ' + f.muestraEn + ' → ' + f.muestraEs,
+          onclick: function () {
+            if (!Voz.hayVozInglesa()) return decir(f.muestraEs, 'palabra');
+            Voz.hablarEnIngles(f.muestraEn)
+              .then(function () { return new Promise(function (r) { setTimeout(r, 400); }); })
+              .then(function () { return decir(f.muestraEs, 'palabra'); });
+          }
+        })
+      ])
+    ]);
   }
 
   /* --- 2. Tocar cada sílaba -------------------------------------------- */
@@ -4127,8 +5359,22 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       var eco = el('p', { class: 'transcripcion', text: '' });
       caja.appendChild(eco);
 
+      /*
+       * Leyendo un cuento entero el niño se para entre línea y línea, y el
+       * reconocedor tomaría esa pausa por final. En modo continuo es él quien
+       * dice cuándo ha terminado, y de paso medimos cuánto ha tardado.
+       */
+      if (opciones.continuo) {
+        caja.appendChild(el('button', {
+          class: 'btn btn-principal btn-grande',
+          text: '⏹️ ' + T.t('yaTermine'),
+          onclick: function () { Escucha.terminar(); }
+        }));
+      }
+
       Escucha.escuchar({
-        maxMs: objetivo.length > 26 ? 15000 : 9000,
+        continuo: !!opciones.continuo,
+        maxMs: opciones.continuo ? 180000 : (objetivo.length > 26 ? 15000 : 9000),
         onParcial: function (t) { eco.textContent = t; }
       }).then(function (r) {
         if (!r.ok) {
@@ -4137,12 +5383,26 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
           narrar(m);
           return;
         }
-        mostrar(Evaluar.puntuar(objetivo, r.textos));
+        mostrar(Evaluar.puntuar(objetivo, r.textos), r.segundos);
       });
     }
 
-    function mostrar(res) {
+    function mostrar(res, segundos) {
       vaciar();
+
+      /* Lo que falló se guarda: el repaso dejará de ser aleatorio. */
+      if (opciones.unidad) {
+        if (res.estrellas >= 3) Progreso.apuntarAcierto(opciones.unidad);
+        else Progreso.apuntarFallo(res.pista ? res.pista.clave : 'otra', opciones.unidad);
+      }
+
+      /* Velocidad, sólo cuando se ha leído un texto de corrido. */
+      var ppm = null;
+      if (opciones.continuo && segundos > 2) {
+        var cuantas = objetivo.split(/\s+/).filter(Boolean).length;
+        ppm = Math.round(cuantas / (segundos / 60));
+        if (ppm > 400) ppm = null;      // medida absurda: mejor no enseñarla
+      }
 
       var marcada = el('p', { class: 'lectura-marcada' });
       res.palabras.forEach(function (p, i) {
@@ -4151,10 +5411,36 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       });
 
       var base = Evaluar.animo(res.estrellas) + (res.pista ? ' ' + res.pista.texto : '');
+
+      /* En un par mínimo, decir la otra palabra no es un fallo cualquiera:
+         conviene nombrarlo, que es justo lo que el ejercicio entrena. */
+      if (opciones.rival && res.oido &&
+          Evaluar.similitud(Evaluar.fonetica(res.oido), Evaluar.fonetica(opciones.rival)) >
+          Evaluar.similitud(Evaluar.fonetica(res.oido), Evaluar.fonetica(objetivo))) {
+        base = 'Has dicho «' + opciones.rival + '», pero pone «' + objetivo + '». Mira bien la diferencia.';
+      }
       var comentario = el('p', { class: 'comentario', text: base });
+
+      var marcaPpm = null;
+      if (ppm) {
+        var previas = Progreso.lecturas().filter(function (l) { return l.texto === opciones.idTexto; });
+        var mejorAntes = previas.reduce(function (a, l) { return Math.max(a, l.ppm); }, 0);
+        Progreso.apuntarLectura({
+          texto: opciones.idTexto || objetivo.slice(0, 20),
+          ppm: ppm, nota: res.nota, intento: previas.length + 1
+        });
+        marcaPpm = el('div', { class: 'marca' }, [
+          el('span', { class: 'ppm-numero', text: String(ppm) }),
+          el('span', { class: 'ppm-texto', text: T.t('ppm') }),
+          ppm > mejorAntes && mejorAntes > 0
+            ? el('span', { class: 'ppm-mejora', text: '🎉 ' + T.t('mejorMarca') })
+            : (mejorAntes ? el('span', { class: 'ppm-mejora', text: T.t('mejorPpm') + ': ' + mejorAntes }) : null)
+        ]);
+      }
 
       caja.appendChild(el('div', { class: 'veredicto v' + res.estrellas }, [
         el('div', { class: 'estrellas-ganadas', text: estrellasTexto(res.estrellas) }),
+        marcaPpm,
         marcada,
         res.oido ? el('p', { class: 'oido', text: T.t('heOido') + ': «' + res.oido + '»' }) : null,
         comentario
@@ -4428,6 +5714,602 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     ver();
   }
 
+  /* ------------------------------------------ los falsos amigos --------- */
+
+  /*
+   * La misma letra, dicha primero con voz inglesa y luego con voz española.
+   * El contraste hay que OÍRLO: leer "en inglés suena distinto" no corrige
+   * nada en alguien que aprendió el abecedario en inglés.
+   */
+  function pasoIngles() {
+    var lista = Avanzado.ingles;
+    var i = 0;
+
+    function ver() {
+      if (i >= lista.length) return siguientePaso();
+      var f = lista[i];
+      var hayIngles = Voz.hayVozInglesa();
+
+      function oirAmbas() {
+        if (!hayIngles) return decir(f.muestraEs, 'palabra');
+        return Voz.hablarEnIngles(f.muestraEn)
+          .then(function () { return new Promise(function (r) { setTimeout(r, 420); }); })
+          .then(function () { return decir(f.muestraEs, 'palabra'); });
+      }
+
+      marco([
+        el('div', { class: 'tarjeta' }, [
+          el('div', { class: 'letra-gigante', text: f.letra }),
+          el('div', { class: 'contraste' }, [
+            el('button', {
+              class: 'btn lado-en', disabled: hayIngles ? null : 'disabled',
+              onclick: function () { Voz.hablarEnIngles(f.muestraEn); }
+            }, [
+              el('span', { class: 'bandera', text: '🇬🇧' }),
+              el('span', { class: 'etq' }, [
+                el('span', { class: 'chico', text: T.t('enIngles') }),
+                el('b', { text: f.muestraEn })
+              ])
+            ]),
+            el('button', {
+              class: 'btn lado-es',
+              onclick: function () { decir(f.muestraEs, 'palabra'); }
+            }, [
+              el('span', { class: 'bandera', text: '🇪🇸' }),
+              el('span', { class: 'etq' }, [
+                el('span', { class: 'chico', text: T.t('enEspanol') }),
+                el('b', { text: f.muestraEs })
+              ])
+            ])
+          ]),
+          el('p', { class: 'truco', text: f.nota }),
+          hayIngles ? null : el('p', { class: 'dato', text: T.t('sinVozInglesa') }),
+          el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+        ]),
+        el('div', { class: 'fila-botones' }, [
+          el('button', { class: 'btn btn-audio', text: '🔊 ' + T.t('otraVez'), onclick: oirAmbas }),
+          el('button', {
+            class: 'btn btn-principal', text: '➡️ ' + T.t('siguiente'),
+            onclick: function () { Voz.parar(); i++; ver(); }
+          })
+        ])
+      ], 'pasoIngles', f.nota, function () {
+        return oirAmbas();
+      });
+    }
+    ver();
+  }
+
+  /* ------------------------------------------ palabras inventadas ------- */
+
+  /*
+   * No existen, así que no hay memoria ni forma global que valga: o las
+   * descifra o no salen. Con micrófono se puntúa de verdad; sin él, se
+   * autoevalúa como en el resto de la app.
+   */
+  function pasoInventadas() {
+    var lista = [];
+    Avanzado.inventadas.forEach(function (n) {
+      lista = lista.concat(mezclar(n.lista).slice(0, 3));
+    });
+    var i = 0;
+
+    function ronda() {
+      if (i >= lista.length) return siguientePaso();
+      var palabra = lista[i];
+      var trozos = Silabas.syllabify(palabra);
+
+      var fila = el('div', { class: 'palabra-silabas' });
+      var nodos = [];
+      trozos.forEach(function (t) {
+        var n = el('span', { class: 'trozo', text: t });
+        nodos.push(n);
+        fila.appendChild(n);
+      });
+
+      var tarjeta = el('div', { class: 'palabra-tarjeta' }, [
+        el('div', { class: 'palabra-emoji', text: '👽' }),
+        fila,
+        el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+      ]);
+
+      if (micDisponible()) {
+        marco([
+          tarjeta,
+          bloqueMicro(palabra, {
+            nodos: nodos,
+            unidad: 'inventadas',
+            alAcabar: function () { i++; ronda(); }
+          })
+        ], 'pasoInventadas', T.t('tocaYLee'));
+        return;
+      }
+
+      marco([
+        tarjeta,
+        el('div', { class: 'fila-botones' }, [
+          el('button', {
+            class: 'btn btn-audio', text: '🔊 ' + T.t('comprobar'),
+            onclick: function () { leerPorSilabas(palabra, nodos); }
+          }),
+          el('button', {
+            class: 'btn btn-principal', text: '➡️ ' + T.t('siguiente'),
+            onclick: function () { Voz.parar(); i++; ronda(); }
+          })
+        ])
+      ], 'pasoInventadas', T.t('ahoraLeeTu'));
+    }
+    ronda();
+  }
+
+  /* ----------------------------------------------- pares mínimos -------- */
+
+  /* Oye una de las dos y toca cuál era: obliga a mirar dentro de la palabra. */
+  function pasoParesOir() {
+    var lista = mezclar(Avanzado.pares.slice()).slice(0, 6);
+    var i = 0;
+
+    function ronda() {
+      if (i >= lista.length) return siguientePaso();
+      var par = lista[i];
+      var cual = Math.random() < 0.5 ? 'a' : 'b';
+      var objetivo = par[cual][0];
+      var opciones = mezclar([par.a, par.b]);
+
+      var rejilla = el('div', { class: 'rejilla-silabas' });
+      opciones.forEach(function (o) {
+        var b = el('button', { class: 'silaba', style: 'font-size:1.8rem' }, [
+          el('span', { style: 'display:block;font-size:2rem', text: o[1] }),
+          el('span', { text: o[0] })
+        ]);
+        b.addEventListener('click', function () {
+          if (o[0] === objetivo) {
+            b.classList.add('bien');
+            Progreso.apuntarAcierto('pares');
+            decir('¡Sí! ' + objetivo, 'frase');
+            i++;
+            setTimeout(ronda, 1300);
+          } else {
+            b.classList.add('mal');
+            setTimeout(function () { b.classList.remove('mal'); }, 500);
+            Progreso.apuntarFallo('par-minimo', 'pares');
+            Voz.secuencia([
+              { text: 'No. Cambian en ' + par.diferencia, tipo: 'frase', pausa: 300 },
+              { text: objetivo, tipo: 'palabra' }
+            ]);
+          }
+        });
+        rejilla.appendChild(b);
+      });
+
+      marco([
+        el('div', { class: 'tarjeta' }, [
+          el('button', {
+            class: 'btn btn-principal btn-grande', text: '🔊 ' + T.t('escuchar'),
+            onclick: function () { decir(objetivo, 'palabra'); }
+          }),
+          el('p', { class: 'dato', text: T.t('enQueCambian') + ': ' + par.diferencia }),
+          el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+        ]),
+        rejilla
+      ], 'pasoPares', null, function () { decir(objetivo, 'palabra'); });
+    }
+    ronda();
+  }
+
+  /* Ahora al revés: lee tú una de las dos y a ver cuál te sale. */
+  function pasoParesLeer() {
+    var lista = mezclar(Avanzado.pares.slice()).slice(0, 4);
+    var i = 0;
+
+    function ronda() {
+      if (i >= lista.length) return siguientePaso();
+      var par = lista[i];
+      var cual = Math.random() < 0.5 ? 'a' : 'b';
+      var objetivo = par[cual][0];
+      var otra = par[cual === 'a' ? 'b' : 'a'][0];
+
+      var tarjeta = el('div', { class: 'palabra-tarjeta' }, [
+        el('div', { class: 'palabra-emoji', text: par[cual][1] }),
+        el('div', { class: 'palabra-entera', text: objetivo }),
+        el('p', { class: 'dato', text: 'No es "' + otra + '". Fíjate en ' + par.diferencia + '.' }),
+        el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+      ]);
+
+      if (!micDisponible()) {
+        marco([tarjeta, el('div', { class: 'fila-botones' }, [
+          el('button', { class: 'btn btn-audio', text: '🔊 ' + T.t('comprobar'),
+            onclick: function () { decir(objetivo, 'palabra'); } }),
+          el('button', { class: 'btn btn-principal', text: '➡️ ' + T.t('siguiente'),
+            onclick: function () { Voz.parar(); i++; ronda(); } })
+        ])], 'pasoLeerVoz', T.t('ahoraLeeTu'));
+        return;
+      }
+
+      marco([
+        tarjeta,
+        bloqueMicro(objetivo, {
+          unidad: 'pares',
+          rival: otra,          /* si dice la otra, hay que decírselo */
+          alAcabar: function () { i++; ronda(); }
+        })
+      ], 'pasoLeerVoz', T.t('tocaYLee'));
+    }
+    ronda();
+  }
+
+  /* ----------------------------------------------------- dictado -------- */
+
+  /*
+   * Oye y escribe. Es la otra mitad de leer: escribir obliga a poner las
+   * letras en orden, sin el atajo de reconocer la palabra entera de un
+   * vistazo. Se distingue el error de lectura ("chirafa" por "jirafa") de la
+   * duda ortográfica legítima ("baca" por "vaca"), que suena igual.
+   */
+  function pasoDictado() {
+    var lista = [];
+    Avanzado.dictado.forEach(function (n) {
+      lista = lista.concat(mezclar(n.lista).slice(0, 3));
+    });
+    var i = 0;
+
+    function ronda() {
+      if (i >= lista.length) return siguientePaso();
+      var palabra = lista[i];
+
+      var campo = el('input', {
+        type: 'text', class: 'campo-codigo campo-dictado', placeholder: T.t('escribeAqui'),
+        autocomplete: 'off', autocorrect: 'off', spellcheck: 'false', autocapitalize: 'off'
+      });
+      var veredicto = el('div', {});
+
+      function decirla() { return decir(palabra, 'palabra'); }
+
+      function revisar() {
+        var escrito = (campo.value || '').trim().toLowerCase();
+        if (!escrito) return campo.focus();
+        var exacto = escrito === palabra.toLowerCase();
+        var suena = Evaluar.fonetica(escrito) === Evaluar.fonetica(palabra);
+
+        veredicto.innerHTML = '';
+        if (exacto) {
+          Progreso.apuntarAcierto('dictado');
+          veredicto.appendChild(el('div', { class: 'veredicto v3' }, [
+            el('div', { class: 'estrellas-ganadas', text: '★★★' }),
+            el('p', { class: 'comentario', text: '¡Perfecto! ' + palabra })
+          ]));
+          narrar('¡Perfecto!');
+          confeti();
+        } else if (suena) {
+          /* Lo ha oído bien: el fallo es de ortografía, no de lectura. */
+          Progreso.apuntarFallo('ortografia', 'dictado');
+          veredicto.appendChild(el('div', { class: 'veredicto v2' }, [
+            el('div', { class: 'estrellas-ganadas', text: '★★☆' }),
+            el('p', { class: 'lectura-marcada' }, [
+              el('span', { class: 'pal-casi', text: escrito }),
+              document.createTextNode(' → '),
+              el('span', { class: 'pal-bien', text: palabra })
+            ]),
+            el('p', { class: 'comentario', text: T.t('ortografia') + '.' })
+          ]));
+          narrar(T.t('ortografia') + '. Se escribe ' + palabra);
+        } else {
+          Progreso.apuntarFallo('dictado-mal', 'dictado');
+          veredicto.appendChild(el('div', { class: 'veredicto v0' }, [
+            el('div', { class: 'estrellas-ganadas', text: '★☆☆' }),
+            el('p', { class: 'lectura-marcada' }, [
+              el('span', { class: 'pal-mal', text: escrito || '—' }),
+              document.createTextNode(' → '),
+              el('span', { class: 'pal-bien', text: palabra })
+            ])
+          ]));
+          Voz.secuencia([
+            { text: 'Escucha otra vez', tipo: 'frase', pausa: 260 },
+            { text: palabra, tipo: 'palabra' }
+          ]);
+        }
+        veredicto.appendChild(el('div', { class: 'fila-botones' }, [
+          el('button', { class: 'btn btn-audio', text: '🔊 ' + T.t('escuchar'), onclick: decirla }),
+          el('button', {
+            class: 'btn btn-principal', text: '➡️ ' + T.t('siguiente'),
+            onclick: function () { Voz.parar(); i++; ronda(); }
+          })
+        ]));
+      }
+
+      campo.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') revisar(); });
+
+      marco([
+        el('div', { class: 'tarjeta' }, [
+          el('button', {
+            class: 'btn btn-principal btn-grande', text: '🔊 ' + T.t('escuchar'), onclick: decirla
+          }),
+          el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+        ]),
+        campo,
+        el('button', { class: 'btn btn-grande', text: '✅ ' + T.t('revisar'), onclick: revisar }),
+        veredicto
+      ], 'pasoDictado', null, decirla);
+
+      setTimeout(function () { campo.focus(); }, 500);
+    }
+    ronda();
+  }
+
+  /* ------------------------------------------------------- cuentos ------ */
+
+  function leidoCuento(c) { return Progreso.unidadCompleta('cuento:' + c.id); }
+
+  /* La biblioteca, ordenada por nivel: textos cada vez más largos. */
+  function verBiblioteca() {
+    vista = { nombre: 'biblioteca' };
+    var bloques = [];
+
+    [1, 2, 3].forEach(function (n) {
+      var lista = Avanzado.cuentosDeNivel(n);
+      if (!lista.length) return;
+      bloques.push(el('h2', { class: 'nivel-titulo', text: T.t('nivel') + ' ' + n }));
+      var rejilla = el('div', { class: 'rejilla-cuentos' });
+      lista.forEach(function (c) {
+        var palabras = c.lineas.join(' ').split(/\s+/).length;
+        var marcas = Progreso.lecturas().filter(function (l) { return l.texto === c.id; });
+        var mejor = marcas.reduce(function (a, l) { return Math.max(a, l.ppm); }, 0);
+        rejilla.appendChild(el('button', {
+          class: 'cuento-btn' + (leidoCuento(c) ? ' leido' : ''),
+          onclick: function () { abrirCuento(c); }
+        }, [
+          el('span', { class: 'cuento-emo', text: c.emoji }),
+          el('span', { class: 'cuento-titulo', text: c.titulo }),
+          el('span', { class: 'cuento-dato', text: palabras + ' palabras' +
+            (mejor ? ' · ' + mejor + ' ppm' : '') }),
+          leidoCuento(c) ? el('span', { class: 'hecha', text: '✓' }) : null
+        ]));
+      });
+      bloques.push(rejilla);
+    });
+
+    pintar([
+      barra(T.t('biblioteca'), verPortada),
+      el('section', { style: '--u: var(--c4)' }, bloques)
+    ]);
+  }
+
+  /*
+   * Un cuento se lee tres veces, no una. La lectura repetida es lo que
+   * convierte descifrar en leer: la primera vez cuesta, la tercera sale
+   * suelta, y ver su propia velocidad subir motiva más que cualquier estrella.
+   */
+  function abrirCuento(c) {
+    Progreso.marcarDia();
+    vista = { nombre: 'cuento' };
+    var texto = c.lineas.join(' ');
+    var pintadas = c.lineas.map(function (linea) { return frasePintada(linea, false); });
+
+    var cuerpo = el('div', {});
+    cuerpo.appendChild(el('div', { class: 'palabra-emoji', style: 'text-align:center', text: c.emoji }));
+    cuerpo.appendChild(el('h2', { style: 'text-align:center;margin:4px 0 14px', text: c.titulo }));
+    pintadas.forEach(function (p) { cuerpo.appendChild(p.caja); });
+
+    function leerTodo() {
+      var k = 0;
+      function seguir() {
+        if (k >= pintadas.length) return Promise.resolve();
+        var p = pintadas[k], linea = c.lineas[k];
+        k++;
+        return leerFrase(p, linea)
+          .then(function () { return new Promise(function (r) { setTimeout(r, 380); }); })
+          .then(seguir);
+      }
+      return seguir();
+    }
+
+    var zonaMicro = el('div', {});
+
+    var acciones = el('div', { class: 'fila-botones' }, [
+      el('button', { class: 'btn btn-audio', text: '🔊 ' + T.t('escuchar'), onclick: leerTodo }),
+      micDisponible() ? el('button', {
+        class: 'btn btn-principal', text: '⏱️ ' + T.t('leerYCronometrar'),
+        onclick: function (ev) {
+          Voz.parar();
+          ev.currentTarget.disabled = true;
+          zonaMicro.innerHTML = '';
+          zonaMicro.appendChild(bloqueMicro(texto, {
+            silabas: false, continuo: true, idTexto: c.id, unidad: 'lectura',
+            alAcabar: function () { preguntaCuento(c); }
+          }));
+          zonaMicro.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }) : null,
+      el('button', {
+        class: 'btn', text: '❓ ' + T.t('preguntaTitulo'),
+        onclick: function () { preguntaCuento(c); }
+      })
+    ]);
+
+    pintar([
+      barra(c.titulo, verBiblioteca),
+      el('section', { style: '--u: var(--c4)' }, [
+        el('div', { class: 'enunciado' }, [
+          el('button', {
+            class: 'btn btn-icono btn-audio', text: '🔊',
+            onclick: function () { narrar(T.t('tocaPalabra')); }
+          }),
+          el('div', { class: 'txt' }, etiqueta('tocaPalabra'))
+        ]),
+        cuerpo, acciones, zonaMicro
+      ])
+    ]);
+  }
+
+  /*
+   * La pregunta no es un adorno: como el niño ya habla español, si descifró
+   * bien la acierta sin esfuerzo. Fallarla significa que leyó mal, no que no
+   * entienda. Es un detector de lectura disfrazado de cuento.
+   */
+  function preguntaCuento(c) {
+    Voz.parar();
+    var p = c.pregunta;
+    var opciones = mezclar(p.opciones.map(function (t, i) {
+      return { texto: t, buena: i === p.correcta };
+    }));
+
+    var lista = el('div', { class: 'opciones-pregunta' });
+    var resuelta = false;
+
+    opciones.forEach(function (o) {
+      var b = el('button', { class: 'opcion', text: o.texto });
+      b.addEventListener('click', function () {
+        if (resuelta) return;
+        if (o.buena) {
+          resuelta = true;
+          b.classList.add('bien');
+          Progreso.completarUnidad('cuento:' + c.id);
+          Progreso.completarPaso('cuento:' + c.id, 'comprension', 2);
+          confeti();
+          mostrarMoraleja(c);
+        } else {
+          b.classList.add('mal');
+          Progreso.apuntarFallo('comprension', 'lectura');
+          narrar('Ésa no. Vuelve a leer el cuento y fíjate.');
+        }
+      });
+      lista.appendChild(b);
+    });
+
+    function mostrarMoraleja(c) {
+      var caja = el('div', { class: 'moraleja' }, [
+        el('span', { class: 'moraleja-icono', text: '💡' }),
+        el('p', { class: 'moraleja-titulo', text: T.t('moraleja') }),
+        el('p', { class: 'moraleja-texto', text: c.moraleja })
+      ]);
+      lista.parentNode.appendChild(caja);
+      lista.parentNode.appendChild(el('div', { class: 'fila-botones' }, [
+        el('button', { class: 'btn', text: '📚 ' + T.t('biblioteca'), onclick: verBiblioteca }),
+        el('button', {
+          class: 'btn btn-principal', text: '🔁 ' + T.t('otraVezMasRapido'),
+          onclick: function () { abrirCuento(c); }
+        })
+      ]));
+      Voz.secuencia([
+        { text: '¡Muy bien!', tipo: 'frase', pausa: 300 },
+        { text: T.t('moraleja') + ': ' + c.moraleja, tipo: 'frase' }
+      ]);
+    }
+
+    var seccion = el('section', { style: '--u: var(--c4)' }, [
+      el('div', { class: 'enunciado' }, [
+        el('button', {
+          class: 'btn btn-icono btn-audio', text: '🔊',
+          onclick: function () { narrar(p.texto); }
+        }),
+        el('div', { class: 'txt' }, etiqueta('preguntaTitulo'))
+      ]),
+      el('div', { class: 'tarjeta' }, [
+        el('div', { class: 'palabra-emoji', text: c.emoji }),
+        el('p', { class: 'pregunta-texto', text: p.texto })
+      ]),
+      lista
+    ]);
+
+    pintar([barra(c.titulo, function () { abrirCuento(c); }), seccion]);
+    setTimeout(function () { narrar(p.texto); }, 300);
+  }
+
+  /* ------------------------------------------------- cómo va la cosa ---- */
+
+  /*
+   * Panel para el adulto. No es para el niño: son los datos que hacen falta
+   * para saber dónde está sin tener que interrogarle.
+   */
+  function verComoVa() {
+    var e = Progreso.estadisticas(Curriculo.unidades);
+    var hoja = el('div', { class: 'hoja' });
+    hoja.addEventListener('click', function (ev) { if (ev.target === hoja) hoja.remove(); });
+    var panel = el('div', { class: 'hoja-panel' });
+
+    panel.appendChild(el('h2', { style: 'margin:0 0 4px', text: '👨‍👩‍👦 ' + T.t('comoVa') }));
+
+    panel.appendChild(el('div', { class: 'cifras' }, [
+      cifra(e.completas + '/' + e.total, T.t('progreso')),
+      cifra('★ ' + e.estrellas, T.t('estrellas')),
+      cifra(String(e.racha), T.t('diasSeguidos')),
+      cifra(String(e.dias), T.t('diasTotales'))
+    ]));
+
+    /* Velocidad de lectura: lo que mejor muestra si está cuajando. */
+    var vel = el('div', { class: 'ajuste' }, [el('label', {}, etiqueta('velocidad2'))]);
+    if (!e.historial.length) {
+      vel.appendChild(el('p', { class: 'dato', text: T.t('sinDatos') }));
+    } else {
+      vel.appendChild(el('p', { class: 'dato' }, [
+        document.createTextNode(T.t('mejorPpm') + ': '),
+        el('b', { text: e.ppmMejor + ' ' + T.t('ppm') })
+      ]));
+      var barras = el('div', { class: 'barras' });
+      var tope = Math.max.apply(null, e.historial.map(function (l) { return l.ppm; })) || 1;
+      e.historial.forEach(function (l) {
+        barras.appendChild(el('span', {
+          class: 'barra-ppm',
+          style: 'height:' + Math.max(8, Math.round(l.ppm / tope * 100)) + '%',
+          title: l.ppm + ' ppm · ' + l.texto + ' · ' + l.fecha
+        }));
+      });
+      vel.appendChild(barras);
+      vel.appendChild(el('p', { class: 'dato', style: 'font-size:.8rem',
+        text: 'Cada barra es una lectura, de la más antigua a la más reciente.' }));
+    }
+    panel.appendChild(vel);
+
+    /* Dónde falla: los diagnósticos que la app fue guardando. */
+    var NOMBRES = {
+      'rr': 'Erre fuerte (pero / perro)',
+      'r': 'Erre suave',
+      'silabas-menos': 'Se come sílabas',
+      'silabas-mas': 'Añade sílabas',
+      'vocal': 'Cambia vocales',
+      'consonante': 'Cambia consonantes',
+      'falta': 'Se salta palabras',
+      'ortografia': 'Ortografía al escribir',
+      'dictado-mal': 'Dictado equivocado',
+      'par-minimo': 'Confunde palabras parecidas',
+      'comprension': 'No pilla lo que lee',
+      'otra': 'Otros'
+    };
+    var fal = el('div', { class: 'ajuste' }, [el('label', {}, etiqueta('dondeFalla'))]);
+    if (!e.errores.length) {
+      fal.appendChild(el('p', { class: 'dato', text: T.t('sinDatos') }));
+    } else {
+      var ul = el('ul', { class: 'lista-fallos' });
+      e.errores.forEach(function (x) {
+        ul.appendChild(el('li', {}, [
+          el('span', { text: NOMBRES[x.clave] || x.clave }),
+          el('b', { text: String(x.veces) })
+        ]));
+      });
+      fal.appendChild(ul);
+      if (e.flojas.length) {
+        fal.appendChild(el('p', { class: 'dato',
+          text: 'El repaso ya le está trayendo: ' + e.flojas.map(function (f) { return f.id; }).join(', ') }));
+      }
+    }
+    panel.appendChild(fal);
+
+    panel.appendChild(el('div', { class: 'ajuste' }, [
+      el('button', { class: 'btn btn-principal btn-grande', text: T.t('cerrar'),
+        onclick: function () { hoja.remove(); } })
+    ]));
+
+    hoja.appendChild(panel);
+    document.body.appendChild(hoja);
+  }
+
+  function cifra(valor, etq) {
+    return el('div', { class: 'cifra' }, [
+      el('b', { text: valor }),
+      el('span', { text: etq })
+    ]);
+  }
+
   /* ---------------------------------------------------- lector libre ---- */
 
   function verLector() {
@@ -4553,14 +6435,18 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
    */
   function seccionTraspaso() {
     var caja = el('div', { class: 'ajuste' });
-    var codigo = Progreso.exportarCodigo(Curriculo.unidades);
-    var enlace = location.href.split('#')[0] + '#p=' + codigo.replace(/-/g, '');
+    var idsCuentos = (Avanzado && Avanzado.cuentos || []).map(function (c) { return c.id; });
+    var codigo = Progreso.exportarCodigo(Curriculo.unidades, idsCuentos);
+    /* El enlace no tiene por qué ser corto, así que lleva el progreso entero:
+       también la velocidad de lectura y los diagnósticos del repaso. */
+    var enlace = location.href.split('#')[0] + '#p=' + Progreso.exportarCompleto();
 
     caja.appendChild(el('label', {}, etiqueta('traspaso')));
     caja.appendChild(el('p', { class: 'dato', text: T.t('tuCodigo') + ':' }));
     caja.appendChild(el('div', { class: 'codigo', text: codigo }));
 
-    var aviso = el('p', { class: 'dato', text: T.t('traspasoAyuda') });
+    caja.appendChild(el('p', { class: 'dato', text: T.t('traspasoAyuda') }));
+    var aviso = el('p', { class: 'dato', text: T.t('enlaceLlevaTodo') });
     caja.appendChild(el('button', {
       class: 'btn btn-grande',
       text: '🔗 ' + T.t('copiarEnlace'),
@@ -4598,13 +6484,18 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       return global.alert(T.t('codigoMal'));
     }
     if (!global.confirm(T.t('codigoPisa'))) return;
-    var r = Progreso.importarCodigo(codigo, Curriculo.unidades);
+    var idsCuentos = (Avanzado && Avanzado.cuentos || []).map(function (c) { return c.id; });
+    var r = Progreso.importarCodigo(codigo, Curriculo.unidades, idsCuentos);
     if (!r.ok) return global.alert(T.t('codigoMal'));
     var hoja = document.querySelector('.hoja');
     if (hoja) hoja.remove();
     confeti();
+    T.usarChino(!!Progreso.ajuste('chino'));
+    document.body.setAttribute('data-may', Progreso.ajuste('mayusculas') ? '1' : '0');
+    Voz.velocidad(Progreso.ajuste('velocidad') || 0.85);
     verPortada();
-    narrar(T.t('codigoBien') + ' ' + r.unidades + ' unidades y ' + r.estrellas + ' estrellas.');
+    narrar(T.t('codigoBien') + ' ' + r.unidades + ' unidades, ' + r.cuentos +
+           ' cuentos y ' + r.estrellas + ' estrellas.');
   }
 
   /* ------------------------------------------------------ instalar ----- */
@@ -4787,6 +6678,34 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       Progreso.ajuste('desbloquearTodo', v);
     }));
 
+    /* Para que otra familia pueda usarla: el enlace, sin más. */
+    panel.appendChild(el('div', { class: 'ajuste' }, [
+      el('button', {
+        class: 'btn btn-grande', text: '📤 ' + T.t('compartir'),
+        onclick: function (ev) {
+          var boton = ev.currentTarget;
+          var url = location.href.split('#')[0];
+          var datos = {
+            title: 'Aprendo a leer en español',
+            text: T.t('queEsEsto'),
+            url: url
+          };
+          if (navigator.share) {
+            navigator.share(datos).catch(function () {});
+          } else if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(function () {
+              boton.textContent = '✅ ' + T.t('compartida');
+            }, function () {});
+          }
+        }
+      })
+    ]));
+
+    panel.appendChild(el('div', { class: 'ajuste' }, [
+      el('button', { class: 'btn btn-grande', text: '👦 ' + T.t('cambiarNino'),
+        onclick: function () { hoja.remove(); verPerfiles(); } })
+    ]));
+
     panel.appendChild(seccionTraspaso());
 
     panel.appendChild(el('div', { class: 'ajuste' }, [
@@ -4838,6 +6757,11 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       if (document.hidden) Voz.parar();
     });
 
+    /* Primera vez en este aparato: preguntamos lo que cambia la app. */
+    var perfil = Progreso.perfilActivo();
+    var estrenando = !perfil.nombre && !Progreso.datos().estrellas &&
+                     !Object.keys(Progreso.datos().unidades).length;
+
     /* Un enlace #p=CODIGO trae el progreso de otro aparato. */
     var traido = /^#p=(.+)$/.exec(location.hash);
     if (traido) {
@@ -4846,6 +6770,8 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       setTimeout(function () { aplicarCodigo(traido[1]); }, 400);
     } else if (location.hash === '#lector') {
       verLector();     /* atajo del icono de la app (manifest → shortcuts) */
+    } else if (estrenando) {
+      verBienvenida();
     } else {
       verPortada();
     }

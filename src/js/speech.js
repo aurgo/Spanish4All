@@ -29,6 +29,15 @@
   var rateScale = 1;   // el ajuste global de velocidad multiplica los anteriores
 
   function isSpanish(v) { return /^es(\b|[-_])/i.test(v.lang || ''); }
+  function isEnglish(v) { return /^en(\b|[-_])/i.test(v.lang || ''); }
+
+  /*
+   * Para enseñar los falsos amigos del alfabeto hace falta decir la misma
+   * letra en inglés y en español, una detrás de otra. Guardamos aparte una
+   * voz inglesa; si el aparato no tiene ninguna, quien llama se entera y
+   * enseña sólo el lado español en vez de pronunciarlo con acento español.
+   */
+  var vozInglesa = null;
 
   /* Puntuación de una voz: preferimos español de España y voces locales. */
   function score(v) {
@@ -52,6 +61,9 @@
 
     var saved = preferredURI && voices.filter(function (v) { return v.voiceURI === preferredURI; })[0];
     chosen = saved || voices.slice().sort(function (a, b) { return score(b) - score(a); })[0] || null;
+
+    var inglesas = all.filter(isEnglish);
+    vozInglesa = inglesas.filter(function (v) { return v.localService; })[0] || inglesas[0] || null;
 
     listeners.forEach(function (fn) { try { fn(voices, chosen); } catch (e) {} });
   }
@@ -179,9 +191,30 @@
     loadVoices();
   }
 
+  /* Pronuncia algo CON VOZ INGLESA. Devuelve false si no hay ninguna. */
+  function sayEnglish(text, opts) {
+    opts = opts || {};
+    if (!supported || !vozInglesa || !text) return Promise.resolve(false);
+    if (opts.interrupt !== false) cancel();
+    return new Promise(function (resolve) {
+      var u = new global.SpeechSynthesisUtterance(String(text));
+      u.voice = vozInglesa;
+      u.lang = vozInglesa.lang;
+      u.rate = Math.max(0.1, Math.min(2, (opts.rate || 0.75) * rateScale));
+      u.pitch = 1;
+      var listo = false;
+      function fin() { if (!listo) { listo = true; clearTimeout(guarda); resolve(true); } }
+      u.onend = fin; u.onerror = fin;
+      var guarda = setTimeout(fin, 4000 + String(text).length * 120);
+      try { synth.speak(u); startKeepAlive(); } catch (e) { fin(); }
+    });
+  }
+
   global.Voz = {
     soportado: supported,
     hablar: say,
+    hablarEnIngles: sayEnglish,
+    hayVozInglesa: function () { return !!vozInglesa; },
     secuencia: sequence,
     parar: cancel,
     preparar: prime,

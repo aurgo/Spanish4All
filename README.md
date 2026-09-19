@@ -5,11 +5,45 @@ cuenta**, usando la voz y el micrófono que ya trae el navegador. La app le lee
 todo en voz alta, y cuando lee él, **le escucha y le puntúa**. Sin instalación
 y sin cuentas.
 
-Pensada para un caso concreto: un niño que **habla español con soltura y lee
-chino tradicional perfectamente, pero nunca ha leído español**. Conoce las
-letras del alfabeto por el inglés, así que lo que le falta no son las formas
-de las letras sino **qué sonido hace cada una en español** — y eso es
-exactamente lo que enseña esta app.
+## Para quién es
+
+Para **niños que ya hablan español en casa pero nunca lo han leído**. El caso
+que la originó, y el que mejor cubre, es el de las familias hispanohablantes
+en Taiwán: niños que hablan español con sus padres, **leen chino tradicional
+con soltura** porque es lo que usan en el colegio, y **conocen el abecedario
+por el inglés**.
+
+Ese perfil tiene tres consecuencias que ninguna app genérica de lectura
+contempla, y que aquí son el eje del diseño:
+
+- **No hay que enseñarles vocabulario.** Ya saben qué es una jirafa. Lo único
+  que les falta es descifrar, así que se puede ir rápido y llegar lejos.
+- **Se saben las letras, pero con los valores del inglés.** La `i` que allí
+  se llama /ai/, la `h` que sopla, la `j`, la `v`, el `qu`. Es su fuente de
+  error más probable, y la app la ataca de frente.
+- **Leen una escritura donde cada signo se reconoce entero.** Ese hábito tiende
+  a colarse al pasar a un alfabeto: adivinar la palabra por su silueta en vez
+  de leerla de izquierda a derecha. De ahí las palabras inventadas y los pares
+  mínimos.
+
+Nada de eso la hace inservible para otros: un niño hispanohablante que no lea
+chino ni sepa inglés puede usarla igual, apagando en la primera pantalla las
+dos ayudas que no le tocan.
+
+## Varios niños en el mismo aparato
+
+Hermanos, o un amigo que viene a casa y quiere probar. Cada niño tiene su
+nombre, su dibujo y su progreso, y se cambia desde la chapa de la esquina.
+Los ajustes también son de cada uno: la velocidad de la voz que le va bien a
+uno no es la del otro.
+
+La primera vez la app pregunta el nombre y dos cosas que cambian cómo
+funciona: si lee chino (los enunciados salen también en chino tradicional) y
+si se sabe las letras en inglés (avisos sobre las que suenan distinto). Es la
+única pantalla escrita para que la lea un adulto.
+
+Quien ya venía usando la app antes de que existieran los perfiles no pierde
+nada: su progreso se convierte en el primer niño de la lista.
 
 ## Cómo se usa
 
@@ -92,6 +126,7 @@ y sólo al final lo difícil.
 | 4 | 28–33 | Sílabas trabadas: bl br, cl cr, fl fr, gl gr, pl pr, tr dr |
 | 5 | 34–36 | Sílabas inversas, diptongos e hiatos, la tilde y los signos `¿?` `¡!` |
 | 6 | 37 | Tres cuentos cortos para leer de corrido |
+| 7 | 38–41 | Nivel avanzado: palabras inventadas, pares mínimos, dictado y los falsos amigos del inglés |
 
 **La regla de oro:** ninguna palabra usa una letra que no se haya enseñado
 antes. Por eso la unidad de la `m` sólo tiene *mamá, mimo, momia, mío, mía* —
@@ -120,6 +155,93 @@ Cada unidad recorre la misma secuencia, que va de reconocer a producir:
 8. **Frases y textos** — lectura de corrido, palabra a palabra o por sílabas,
    con un 🎤 para leerlas él y que le puntúen. Los cuentos se leen línea a
    línea, porque el reconocedor corta en la primera pausa.
+
+## El nivel avanzado
+
+Las cuatro últimas unidades y la biblioteca atacan cosas que el método
+silábico solo no cubre, y que en este caso concreto importan mucho.
+
+### Los falsos amigos del inglés (unidad 41, y avisos por el camino)
+
+Quien aprendió el abecedario en inglés arrastra sus valores: la `i` que allí
+se llama /ai/ y aquí suena /i/, la `h` que allí sopla y aquí calla, la `j`,
+la `v`, la `z`, el `qu`. Es la interferencia más probable en alguien que llega
+al español sabiendo leer en inglés.
+
+La app dice **la misma letra con voz inglesa y con voz española, una detrás de
+otra**, usando dos voces distintas del sistema. El contraste hay que oírlo:
+leer «en inglés suena distinto» no corrige nada. Y el aviso aparece también
+dentro de cada unidad de letra afectada, el día que se aprende, no en una
+lección suelta al final.
+
+Si el aparato no tiene voz inglesa instalada, se enseña la nota sin el
+ejemplo, en vez de pronunciar el inglés con acento español.
+
+### Palabras inventadas (unidad 38)
+
+*lomi*, *prata*, *quebio*. No existen, pero podrían: respetan las reglas del
+español. No se pueden adivinar por su forma ni recordar de memoria, así que
+o se descifran letra a letra o no salen.
+
+Es la prueba de fuego de la lectura alfabética, y en particular el antídoto
+contra leer por silueta — un hábito razonable en quien viene de una escritura
+donde cada signo se reconoce entero, como el chino.
+
+Un test comprueba que ninguna es una palabra real del currículo, que todas se
+silabean correctamente, y que **ninguna contiene una palabrota**: se generan
+combinando sílabas y una combinación desafortunada acabaría delante de un
+niño.
+
+### Pares mínimos (unidad 39)
+
+*pato/pata*, *lago/algo*, *pero/perro*, *sal/las*. Palabras reales que cambian
+en una letra o en su orden. Primero se oye una y hay que tocar cuál era;
+después se lee una en voz alta y la app comprueba **cuál de las dos ha dicho**
+— si dice la otra, se lo nombra, que es justo lo que el ejercicio entrena.
+
+Un test verifica que cada par se diferencia de verdad en una sola letra o es
+un anagrama; cazó un par que no lo era.
+
+### Dictado (unidad 40)
+
+Oye una palabra y la escribe. Escribir obliga a poner las letras en orden, sin
+el atajo de reconocer la palabra entera de un vistazo.
+
+Distingue dos cosas que no son lo mismo: escribir *chirafa* por *jirafa* es un
+error de lectura; escribir *baca* por *vaca* es una duda ortográfica, porque
+suena exactamente igual. Reutiliza el mismo motor fonético que puntúa la voz.
+
+### Cuentos con moraleja, cronometrados (📚)
+
+Ocho historias en tres niveles, de 40 a 110 palabras. Cada una trae:
+
+- **Lectura repetida y cronometrada.** Lee en voz alta, la app mide y le
+  enseña sus **palabras por minuto**. La segunda vez sale más rápido, y ver la
+  propia curva subir motiva más que las estrellas. La lectura repetida es de
+  lo mejor documentado para ganar fluidez, y la fluidez es lo que libera
+  cabeza para entender en vez de descifrar.
+- **Una pregunta de comprensión** con tres respuestas, barajadas. No es un
+  adorno: como el niño ya habla español, si descifró bien la acierta sin
+  esfuerzo. Fallarla significa que leyó mal. Es un detector de lectura
+  disfrazado de cuento.
+- **La moraleja**, que aparece sólo al acertar.
+
+Para un texto largo el reconocedor se pone en modo continuo: un niño que
+empieza se para entre línea y línea, y si no, esa pausa se tomaría por final.
+Es él quien dice cuándo ha terminado.
+
+### El repaso ya no es aleatorio
+
+Cada vez que lee en voz alta, la app guarda **qué** falló — erre fuerte,
+sílaba comida, vocal cambiada, palabra saltada — y de qué unidad venía la
+palabra. El repaso pesa esas unidades al doble, y lo que ya le sale bien deja
+de aparecer. Antes calculaba ese diagnóstico y lo tiraba.
+
+### 👨‍👩‍👦 Panel para el adulto
+
+Desde la portada: unidades hechas, estrellas, **racha de días**, velocidad de
+lectura con una barra por sesión, y en qué falla más. Para saber dónde está
+sin tener que interrogarle.
 
 Además, desde la portada:
 
@@ -155,30 +277,39 @@ El progreso (estrellas, unidades hechas, ajustes) se guarda en el
 ### Cambiar de dispositivo
 
 Como el progreso vive en el navegador, cambiar de tableta significaría empezar
-de cero. Para evitarlo, ⚙️ muestra un **código de trece caracteres**:
+de cero. Hay **dos formas de llevárselo**, porque no sirven para lo mismo.
+
+**El código corto**, de diecisiete caracteres, que ⚙️ muestra en grande:
 
 ```
-6BZZ-G000-00C1-W
+AKZZ-ZZZZ-ZZ8Z-01WS-8
 ```
 
-Se teclea en el otro aparato, o se manda el enlace que lo lleva dentro
-(`…/#p=6BZZG00000C1W`), que al abrirse lo aplica solo. Recupera qué unidades
-están terminadas y cuántas estrellas hay.
+Se puede dictar por teléfono o apuntar en un papel. Lleva **las unidades
+terminadas, los cuentos leídos y las estrellas**: lo que se ve en pantalla.
 
-Tres decisiones detrás de ese formato:
+**El enlace**, que se copia con un botón. Ahí la longitud no molesta, así que
+lleva el progreso **entero**: además de lo anterior, la velocidad de lectura de
+cada cuento, los diagnósticos que alimentan el repaso adaptativo, y los ajustes
+del niño. Al abrirlo en el otro aparato se aplica solo.
 
-- **Corto a propósito.** Un volcado completo del progreso serían cientos de
-  caracteres, imposibles de dictar. Trece caben en un mensaje o en un papel.
-  Lo que se pierde es el detalle de las actividades sueltas dentro de la
-  unidad a medias; esa unidad simplemente se vuelve a empezar.
+Meter todo eso en el código corto lo multiplicaría por cincuenta y dejaría de
+poder dictarse; dejarlo fuera del enlace sería perder, al cambiar de tableta,
+justo lo que la app tardó semanas en aprender sobre ese niño.
+
+Tres decisiones detrás del formato corto:
+
 - **Sin letras confundibles.** Usa base32 de Crockford, que no tiene `I`, `L`,
   `O` ni `U`, para que nadie lea un 1 donde hay una ele. Al teclear, además,
   se corrigen esas confusiones.
 - **Con dígito de control.** Un carácter mal copiado se rechaza en vez de
   restaurar un progreso equivocado en silencio, que sería peor que no tener
   la función: aparecerían unidades abiertas sin haberlas hecho.
+- **Compatible hacia atrás.** Los códigos generados antes de que existieran
+  el nivel avanzado y los cuentos siguen valiendo, y no marcan unidades que
+  entonces no existían.
 
-Los **ajustes no viajan**, y es deliberado: la voz elegida no existe en el
+La **voz elegida nunca viaja**, en ninguna de las dos formas: no existe en el
 otro aparato, porque cada sistema trae las suyas.
 
 ## Cómo está hecho
@@ -192,7 +323,8 @@ JavaScript sin dependencias ni compilación. Seis archivos:
 | `src/js/escucha.js` | El micrófono: envoltorio de `SpeechRecognition` con sus asperezas y sus errores traducidos |
 | `src/js/evaluar.js` | Puntúa la lectura comparando **sonidos**, no letras, y diagnostica qué ha fallado |
 | `src/js/modelo.js` | El modelo integrado del navegador, si lo hay (opcional) |
-| `src/js/curriculum.js` | Las 37 unidades: letras, sílabas, palabras, frases y cuentos |
+| `src/js/curriculum.js` | Las 41 unidades: letras, sílabas, palabras, frases y cuentos |
+| `src/js/avanzado.js` | Material del nivel avanzado: falsos amigos, palabras inventadas, pares mínimos, dictado y los ocho cuentos |
 | `src/js/progress.js` | Progreso y ajustes en `localStorage` |
 | `src/js/textos.js` | Textos de interfaz en español y chino |
 | `src/js/pwa.js` | Instalación: genera e inyecta el *manifest*, registra el service worker si lo hay, y explica los pasos de cada navegador |
@@ -290,9 +422,16 @@ conviene volver a pasarlas si se toca el silabeador o el currículo:
 - **Lectura en voz alta** (28 comprobaciones) — que *vaca*/*baca*,
   *casa*/*caza*, *pollo*/*poyo* u *hola*/*ola* cuenten como iguales, que
   *pero*/*perro* cuente como distinto, y que las estrellas salgan donde deben.
+- **Varios niños** (6 comprobaciones) — que el progreso de uno no se mezcle
+  con el de otro, que los ajustes tampoco, que nunca se quede el aparato sin
+  ningún niño, y que quien venía de antes conserve todo al actualizar.
 - **Código de progreso** (12 comprobaciones) — ida y vuelta sin pérdidas, y
   sobre todo que un código con **un solo carácter cambiado** se rechace: se
   prueban las 403 variantes posibles.
+- **Nivel avanzado** (107 comprobaciones) — que ninguna palabra inventada sea
+  una palabrota ni una palabra real, que cada par mínimo se diferencie
+  realmente en una sola letra, y que cada cuento tenga moraleja y una pregunta
+  bien formada con su respuesta correcta.
 
 ## Compatibilidad
 

@@ -23,6 +23,7 @@
   var soportado = !!SR;
   var rec = null;
   var activo = false;
+  var detener = null;   // cierra la escucha en curso y devuelve lo oído
   var permiso = 'desconocido';   // desconocido | concedido | denegado
   var enDispositivo = false;
 
@@ -64,17 +65,26 @@
     return new Promise(function (resolver) {
       var terminado = false;
       var textos = [];
+      var seguido = '';          // lo acumulado en modo continuo
       var errorFinal = null;
+      var arranque = 0;
 
       function acabar(err) {
         if (terminado) return;
         terminado = true;
         activo = false;
+        detener = null;
         clearTimeout(guarda);
         try { if (rec) rec.stop(); } catch (e) {}
         rec = null;
-        if (textos.length) { permiso = 'concedido'; resolver({ ok: true, textos: textos, error: null }); }
-        else resolver({ ok: false, textos: [], error: err || errorFinal || 'sin-voz' });
+        var segundos = arranque ? (Date.now() - arranque) / 1000 : 0;
+        if (seguido) textos = [seguido];
+        if (textos.length) {
+          permiso = 'concedido';
+          resolver({ ok: true, textos: textos, error: null, segundos: segundos });
+        } else {
+          resolver({ ok: false, textos: [], error: err || errorFinal || 'sin-voz', segundos: segundos });
+        }
       }
 
       try {
@@ -85,8 +95,14 @@
 
       rec.lang = opciones.idioma || 'es-ES';
       rec.interimResults = true;
-      rec.continuous = false;
-      rec.maxAlternatives = 5;
+      /*
+       * Para una palabra o una frase basta con parar en la primera pausa.
+       * Para un cuento no: un niño que empieza se para entre línea y línea, y
+       * el reconocedor lo tomaría por final. En modo continuo seguimos
+       * escuchando hasta que él dice que ha terminado.
+       */
+      rec.continuous = !!opciones.continuo;
+      rec.maxAlternatives = opciones.continuo ? 1 : 5;
       /* Si el navegador sabe hacerlo en local, que no salga el audio. */
       try { if (enDispositivo) rec.processLocally = true; } catch (e) {}
 
@@ -95,16 +111,22 @@
         for (var i = ev.resultIndex; i < ev.results.length; i++) {
           var r = ev.results[i];
           if (r.isFinal) {
-            for (var j = 0; j < r.length; j++) {
-              var t = (r[j].transcript || '').trim();
-              if (t && textos.indexOf(t) === -1) textos.push(t);
+            if (opciones.continuo) {
+              /* Un texto largo llega a trozos: se van encadenando. */
+              seguido += (seguido ? ' ' : '') + (r[0].transcript || '').trim();
+            } else {
+              for (var j = 0; j < r.length; j++) {
+                var t = (r[j].transcript || '').trim();
+                if (t && textos.indexOf(t) === -1) textos.push(t);
+              }
             }
           } else {
             parcial += r[0].transcript;
           }
         }
-        if (parcial && opciones.onParcial) opciones.onParcial(parcial.trim());
-        if (textos.length && opciones.onParcial) opciones.onParcial(textos[0]);
+        if (opciones.onParcial) {
+          opciones.onParcial(((seguido ? seguido + ' ' : '') + parcial).trim() || textos[0] || '');
+        }
       };
 
       rec.onerror = function (ev) {
@@ -122,6 +144,8 @@
 
       try {
         activo = true;
+        arranque = Date.now();
+        detener = function () { acabar(null); };
         rec.start();
         if (opciones.alEmpezar) opciones.alEmpezar();
       } catch (e) {
@@ -152,6 +176,8 @@
     enDispositivo: function () { return enDispositivo; },
     permiso: function () { return permiso; },
     escuchar: escuchar,
+    /* En modo continuo, el niño decide cuándo ha terminado de leer. */
+    terminar: function () { if (detener) detener(); },
     parar: parar,
     mensaje: function (codigo) { return MENSAJES[codigo] || 'Algo no ha ido bien con el micrófono.'; }
   };

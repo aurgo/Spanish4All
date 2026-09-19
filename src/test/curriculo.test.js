@@ -21,7 +21,9 @@ const NUEVAS = {
   'g-fuerte': 'g', 'gue-gui': '', 'ge-gi': '', h: 'h', 'ñ': 'ñ', ll: '', ch: '',
   y: 'y', qu: 'q', 'z-ce-ci': 'z', 'gue-dieresis': 'ü', 'k-w-x': 'kwx',
   'bl-br': '', 'cl-cr': '', 'fl-fr': '', 'gl-gr': '', 'pl-pr': '', 'tr-dr': '',
-  inversas: '', diptongos: '', tildes: '', lectura: ''
+  inversas: '', diptongos: '', tildes: '', lectura: '',
+  /* Nivel avanzado: no estrenan letras, trabajan lo ya aprendido. */
+  inventadas: '', pares: '', dictado: '', ingles: ''
 };
 
 const SIN_TILDE = { 'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u' };

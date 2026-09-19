@@ -28,7 +28,7 @@ const crypto = require('crypto');
 const raiz = __dirname;                    // src/
 const sitio = path.join(raiz, '..');       // la raíz del repositorio
 
-const ORDEN = ['syllabify.js', 'speech.js', 'textos.js', 'curriculum.js', 'progress.js',
+const ORDEN = ['syllabify.js', 'speech.js', 'textos.js', 'curriculum.js', 'avanzado.js', 'progress.js',
                'escucha.js', 'evaluar.js', 'modelo.js', 'iconos.js', 'pwa.js', 'app.js'];
 
 function leer(rel) {

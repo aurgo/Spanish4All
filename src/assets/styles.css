@@ -535,7 +535,12 @@ button { font: inherit; color: inherit; }
   font-size: 1rem;
 }
 .ajuste input[type="range"] { height: 40px; accent-color: var(--acento); }
-.interruptor { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+/* Más específico que ".ajuste label { display: block }", que si no gana por
+   especificidad y deja la casilla pegada al texto en vez de a la derecha. */
+.ajuste label.interruptor,
+.interruptor {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+}
 .interruptor input { width: 30px; height: 30px; accent-color: var(--acento); }
 
 .aviso {
@@ -714,3 +719,184 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   color: var(--tinta);
 }
 .campo-codigo:focus { outline: none; border-color: var(--acento); }
+
+/* ==================================================== nivel avanzado ==== */
+
+/* Falsos amigos: las dos lenguas enfrentadas, para que el contraste se vea
+   además de oírse. */
+.contraste { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0 6px; }
+.contraste .btn { flex-direction: column; gap: 4px; min-height: 96px; padding: 12px 8px; }
+.contraste .bandera { font-size: 1.6rem; }
+.contraste .chico { font-size: .72rem; font-weight: 700; opacity: .7; }
+.contraste b { font-family: var(--lectura); font-size: 1.3rem; }
+.lado-en { --boton-borde: #6a63cf; }
+.lado-es { --boton-borde: var(--acento); }
+
+.aviso-ingles {
+  display: flex; gap: 12px; align-items: flex-start; text-align: left;
+  margin: 16px auto 0; max-width: 46ch;
+  padding: 14px 16px;
+  border: 2px dashed var(--c5);
+  border-radius: var(--radio-s);
+  background: color-mix(in srgb, var(--c5) 8%, var(--superficie));
+}
+.aviso-ingles p { margin: 0 0 10px; font-weight: 600; font-size: .95rem; line-height: 1.45; }
+.aviso-ingles .btn { min-height: 48px; font-size: .95rem; padding: 8px 14px; }
+
+.campo-dictado { text-transform: lowercase; letter-spacing: .04em; margin-top: 14px; }
+
+/* ------------------------------------------------------------ cuentos -- */
+.nivel-titulo {
+  margin: 22px 0 10px; font-size: 1.05rem; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--tinta-suave);
+}
+.rejilla-cuentos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.cuento-btn {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 16px 10px;
+  border: 3px solid var(--u); border-radius: 22px;
+  background: var(--superficie); box-shadow: 0 5px 0 var(--u);
+  cursor: pointer; transition: transform .08s ease; touch-action: manipulation;
+}
+.cuento-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--u); }
+.cuento-btn.leido { border-color: var(--exito); box-shadow: 0 5px 0 var(--exito); }
+.cuento-emo { font-size: 2.4rem; line-height: 1; }
+.cuento-titulo { font-weight: 800; text-align: center; line-height: 1.25; }
+.cuento-dato { font-size: .78rem; font-weight: 700; color: var(--tinta-suave); }
+
+/* ------------------------------------------------------- comprensión -- */
+.pregunta-texto {
+  font-family: var(--lectura);
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
+  font-weight: 700; line-height: 1.5; margin: 10px 0 0;
+}
+.opciones-pregunta { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.opcion {
+  font-family: var(--lectura);
+  font-size: clamp(1.1rem, 4.6vw, 1.4rem);
+  font-weight: 600; line-height: 1.4; text-align: left;
+  padding: 18px 20px;
+  border: 3px solid var(--borde); border-radius: 20px;
+  background: var(--superficie); color: var(--tinta);
+  box-shadow: 0 4px 0 var(--borde);
+  cursor: pointer; transition: transform .08s ease; touch-action: manipulation;
+}
+.opcion:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--borde); }
+.opcion.bien { border-color: var(--exito); background: var(--exito-suave); color: var(--exito); box-shadow: 0 4px 0 var(--exito); }
+.opcion.mal { border-color: var(--error); background: var(--error-suave); color: var(--error); box-shadow: 0 4px 0 var(--error); animation: tiembla .35s; }
+
+.moraleja {
+  margin-top: 20px; padding: 20px 18px;
+  border-radius: 22px;
+  border: 3px solid var(--estrella);
+  background: color-mix(in srgb, var(--estrella) 12%, var(--superficie));
+  text-align: center;
+}
+.moraleja-icono { font-size: 2.2rem; line-height: 1; }
+.moraleja-titulo {
+  margin: 6px 0 4px; font-size: .8rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-suave);
+}
+.moraleja-texto {
+  margin: 0; font-family: var(--lectura);
+  font-size: clamp(1.1rem, 4.8vw, 1.45rem); font-weight: 700; line-height: 1.5;
+}
+
+/* --------------------------------------------------------- velocidad -- */
+.marca { margin: 4px 0 12px; }
+.ppm-numero {
+  display: block; font-size: 3.2rem; font-weight: 800; line-height: 1;
+  color: var(--u, var(--acento)); font-variant-numeric: tabular-nums;
+}
+.ppm-texto { display: block; font-size: .8rem; font-weight: 700; color: var(--tinta-suave); }
+.ppm-mejora { display: block; margin-top: 6px; font-weight: 800; color: var(--exito); }
+
+/* ------------------------------------------------- panel del adulto --- */
+.cifras { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0 6px; }
+.cifra {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 12px 4px; border-radius: var(--radio-s);
+  background: var(--superficie); border: 2px solid var(--borde);
+}
+.cifra b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.cifra span { font-size: .68rem; font-weight: 700; color: var(--tinta-suave); text-align: center; line-height: 1.2; }
+
+/* Una barra por lectura: se ve de un vistazo si va ganando velocidad. */
+.barras {
+  display: flex; align-items: flex-end; gap: 4px;
+  height: 84px; margin: 12px 0 6px; padding: 6px;
+  border-radius: var(--radio-s); background: var(--superficie-2);
+}
+.barra-ppm { flex: 1; border-radius: 4px 4px 0 0; background: var(--c3); min-height: 8px; }
+.barra-ppm:last-child { background: var(--acento); }
+
+.lista-fallos { margin: 0; padding: 0; list-style: none; }
+.lista-fallos li {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--borde);
+  font-weight: 700;
+}
+.lista-fallos li:last-child { border-bottom: 0; }
+.lista-fallos b { color: var(--error); font-variant-numeric: tabular-nums; }
+
+/* ================================================ varios niños ========== */
+
+/* Bienvenida: la única pantalla escrita para que la lea un adulto. */
+.bienvenida { text-align: center; padding: 24px 0 40px; }
+.bienvenida .logo { font-size: clamp(3.4rem, 16vw, 5rem); line-height: 1; }
+.bienvenida h1 { margin: 6px 0 10px; font-size: clamp(1.8rem, 7vw, 2.4rem); }
+.bienvenida .ajuste { text-align: left; }
+
+.campo-nombre {
+  width: 100%;
+  padding: 16px;
+  font-family: var(--lectura);
+  font-size: 1.4rem;
+  text-align: center;
+  border: 3px solid var(--borde);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+  color: var(--tinta);
+}
+.campo-nombre:focus { outline: none; border-color: var(--acento); }
+
+.avatares { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.avatar {
+  width: 56px; height: 56px;
+  font-size: 1.8rem; line-height: 1;
+  border: 3px solid var(--borde); border-radius: 50%;
+  background: var(--superficie);
+  cursor: pointer; transition: transform .08s ease;
+  touch-action: manipulation;
+}
+.avatar:active { transform: scale(.92); }
+.avatar.elegido {
+  border-color: var(--acento);
+  background: color-mix(in srgb, var(--acento) 16%, var(--superficie));
+  transform: scale(1.08);
+}
+
+/* Lista de niños del aparato */
+.perfil {
+  position: relative;
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  margin-bottom: 10px; padding: 14px 16px;
+  border: 3px solid var(--borde); border-radius: var(--radio);
+  background: var(--superficie); color: var(--tinta);
+  text-align: left; cursor: pointer;
+  touch-action: manipulation;
+}
+.perfil.activo { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 10%, var(--superficie)); }
+.perfil-emo { font-size: 2rem; line-height: 1; }
+.perfil-datos { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.perfil-datos b { font-size: 1.1rem; }
+.perfil-datos span { font-size: .82rem; font-weight: 700; color: var(--tinta-suave); }
+.perfil .hecha { position: static; width: 26px; height: 26px; border-width: 0; }
+
+/* La chapa de la esquina: quién está leyendo y cuántas estrellas lleva. */
+.marcador-perfil { cursor: pointer; max-width: 58vw; }
+.perfil-mini { font-size: 1.15rem; }
+.perfil-nombre {
+  max-width: 7ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}

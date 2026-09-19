@@ -442,6 +442,42 @@
         }
       ],
       frases: []
+    },
+
+    {
+      id: 'inventadas', tipo: 'inventadas', color: 5, emoji: '👽',
+      titulo: 'Palabras inventadas', letra: '👽', nombre: 'palabras inventadas',
+      fonema: 'leer sin adivinar',
+      truco: 'Estas palabras no existen: me las he inventado. Por eso no puedes acordarte de ellas ni adivinarlas por su forma. Sólo salen si las lees letra a letra. Es el ejercicio que de verdad demuestra que sabes leer.',
+      trucoZh: '這些詞是我編出來的，不存在。所以你不能靠記憶或看形狀猜出來，只能一個字母一個字母地讀。這才真正證明你會讀。',
+      silabas: [], palabras: [], frases: []
+    },
+
+    {
+      id: 'pares', tipo: 'pares', color: 6, emoji: '👀',
+      titulo: 'Parecidas pero distintas', letra: 'pato · pata', nombre: 'pares parecidos',
+      fonema: 'mirar dentro de la palabra',
+      truco: 'Estas parejas se parecen muchísimo: cambian en una letra, o en el orden. Si miras sólo la forma de fuera, caes. Hay que mirar dentro.',
+      trucoZh: '這些詞長得很像，只差一個字母或順序不同。只看外形會看錯，要看清楚裡面。',
+      silabas: [], palabras: [], frases: []
+    },
+
+    {
+      id: 'dictado', tipo: 'dictado', color: 7, emoji: '✍️',
+      titulo: 'Escribe lo que oigas', letra: '✍️', nombre: 'dictado',
+      fonema: 'del sonido a la letra',
+      truco: 'Ahora al revés: oyes una palabra y la escribes. Escribir obliga a poner las letras en su orden, una detrás de otra. Es la otra mitad de leer.',
+      trucoZh: '現在反過來：聽到一個詞，把它寫出來。寫字必須把字母按順序排好，這是閱讀的另一半。',
+      silabas: [], palabras: [], frases: []
+    },
+
+    {
+      id: 'ingles', tipo: 'ingles', color: 0, emoji: '🔀',
+      titulo: 'El inglés y el español', letra: 'A a', nombre: 'los falsos amigos',
+      fonema: 'la misma letra, otro sonido',
+      truco: 'Tú aprendiste las letras en inglés, y eso ayuda, pero también engaña: muchas suenan distinto en español. Vamos a oír las dos, una detrás de otra, para que no se te mezclen.',
+      trucoZh: '你是從英文學會字母的，這有幫助，但也會混淆：很多字母在西班牙語裡發音不同。我們把兩種發音接連聽一遍，就不會弄混了。',
+      silabas: [], palabras: [], frases: []
     }
   ];
 
