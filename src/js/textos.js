@@ -109,7 +109,24 @@
     instalarComo:   ['Cómo instalarla', '怎麼安裝'],
     yaInstalada:    ['Ya está instalada', '已經安裝好了'],
     sinConexion:    ['Funciona sin internet', '沒有網路也能用'],
-    entendido:      ['Entendido', '知道了']
+    entendido:      ['Entendido', '知道了'],
+
+    /* Pasar el progreso a otro dispositivo */
+    traspaso:       ['Cambiar de dispositivo', '換一台裝置'],
+    tuCodigo:       ['Tu código', '你的代碼'],
+    copiarEnlace:   ['Copiar el enlace', '複製連結'],
+    copiado:        ['¡Copiado!', '已複製！'],
+    vienesDeOtro:   ['¿Vienes de otro aparato?', '從別的裝置來的嗎？'],
+    pegaCodigo:     ['Escribe aquí el código', '在這裡輸入代碼'],
+    continuarAqui:  ['Continuar aquí', '在這裡繼續'],
+    traspasoAyuda:  ['Apunta este código o manda el enlace al otro aparato. Allí recuperas las unidades hechas y las estrellas.',
+                     '記下這個代碼，或把連結傳到另一台裝置。在那裡就能找回已完成的課程和星星。'],
+    traspasoOjo:    ['Los ajustes no viajan: la voz de cada aparato es distinta.',
+                     '設定不會一起帶過去：每台裝置的語音不一樣。'],
+    codigoMal:      ['Ese código no vale. Míralo otra vez.', '這個代碼無效，請再檢查一次。'],
+    codigoPisa:     ['Esto sustituirá el progreso de este aparato. ¿Seguro?',
+                     '這會取代這台裝置上的進度。確定嗎？'],
+    codigoBien:     ['¡Listo! Progreso recuperado.', '好了！進度已經找回來。']
   };
 
   var idioma = 0;   // 0 = español, 1 = chino como apoyo

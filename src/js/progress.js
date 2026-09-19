@@ -109,6 +109,102 @@
     return d.ajustes[clave];
   }
 
+  /* ---------------------------------------------- pasar de dispositivo ---
+   *
+   * El progreso vive en el localStorage, que es de este navegador y de este
+   * aparato. Para poder seguir en otra tableta lo empaquetamos en un código
+   * CORTO: catorce caracteres que se pueden dictar por teléfono o mandar por
+   * mensaje, en vez de un pegote de texto.
+   *
+   * Qué viaja: qué unidades están terminadas y cuántas estrellas hay.
+   * Qué NO viaja, a propósito: los ajustes. La voz elegida no existe en el
+   * otro aparato (cada sistema trae las suyas), así que copiarla daría
+   * problemas en lugar de ahorrarlos.
+   *
+   * Formato de los bits: [versión:3][nº unidades:6][una por unidad][estrellas:12][control:7]
+   */
+
+  /* Base32 de Crockford: sin I, L, O ni U, para que nadie confunda un 1 con
+     una ele ni un 0 con una O al copiarlo a mano. */
+  var ALFABETO = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+
+  function meterBits(valor, cuantos, bits) {
+    for (var i = cuantos - 1; i >= 0; i--) bits.push((valor >> i) & 1);
+  }
+  function sacarBits(bits, desde, cuantos) {
+    var v = 0;
+    for (var i = 0; i < cuantos; i++) v = (v << 1) | (bits[desde + i] || 0);
+    return v;
+  }
+  function control(bits, hasta) {
+    var suma = 0;
+    for (var i = 0; i < hasta; i++) suma = (suma + bits[i] * (i + 1)) % 127;
+    return suma;
+  }
+
+  function exportarCodigo(unidades) {
+    var bits = [];
+    meterBits(1, 3, bits);
+    meterBits(unidades.length, 6, bits);
+    unidades.forEach(function (u) { bits.push(unidadCompleta(u.id) ? 1 : 0); });
+    meterBits(Math.min(4095, leer().estrellas), 12, bits);
+    meterBits(control(bits, bits.length), 7, bits);
+
+    var texto = '';
+    for (var i = 0; i < bits.length; i += 5) {
+      texto += ALFABETO[sacarBits(bits, i, 5)];
+    }
+    return texto.match(/.{1,4}/g).join('-');
+  }
+
+  /*
+   * Lee un código. Devuelve { ok, completas[], estrellas } o { ok:false, error }.
+   * El dígito de control hace que una letra mal copiada se detecte en vez de
+   * restaurar un progreso equivocado en silencio.
+   */
+  function leerCodigo(codigo) {
+    var limpio = String(codigo || '').toUpperCase().replace(/[^0-9A-Z]/g, '')
+      .replace(/O/g, '0').replace(/[IL]/g, '1');   // confusiones típicas al teclear
+    if (limpio.length < 4) return { ok: false, error: 'corto' };
+
+    var bits = [];
+    for (var i = 0; i < limpio.length; i++) {
+      var v = ALFABETO.indexOf(limpio[i]);
+      if (v === -1) return { ok: false, error: 'caracter' };
+      meterBits(v, 5, bits);
+    }
+
+    if (sacarBits(bits, 0, 3) !== 1) return { ok: false, error: 'version' };
+    var n = sacarBits(bits, 3, 6);
+    var total = 3 + 6 + n + 12 + 7;
+    if (!n || bits.length < total) return { ok: false, error: 'corto' };
+    if (sacarBits(bits, total - 7, 7) !== control(bits, total - 7)) {
+      return { ok: false, error: 'control' };
+    }
+
+    var completas = [];
+    for (var k = 0; k < n; k++) completas.push(bits[9 + k] === 1);
+    return { ok: true, completas: completas, estrellas: sacarBits(bits, 9 + n, 12) };
+  }
+
+  /* Aplica un código ya validado. Sustituye el progreso, no lo mezcla. */
+  function importarCodigo(codigo, unidades) {
+    var r = leerCodigo(codigo);
+    if (!r.ok) return r;
+
+    var d = leer();
+    var ajustes = d.ajustes;          // los ajustes de ESTE aparato se respetan
+    var limpio = vacio();
+    limpio.ajustes = ajustes;
+    limpio.estrellas = r.estrellas;
+    unidades.forEach(function (u, i) {
+      if (r.completas[i]) limpio.unidades[u.id] = { pasos: {}, estrellas: 0, completa: true };
+    });
+    memoria = limpio;
+    guardar();
+    return { ok: true, unidades: r.completas.filter(Boolean).length, estrellas: r.estrellas };
+  }
+
   function reiniciar() {
     memoria = vacio();
     guardar();
@@ -133,6 +229,9 @@
     disponible: disponible,
     siguienteUnidad: siguienteUnidad,
     ajuste: ajuste,
+    exportarCodigo: exportarCodigo,
+    leerCodigo: leerCodigo,
+    importarCodigo: importarCodigo,
     reiniciar: reiniciar,
     resumen: resumen,
     datos: leer,

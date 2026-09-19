@@ -152,6 +152,35 @@ o pegado, y recibir su nota.
 El progreso (estrellas, unidades hechas, ajustes) se guarda en el
 `localStorage` del navegador. No hay servidor: nada sale del dispositivo.
 
+### Cambiar de dispositivo
+
+Como el progreso vive en el navegador, cambiar de tableta significaría empezar
+de cero. Para evitarlo, ⚙️ muestra un **código de trece caracteres**:
+
+```
+6BZZ-G000-00C1-W
+```
+
+Se teclea en el otro aparato, o se manda el enlace que lo lleva dentro
+(`…/#p=6BZZG00000C1W`), que al abrirse lo aplica solo. Recupera qué unidades
+están terminadas y cuántas estrellas hay.
+
+Tres decisiones detrás de ese formato:
+
+- **Corto a propósito.** Un volcado completo del progreso serían cientos de
+  caracteres, imposibles de dictar. Trece caben en un mensaje o en un papel.
+  Lo que se pierde es el detalle de las actividades sueltas dentro de la
+  unidad a medias; esa unidad simplemente se vuelve a empezar.
+- **Sin letras confundibles.** Usa base32 de Crockford, que no tiene `I`, `L`,
+  `O` ni `U`, para que nadie lea un 1 donde hay una ele. Al teclear, además,
+  se corrigen esas confusiones.
+- **Con dígito de control.** Un carácter mal copiado se rechaza en vez de
+  restaurar un progreso equivocado en silencio, que sería peor que no tener
+  la función: aparecerían unidades abiertas sin haberlas hecho.
+
+Los **ajustes no viajan**, y es deliberado: la voz elegida no existe en el
+otro aparato, porque cada sistema trae las suyas.
+
 ## Cómo está hecho
 
 JavaScript sin dependencias ni compilación. Seis archivos:
@@ -261,6 +290,9 @@ conviene volver a pasarlas si se toca el silabeador o el currículo:
 - **Lectura en voz alta** (28 comprobaciones) — que *vaca*/*baca*,
   *casa*/*caza*, *pollo*/*poyo* u *hola*/*ola* cuenten como iguales, que
   *pero*/*perro* cuente como distinto, y que las estrellas salgan donde deben.
+- **Código de progreso** (12 comprobaciones) — ida y vuelta sin pérdidas, y
+  sobre todo que un código con **un solo carácter cambiado** se rechace: se
+  prueban las 403 variantes posibles.
 
 ## Compatibilidad
 

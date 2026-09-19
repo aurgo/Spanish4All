@@ -1310,6 +1310,69 @@
     ]);
   }
 
+  /* --------------------------------------------- cambiar de aparato ---- */
+
+  /*
+   * El progreso vive en el localStorage, que no sale de este navegador. Para
+   * seguir en otra tableta se pasa un código corto: se puede dictar por
+   * teléfono, o mandar dentro de un enlace que al abrirlo ya lo aplica.
+   */
+  function seccionTraspaso() {
+    var caja = el('div', { class: 'ajuste' });
+    var codigo = Progreso.exportarCodigo(Curriculo.unidades);
+    var enlace = location.href.split('#')[0] + '#p=' + codigo.replace(/-/g, '');
+
+    caja.appendChild(el('label', {}, etiqueta('traspaso')));
+    caja.appendChild(el('p', { class: 'dato', text: T.t('tuCodigo') + ':' }));
+    caja.appendChild(el('div', { class: 'codigo', text: codigo }));
+
+    var aviso = el('p', { class: 'dato', text: T.t('traspasoAyuda') });
+    caja.appendChild(el('button', {
+      class: 'btn btn-grande',
+      text: '🔗 ' + T.t('copiarEnlace'),
+      onclick: function (ev) {
+        var boton = ev.currentTarget;
+        function hecho() { boton.textContent = '✅ ' + T.t('copiado'); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(enlace).then(hecho, function () { aviso.textContent = enlace; });
+        } else {
+          aviso.textContent = enlace;   // sin portapapeles: que al menos se vea
+        }
+      }
+    }));
+    caja.appendChild(aviso);
+    caja.appendChild(el('p', { class: 'dato', text: '⚠️ ' + T.t('traspasoOjo') }));
+
+    caja.appendChild(el('p', { class: 'dato', style: 'margin-top:18px' }, etiqueta('vienesDeOtro')));
+    var campo = el('input', {
+      type: 'text', class: 'campo-codigo', placeholder: T.t('pegaCodigo'),
+      autocapitalize: 'characters', autocomplete: 'off', spellcheck: 'false'
+    });
+    caja.appendChild(campo);
+    caja.appendChild(el('button', {
+      class: 'btn btn-grande',
+      text: '⬇️ ' + T.t('continuarAqui'),
+      onclick: function () { aplicarCodigo(campo.value); }
+    }));
+    return caja;
+  }
+
+  /* Aplica un código, avisando antes de que sustituye lo que haya aquí. */
+  function aplicarCodigo(codigo) {
+    if (!Progreso.leerCodigo(codigo).ok) {
+      narrar(T.t('codigoMal'));
+      return global.alert(T.t('codigoMal'));
+    }
+    if (!global.confirm(T.t('codigoPisa'))) return;
+    var r = Progreso.importarCodigo(codigo, Curriculo.unidades);
+    if (!r.ok) return global.alert(T.t('codigoMal'));
+    var hoja = document.querySelector('.hoja');
+    if (hoja) hoja.remove();
+    confeti();
+    verPortada();
+    narrar(T.t('codigoBien') + ' ' + r.unidades + ' unidades y ' + r.estrellas + ' estrellas.');
+  }
+
   /* ------------------------------------------------------ instalar ----- */
 
   /*
@@ -1490,6 +1553,8 @@
       Progreso.ajuste('desbloquearTodo', v);
     }));
 
+    panel.appendChild(seccionTraspaso());
+
     panel.appendChild(el('div', { class: 'ajuste' }, [
       el('button', {
         class: 'btn btn-grande',
@@ -1539,9 +1604,17 @@
       if (document.hidden) Voz.parar();
     });
 
-    /* Atajo del icono de la app (manifest → shortcuts): abre el lector. */
-    if (location.hash === '#lector') verLector();
-    else verPortada();
+    /* Un enlace #p=CODIGO trae el progreso de otro aparato. */
+    var traido = /^#p=(.+)$/.exec(location.hash);
+    if (traido) {
+      history.replaceState(null, '', location.pathname + location.search);
+      verPortada();
+      setTimeout(function () { aplicarCodigo(traido[1]); }, 400);
+    } else if (location.hash === '#lector') {
+      verLector();     /* atajo del icono de la app (manifest → shortcuts) */
+    } else {
+      verPortada();
+    }
 
     /* Si el navegador ofrece instalar más tarde, refrescamos la portada. */
     PWA.alCambiar(function () { if (vista.nombre === 'portada') verPortada(); });

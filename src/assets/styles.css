@@ -681,3 +681,36 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 }
 .pasos-instalar li { margin-bottom: 10px; }
 .pasos-instalar.opciones { list-style: '→  '; }
+
+/* Código para pasar el progreso: pensado para leerlo en voz alta y copiarlo
+   a mano, así que va grande, separado y en una tipografía de ancho fijo. */
+.codigo {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: clamp(1.3rem, 6vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-align: center;
+  padding: 14px 10px;
+  margin: 8px 0 14px;
+  border: 3px dashed var(--acento);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+  color: var(--acento);
+  user-select: all;          /* un toque lo selecciona entero */
+  word-break: break-all;
+}
+.campo-codigo {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 10px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 1.2rem;
+  letter-spacing: .08em;
+  text-align: center;
+  text-transform: uppercase;
+  border: 3px solid var(--borde);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+  color: var(--tinta);
+}
+.campo-codigo:focus { outline: none; border-color: var(--acento); }

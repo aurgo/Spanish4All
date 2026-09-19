@@ -5,7 +5,8 @@
 const suites = [
   require('./silabas.test.js'),
   require('./curriculo.test.js'),
-  require('./evaluar.test.js')
+  require('./evaluar.test.js'),
+  require('./codigo.test.js')
 ];
 
 let fallos = 0;

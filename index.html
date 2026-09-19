@@ -696,6 +696,39 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 .pasos-instalar li { margin-bottom: 10px; }
 .pasos-instalar.opciones { list-style: '→  '; }
 
+/* Código para pasar el progreso: pensado para leerlo en voz alta y copiarlo
+   a mano, así que va grande, separado y en una tipografía de ancho fijo. */
+.codigo {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: clamp(1.3rem, 6vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-align: center;
+  padding: 14px 10px;
+  margin: 8px 0 14px;
+  border: 3px dashed var(--acento);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+  color: var(--acento);
+  user-select: all;          /* un toque lo selecciona entero */
+  word-break: break-all;
+}
+.campo-codigo {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 10px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 1.2rem;
+  letter-spacing: .08em;
+  text-align: center;
+  text-transform: uppercase;
+  border: 3px solid var(--borde);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+  color: var(--tinta);
+}
+.campo-codigo:focus { outline: none; border-color: var(--acento); }
+
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icono-apple-180.png">
@@ -1267,7 +1300,24 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     instalarComo:   ['Cómo instalarla', '怎麼安裝'],
     yaInstalada:    ['Ya está instalada', '已經安裝好了'],
     sinConexion:    ['Funciona sin internet', '沒有網路也能用'],
-    entendido:      ['Entendido', '知道了']
+    entendido:      ['Entendido', '知道了'],
+
+    /* Pasar el progreso a otro dispositivo */
+    traspaso:       ['Cambiar de dispositivo', '換一台裝置'],
+    tuCodigo:       ['Tu código', '你的代碼'],
+    copiarEnlace:   ['Copiar el enlace', '複製連結'],
+    copiado:        ['¡Copiado!', '已複製！'],
+    vienesDeOtro:   ['¿Vienes de otro aparato?', '從別的裝置來的嗎？'],
+    pegaCodigo:     ['Escribe aquí el código', '在這裡輸入代碼'],
+    continuarAqui:  ['Continuar aquí', '在這裡繼續'],
+    traspasoAyuda:  ['Apunta este código o manda el enlace al otro aparato. Allí recuperas las unidades hechas y las estrellas.',
+                     '記下這個代碼，或把連結傳到另一台裝置。在那裡就能找回已完成的課程和星星。'],
+    traspasoOjo:    ['Los ajustes no viajan: la voz de cada aparato es distinta.',
+                     '設定不會一起帶過去：每台裝置的語音不一樣。'],
+    codigoMal:      ['Ese código no vale. Míralo otra vez.', '這個代碼無效，請再檢查一次。'],
+    codigoPisa:     ['Esto sustituirá el progreso de este aparato. ¿Seguro?',
+                     '這會取代這台裝置上的進度。確定嗎？'],
+    codigoBien:     ['¡Listo! Progreso recuperado.', '好了！進度已經找回來。']
   };
 
   var idioma = 0;   // 0 = español, 1 = chino como apoyo
@@ -1888,6 +1938,102 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     return d.ajustes[clave];
   }
 
+  /* ---------------------------------------------- pasar de dispositivo ---
+   *
+   * El progreso vive en el localStorage, que es de este navegador y de este
+   * aparato. Para poder seguir en otra tableta lo empaquetamos en un código
+   * CORTO: catorce caracteres que se pueden dictar por teléfono o mandar por
+   * mensaje, en vez de un pegote de texto.
+   *
+   * Qué viaja: qué unidades están terminadas y cuántas estrellas hay.
+   * Qué NO viaja, a propósito: los ajustes. La voz elegida no existe en el
+   * otro aparato (cada sistema trae las suyas), así que copiarla daría
+   * problemas en lugar de ahorrarlos.
+   *
+   * Formato de los bits: [versión:3][nº unidades:6][una por unidad][estrellas:12][control:7]
+   */
+
+  /* Base32 de Crockford: sin I, L, O ni U, para que nadie confunda un 1 con
+     una ele ni un 0 con una O al copiarlo a mano. */
+  var ALFABETO = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+
+  function meterBits(valor, cuantos, bits) {
+    for (var i = cuantos - 1; i >= 0; i--) bits.push((valor >> i) & 1);
+  }
+  function sacarBits(bits, desde, cuantos) {
+    var v = 0;
+    for (var i = 0; i < cuantos; i++) v = (v << 1) | (bits[desde + i] || 0);
+    return v;
+  }
+  function control(bits, hasta) {
+    var suma = 0;
+    for (var i = 0; i < hasta; i++) suma = (suma + bits[i] * (i + 1)) % 127;
+    return suma;
+  }
+
+  function exportarCodigo(unidades) {
+    var bits = [];
+    meterBits(1, 3, bits);
+    meterBits(unidades.length, 6, bits);
+    unidades.forEach(function (u) { bits.push(unidadCompleta(u.id) ? 1 : 0); });
+    meterBits(Math.min(4095, leer().estrellas), 12, bits);
+    meterBits(control(bits, bits.length), 7, bits);
+
+    var texto = '';
+    for (var i = 0; i < bits.length; i += 5) {
+      texto += ALFABETO[sacarBits(bits, i, 5)];
+    }
+    return texto.match(/.{1,4}/g).join('-');
+  }
+
+  /*
+   * Lee un código. Devuelve { ok, completas[], estrellas } o { ok:false, error }.
+   * El dígito de control hace que una letra mal copiada se detecte en vez de
+   * restaurar un progreso equivocado en silencio.
+   */
+  function leerCodigo(codigo) {
+    var limpio = String(codigo || '').toUpperCase().replace(/[^0-9A-Z]/g, '')
+      .replace(/O/g, '0').replace(/[IL]/g, '1');   // confusiones típicas al teclear
+    if (limpio.length < 4) return { ok: false, error: 'corto' };
+
+    var bits = [];
+    for (var i = 0; i < limpio.length; i++) {
+      var v = ALFABETO.indexOf(limpio[i]);
+      if (v === -1) return { ok: false, error: 'caracter' };
+      meterBits(v, 5, bits);
+    }
+
+    if (sacarBits(bits, 0, 3) !== 1) return { ok: false, error: 'version' };
+    var n = sacarBits(bits, 3, 6);
+    var total = 3 + 6 + n + 12 + 7;
+    if (!n || bits.length < total) return { ok: false, error: 'corto' };
+    if (sacarBits(bits, total - 7, 7) !== control(bits, total - 7)) {
+      return { ok: false, error: 'control' };
+    }
+
+    var completas = [];
+    for (var k = 0; k < n; k++) completas.push(bits[9 + k] === 1);
+    return { ok: true, completas: completas, estrellas: sacarBits(bits, 9 + n, 12) };
+  }
+
+  /* Aplica un código ya validado. Sustituye el progreso, no lo mezcla. */
+  function importarCodigo(codigo, unidades) {
+    var r = leerCodigo(codigo);
+    if (!r.ok) return r;
+
+    var d = leer();
+    var ajustes = d.ajustes;          // los ajustes de ESTE aparato se respetan
+    var limpio = vacio();
+    limpio.ajustes = ajustes;
+    limpio.estrellas = r.estrellas;
+    unidades.forEach(function (u, i) {
+      if (r.completas[i]) limpio.unidades[u.id] = { pasos: {}, estrellas: 0, completa: true };
+    });
+    memoria = limpio;
+    guardar();
+    return { ok: true, unidades: r.completas.filter(Boolean).length, estrellas: r.estrellas };
+  }
+
   function reiniciar() {
     memoria = vacio();
     guardar();
@@ -1912,6 +2058,9 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     disponible: disponible,
     siguienteUnidad: siguienteUnidad,
     ajuste: ajuste,
+    exportarCodigo: exportarCodigo,
+    leerCodigo: leerCodigo,
+    importarCodigo: importarCodigo,
     reiniciar: reiniciar,
     resumen: resumen,
     datos: leer,
@@ -4395,6 +4544,69 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     ]);
   }
 
+  /* --------------------------------------------- cambiar de aparato ---- */
+
+  /*
+   * El progreso vive en el localStorage, que no sale de este navegador. Para
+   * seguir en otra tableta se pasa un código corto: se puede dictar por
+   * teléfono, o mandar dentro de un enlace que al abrirlo ya lo aplica.
+   */
+  function seccionTraspaso() {
+    var caja = el('div', { class: 'ajuste' });
+    var codigo = Progreso.exportarCodigo(Curriculo.unidades);
+    var enlace = location.href.split('#')[0] + '#p=' + codigo.replace(/-/g, '');
+
+    caja.appendChild(el('label', {}, etiqueta('traspaso')));
+    caja.appendChild(el('p', { class: 'dato', text: T.t('tuCodigo') + ':' }));
+    caja.appendChild(el('div', { class: 'codigo', text: codigo }));
+
+    var aviso = el('p', { class: 'dato', text: T.t('traspasoAyuda') });
+    caja.appendChild(el('button', {
+      class: 'btn btn-grande',
+      text: '🔗 ' + T.t('copiarEnlace'),
+      onclick: function (ev) {
+        var boton = ev.currentTarget;
+        function hecho() { boton.textContent = '✅ ' + T.t('copiado'); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(enlace).then(hecho, function () { aviso.textContent = enlace; });
+        } else {
+          aviso.textContent = enlace;   // sin portapapeles: que al menos se vea
+        }
+      }
+    }));
+    caja.appendChild(aviso);
+    caja.appendChild(el('p', { class: 'dato', text: '⚠️ ' + T.t('traspasoOjo') }));
+
+    caja.appendChild(el('p', { class: 'dato', style: 'margin-top:18px' }, etiqueta('vienesDeOtro')));
+    var campo = el('input', {
+      type: 'text', class: 'campo-codigo', placeholder: T.t('pegaCodigo'),
+      autocapitalize: 'characters', autocomplete: 'off', spellcheck: 'false'
+    });
+    caja.appendChild(campo);
+    caja.appendChild(el('button', {
+      class: 'btn btn-grande',
+      text: '⬇️ ' + T.t('continuarAqui'),
+      onclick: function () { aplicarCodigo(campo.value); }
+    }));
+    return caja;
+  }
+
+  /* Aplica un código, avisando antes de que sustituye lo que haya aquí. */
+  function aplicarCodigo(codigo) {
+    if (!Progreso.leerCodigo(codigo).ok) {
+      narrar(T.t('codigoMal'));
+      return global.alert(T.t('codigoMal'));
+    }
+    if (!global.confirm(T.t('codigoPisa'))) return;
+    var r = Progreso.importarCodigo(codigo, Curriculo.unidades);
+    if (!r.ok) return global.alert(T.t('codigoMal'));
+    var hoja = document.querySelector('.hoja');
+    if (hoja) hoja.remove();
+    confeti();
+    verPortada();
+    narrar(T.t('codigoBien') + ' ' + r.unidades + ' unidades y ' + r.estrellas + ' estrellas.');
+  }
+
   /* ------------------------------------------------------ instalar ----- */
 
   /*
@@ -4575,6 +4787,8 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       Progreso.ajuste('desbloquearTodo', v);
     }));
 
+    panel.appendChild(seccionTraspaso());
+
     panel.appendChild(el('div', { class: 'ajuste' }, [
       el('button', {
         class: 'btn btn-grande',
@@ -4624,9 +4838,17 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       if (document.hidden) Voz.parar();
     });
 
-    /* Atajo del icono de la app (manifest → shortcuts): abre el lector. */
-    if (location.hash === '#lector') verLector();
-    else verPortada();
+    /* Un enlace #p=CODIGO trae el progreso de otro aparato. */
+    var traido = /^#p=(.+)$/.exec(location.hash);
+    if (traido) {
+      history.replaceState(null, '', location.pathname + location.search);
+      verPortada();
+      setTimeout(function () { aplicarCodigo(traido[1]); }, 400);
+    } else if (location.hash === '#lector') {
+      verLector();     /* atajo del icono de la app (manifest → shortcuts) */
+    } else {
+      verPortada();
+    }
 
     /* Si el navegador ofrece instalar más tarde, refrescamos la portada. */
     PWA.alCambiar(function () { if (vista.nombre === 'portada') verPortada(); });
