@@ -51,6 +51,13 @@ module.exports = function () {
 
   /* --- pares mínimos: tienen que diferenciarse en UNA cosa --- */
   A.pares.forEach(par => {
+    /* La explicación de en qué cambian también la LEE el niño. */
+    total++;
+    if (!par.diferenciaZh) {
+      fallos.push(`  el par "${par.a[0]}/${par.b[0]}" no explica en chino en qué cambian`);
+    } else if (!/[\u3400-\u9FFF]/.test(par.diferenciaZh)) {
+      fallos.push(`  "${par.diferenciaZh}" no parece chino`);
+    }
     total++;
     const a = par.a[0].toLowerCase(), b = par.b[0].toLowerCase();
     if (a === b) { fallos.push(`  el par "${a}" es la misma palabra dos veces`); return; }

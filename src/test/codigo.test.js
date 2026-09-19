@@ -173,5 +173,40 @@ module.exports = function () {
     fallos.push('  un código antiguo marcó unidades que entonces no existían');
   }
 
+  /* --- lo que de verdad se pega: el enlace entero ---
+   *
+   * El botón copia un enlace, y en la app instalada no hay barra de
+   * direcciones donde abrirlo: lo único que se puede hacer es pegarlo en la
+   * casilla. Antes eso respondía "código no válido". */
+  {
+    const A = cargar();
+    [0, 1, 2, 3].forEach(i => A.completarUnidad(UNIDADES[i].id));
+    A.completarUnidad('cuento:c2');
+    const corto = A.exportarCodigo(UNIDADES, CUENTOS);
+    const largo = A.exportarCompleto();
+
+    const formas = [
+      ['enlace con el código completo', 'https://aurgo.github.io/Spanish4All/#p=' + largo],
+      ['enlace con espacios alrededor', '  https://aurgo.github.io/Spanish4All/index.html#p=' + largo + '  '],
+      ['enlace entre corchetes de un chat', '<https://aurgo.github.io/Spanish4All/#p=' + largo + '>'],
+      ['sólo el código completo', largo],
+      ['el código corto suelto', corto],
+      ['el código corto con espacios', '  ' + corto + ' ']
+    ];
+    formas.forEach(([como, texto]) => {
+      total++;
+      const B = cargar();
+      const r = B.importarCodigo(texto, UNIDADES, CUENTOS);
+      if (!r.ok) { fallos.push(`  pegando ${como} dice que el código no vale`); return; }
+      if (!B.unidadCompleta(UNIDADES[3].id)) fallos.push(`  pegando ${como} no llegó el progreso`);
+    });
+
+    /* Y lo que no es un traspaso sigue sin colar. */
+    total++;
+    if (cargar().importarCodigo('https://aurgo.github.io/Spanish4All/', UNIDADES, CUENTOS).ok) {
+      fallos.push('  un enlace sin código se aceptó como si lo tuviera');
+    }
+  }
+
   return { nombre: 'Código de progreso', total: total, fallos: fallos };
 };

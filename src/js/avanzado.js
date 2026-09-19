@@ -100,26 +100,26 @@
    * "diferencia" dice qué hay que mirar, para poder explicarlo si falla.
    */
   var pares = [
-    { a: ['pato', '🦆'], b: ['pata', '🐾'], diferencia: 'la última vocal' },
-    { a: ['gato', '🐈'], b: ['gota', '💧'], diferencia: 'el orden de las letras' },
-    { a: ['pero', '🤔'], b: ['perro', '🐕'], diferencia: 'una erre o dos' },
-    { a: ['caro', '💰'], b: ['carro', '🚗'], diferencia: 'una erre o dos' },
-    { a: ['casa', '🏠'], b: ['caza', '🏹'], diferencia: 'cómo se escribe, no cómo suena' },
-    { a: ['mano', '🖐️'], b: ['mono', '🐒'], diferencia: 'la vocal de en medio' },
-    { a: ['lago', '🏞️'], b: ['algo', '❓'], diferencia: 'el orden: la a va antes o después' },
-    { a: ['sal', '🧂'], b: ['las', '👉'], diferencia: 'el orden de las letras' },
-    { a: ['sol', '☀️'], b: ['los', '👉'], diferencia: 'el orden de las letras' },
-    { a: ['bota', '👢'], b: ['boca', '👄'], diferencia: 'una consonante' },
-    { a: ['rata', '🐀'], b: ['rana', '🐸'], diferencia: 'una consonante' },
-    { a: ['cama', '🛏️'], b: ['cana', '👵'], diferencia: 'una consonante' },
-    { a: ['dedo', '☝️'], b: ['dado', '🎲'], diferencia: 'la vocal de en medio' },
-    { a: ['lobo', '🐺'], b: ['lomo', '🥓'], diferencia: 'una consonante' },
-    { a: ['plato', '🍽️'], b: ['plano', '🗺️'], diferencia: 'una consonante' },
-    { a: ['mesa', '🍽️'], b: ['misa', '⛪'], diferencia: 'la primera vocal' },
-    { a: ['vaso', '🥛'], b: ['paso', '👣'], diferencia: 'la primera consonante' },
-    { a: ['coro', '🎶'], b: ['corro', '🏃'], diferencia: 'una erre o dos' },
-    { a: ['para', '🛑'], b: ['parra', '🍇'], diferencia: 'una erre o dos' },
-    { a: ['rosa', '🌹'], b: ['ropa', '👕'], diferencia: 'una consonante' }
+    { a: ['pato', '🦆'], b: ['pata', '🐾'], diferencia: 'la última vocal', diferenciaZh: '最後一個母音' },
+    { a: ['gato', '🐈'], b: ['gota', '💧'], diferencia: 'el orden de las letras', diferenciaZh: '字母的順序' },
+    { a: ['pero', '🤔'], b: ['perro', '🐕'], diferencia: 'una erre o dos', diferenciaZh: '一個 r 還是兩個 rr' },
+    { a: ['caro', '💰'], b: ['carro', '🚗'], diferencia: 'una erre o dos', diferenciaZh: '一個 r 還是兩個 rr' },
+    { a: ['casa', '🏠'], b: ['caza', '🏹'], diferencia: 'cómo se escribe, no cómo suena', diferenciaZh: '寫法不同，但發音一樣' },
+    { a: ['mano', '🖐️'], b: ['mono', '🐒'], diferencia: 'la vocal de en medio', diferenciaZh: '中間的母音' },
+    { a: ['lago', '🏞️'], b: ['algo', '❓'], diferencia: 'el orden: la a va antes o después', diferenciaZh: '順序：a 在前面還是後面' },
+    { a: ['sal', '🧂'], b: ['las', '👉'], diferencia: 'el orden de las letras', diferenciaZh: '字母的順序' },
+    { a: ['sol', '☀️'], b: ['los', '👉'], diferencia: 'el orden de las letras', diferenciaZh: '字母的順序' },
+    { a: ['bota', '👢'], b: ['boca', '👄'], diferencia: 'una consonante', diferenciaZh: '一個子音' },
+    { a: ['rata', '🐀'], b: ['rana', '🐸'], diferencia: 'una consonante', diferenciaZh: '一個子音' },
+    { a: ['cama', '🛏️'], b: ['cana', '👵'], diferencia: 'una consonante', diferenciaZh: '一個子音' },
+    { a: ['dedo', '☝️'], b: ['dado', '🎲'], diferencia: 'la vocal de en medio', diferenciaZh: '中間的母音' },
+    { a: ['lobo', '🐺'], b: ['lomo', '🥓'], diferencia: 'una consonante', diferenciaZh: '一個子音' },
+    { a: ['plato', '🍽️'], b: ['plano', '🗺️'], diferencia: 'una consonante', diferenciaZh: '一個子音' },
+    { a: ['mesa', '🍽️'], b: ['misa', '⛪'], diferencia: 'la primera vocal', diferenciaZh: '第一個母音' },
+    { a: ['vaso', '🥛'], b: ['paso', '👣'], diferencia: 'la primera consonante', diferenciaZh: '第一個子音' },
+    { a: ['coro', '🎶'], b: ['corro', '🏃'], diferencia: 'una erre o dos', diferenciaZh: '一個 r 還是兩個 rr' },
+    { a: ['para', '🛑'], b: ['parra', '🍇'], diferencia: 'una erre o dos', diferenciaZh: '一個 r 還是兩個 rr' },
+    { a: ['rosa', '🌹'], b: ['ropa', '👕'], diferencia: 'una consonante', diferenciaZh: '一個子音' }
   ];
 
   /* ------------------------------------------------------- dictado ------ */

@@ -909,3 +909,54 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 }
 .moraleja-texto.zh { margin-top: 8px; font-size: 1rem; opacity: .75; }
 .aviso-ingles .zh { font-weight: 600; }
+
+/* Lo que queda por repasar al acabar una unidad. */
+.a-repasar {
+  margin: 18px auto 0; max-width: 40ch;
+  padding: 14px; border-radius: var(--radio-s);
+  background: color-mix(in srgb, var(--estrella) 12%, var(--superficie));
+  border: 2px dashed var(--estrella);
+}
+.a-repasar .trozo { font-size: 1.2rem; padding: 4px 12px; }
+
+/*
+ * El dibujo que no se puede ver todavía.
+ *
+ * En los ejercicios de micrófono el dibujo llegaba antes que la palabra, y con
+ * él delante el niño decía «pino» al ver el pino, sin leer nada. Ahora ocupa su
+ * sitio pero no se ve (visibility, no display: así la pantalla no salta cuando
+ * aparece) y se descubre cuando ya ha leído.
+ */
+.tapado { visibility: hidden; }
+
+.micro-ayuda {
+  margin: 8px 0 0;
+  font-size: .92rem;
+  line-height: 1.4;
+  color: var(--tinta-suave);
+  text-align: center;
+}
+
+/* El aviso de "este aparato no tiene voz española" no puede pasar
+   desapercibido: mientras no se arregle, la app enseña a pronunciar mal. */
+.aviso-grande {
+  display: block;
+  border: 2px solid var(--aviso, #d98324);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+.aviso-grande .aviso-linea { display: flex; gap: 10px; align-items: flex-start; font-weight: 700; }
+.aviso-grande .dato { margin: 8px 0 0; text-align: left; }
+
+/* El nivel de cada unidad en el mapa: no es lo mismo haberla pasado que
+   sabérsela, y eso tiene que verse sin abrir nada. */
+.nivel-unidad {
+  position: absolute;
+  left: 0; right: 0; bottom: 4px;
+  font-size: .62rem;
+  letter-spacing: 1px;
+  color: var(--tinta-suave);
+  text-align: center;
+}
+.nivel-unidad.n3 { color: #e0a01e; }

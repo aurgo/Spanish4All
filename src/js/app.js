@@ -55,6 +55,29 @@
     nodo.appendChild(zh);
   }
 
+  /*
+   * Frases que mezclan texto de la tabla con datos de dentro de la app.
+   *
+   * T.t() devuelve "español\nchino", así que encadenar dos con un + dejaba
+   * las dos lenguas revueltas en la misma línea: «No es 不是 «caro». Fíjate
+   * en 注意看 una erre o dos». Aquí se montan las dos frases en paralelo y
+   * cada lengua se queda en su renglón.
+   *
+   * Las partes son textos sueltos (van igual en las dos) o {clave: 'x'},
+   * que se traduce; {es: '…', zh: '…'} sirve para datos que ya vienen en
+   * las dos lenguas.
+   */
+  function bilingue(partes) {
+    var es = '', zh = '';
+    partes.forEach(function (p) {
+      if (typeof p === 'string') { es += p; zh += p; return; }
+      if (p.clave) { es += T.es(p.clave); zh += T.zh(p.clave) || T.es(p.clave); return; }
+      es += p.es || '';
+      zh += p.zh || p.es || '';
+    });
+    return (T.usarChino() && zh !== es) ? es + '\n' + zh : es;
+  }
+
   function el(tag, attrs, hijos) {
     var n = document.createElement(tag);
     if (attrs) {
@@ -85,6 +108,56 @@
       var t = r[i]; r[i] = r[j]; r[j] = t;
     }
     return r;
+  }
+
+  /*
+   * Cola de ejercicios que DEVUELVE lo fallado.
+   *
+   * Antes bastaba con acabar acertando: se podían ir probando botones hasta
+   * dar con el bueno y el ejercicio se daba por bueno igual, con todas las
+   * estrellas. Ahora lo que falla vuelve al final de la cola, y otra vez en
+   * una segunda vuelta, así que hay que sacarlo de verdad. Y se apunta cuál
+   * era, para que el repaso pueda devolvérselo tal cual días después.
+   */
+  function crearCola(lista, vueltasExtra) {
+    return {
+      pendientes: mezclar(lista),
+      fallados: [],
+      vuelta: 0,
+      maxVueltas: vueltasExtra === undefined ? 2 : vueltasExtra,
+      total: lista.length,
+      hechos: 0,
+      erroresRonda: 0,
+
+      siguiente: function () {
+        this.erroresRonda = 0;
+        if (this.pendientes.length) return this.pendientes.shift();
+        if (this.fallados.length && this.vuelta < this.maxVueltas) {
+          this.vuelta++;                       // otra pasada con lo que falló
+          this.pendientes = mezclar(this.fallados);
+          this.fallados = [];
+          return this.pendientes.shift();
+        }
+        return null;
+      },
+
+      falla: function (item) {
+        this.erroresRonda++;
+        if (leccion) leccion.erroresPaso = (leccion.erroresPaso || 0) + 1;
+        if (this.fallados.indexOf(item) === -1) this.fallados.push(item);
+      },
+
+      /* Devuelve true sólo si lo ha sacado a la primera. */
+      resuelve: function () {
+        this.hechos++;
+        return this.erroresRonda === 0;
+      },
+
+      etiqueta: function () {
+        return (this.vuelta ? '🔁 ' : '') +
+               Math.min(this.hechos + 1, this.total) + ' / ' + this.total;
+      }
+    };
   }
 
   /* n elementos al azar de "fuente" que no estén ya en "fuera" */
@@ -364,7 +437,8 @@
       panel.appendChild(el('div', { class: 'ajuste' }, [
         el('button', {
           class: 'btn btn-grande', style: 'border-color:var(--error);color:var(--error)',
-          text: '🗑️ ' + T.t('borrarNino') + ': ' + (activo.nombre || T.t('sinNombre')),
+          text: bilingue([{ clave: 'borrarNino' }, ': ',
+                          activo.nombre ? activo.nombre : { clave: 'sinNombre' }]),
           onclick: function () {
             if (!global.confirm(T.t('borrarNinoOjo'))) return;
             Progreso.borrarPerfil(activo.id);
@@ -390,12 +464,19 @@
     vista = { nombre: 'portada' };
     var unidades = Curriculo.unidades;
     var res = Progreso.resumen(unidades);
-    var sugerida = Progreso.siguienteUnidad(unidades);
+    /* No siempre la siguiente: si dejó atrás una que no se sabe, ésa. */
+    var sugerida = Progreso.primeraFloja(unidades);
 
     var rejilla = el('div', { class: 'rejilla-unidades' });
     unidades.forEach(function (u, i) {
       var libre = Progreso.disponible(i, unidades);
       var hecha = Progreso.unidadCompleta(u.id);
+      /*
+       * El ✓ decía "hecha" aunque la hubiera pasado a base de tocar botones.
+       * Ahora se ven las estrellas de lo que sabe: tres, sabida; una o dos,
+       * empezada. Así se distingue de un vistazo lo aprendido de lo visitado.
+       */
+      var nivel = Progreso.nivelUnidad(u.id);
       var etq = u.letra || u.titulo;
       var btn = el('button', {
         class: 'unidad-btn' + (i === sugerida && libre ? ' sugerida' : ''),
@@ -413,7 +494,11 @@
         el('span', { class: 'n', text: String(i + 1) }),
         el('span', { class: 'letra' + (etq.length <= 2 ? ' corta' : ''), text: etq }),
         el('span', { class: 'emo', text: u.emoji || '' }),
-        hecha ? el('span', { class: 'hecha', text: '✓' }) : null
+        hecha && nivel >= 3 ? el('span', { class: 'hecha', text: '✓' }) : null,
+        (hecha || nivel) ? el('span', {
+          class: 'nivel-unidad n' + nivel,
+          text: estrellasTexto(nivel)
+        }) : null
       ]);
       rejilla.appendChild(btn);
     });
@@ -469,14 +554,31 @@
     ]);
   }
 
+  /*
+   * Sin voz española la app enseña a pronunciar mal y nadie se entera: suena
+   * a "casi español". Por eso el aviso dice QUÉ pasa, con un ejemplo, y CÓMO
+   * se arregla, en vez de un "puede sonar raro" que no lleva a ninguna parte.
+   */
   function avisosVoz() {
     if (!Voz.soportado) {
       return el('div', { class: 'aviso' }, [el('span', { text: '⚠️' }), el('span', { text: T.t('sinVoz') })]);
     }
-    if (!Voz.hayVozEspanola()) {
-      return el('div', { class: 'aviso' }, [el('span', { text: '⚠️' }), el('span', { text: T.t('sinVozEs') })]);
+    if (Voz.hayVozEspanola()) return null;
+
+    var e = Voz.estado();
+    var caja = el('div', { class: 'aviso aviso-grande' }, [
+      el('div', { class: 'aviso-linea' }, [
+        el('span', { text: '⚠️' }),
+        el('span', { text: T.t('sinVozEs') })
+      ]),
+      el('p', { class: 'dato', text: T.t('comoPonerVoz') })
+    ]);
+    if (e.usando) {
+      caja.appendChild(el('p', { class: 'dato', text: bilingue([
+        { clave: 'vozEnUso' }, ': ' + e.usando.nombre + ' (' + e.usando.lang + ')'
+      ]) }));
     }
-    return null;
+    return caja;
   }
 
   /* ------------------------------------------------------------- lección */
@@ -512,6 +614,7 @@
     leccion = {
       indice: indice,
       unidad: u,
+      listas: null,
       pasos: pasosDe(u),
       paso: 0,
       estrellas: 0,
@@ -523,42 +626,87 @@
   }
 
   /*
-   * El repaso ya no coge palabras al azar: la app lleva la cuenta de qué
-   * unidades se le atragantan al leer en voz alta, y esas pesan el doble.
-   * Lo que ya le sale bien deja de aparecer.
+   * Qué palabras toca en ESTE paso.
+   *
+   * En una unidad normal, las suyas. En el repaso no: los primeros pasos van
+   * con palabras al azar de lo que ya ha visto, a modo de calentamiento, y
+   * los últimos con las que falló. Empezar por los fallos es empezar por lo
+   * más difícil, y se desanima antes de coger carrerilla.
+   */
+  function palabrasDelPaso() {
+    var l = leccion;
+    var propia = l.listas && l.listas[l.pasos[l.paso]];
+    return (propia && propia.length) ? propia : (l.unidad.palabras || []);
+  }
+
+  /* Dónde estaba el dibujo de cada palabra del currículo. */
+  function emojiDe(palabra) {
+    if (!emojiDe.mapa) {
+      emojiDe.mapa = {};
+      Curriculo.unidades.forEach(function (u) {
+        (u.palabras || []).forEach(function (p) { emojiDe.mapa[p[0]] = p[1]; });
+      });
+    }
+    return emojiDe.mapa[palabra];
+  }
+
+  /*
+   * El repaso son SUS fallos, no palabras al azar.
+   *
+   * Cada vez que se equivoca, la app apunta la sílaba o la palabra concreta.
+   * Aquí se montan ejercicios con exactamente esas, y lo que ya le sale bien
+   * deja de aparecer. Si todavía no ha fallado en nada, se cae al repaso
+   * general de lo aprendido.
    */
   function abrirRepaso() {
     var hasta = Progreso.siguienteUnidad(Curriculo.unidades);
-    var palabras = Curriculo.palabrasHasta(Math.max(0, hasta));
-    if (palabras.length < 4) {
-      narrar(T.es('todaviaNoHay'));
-      return;
+    var general = Curriculo.palabrasHasta(Math.max(0, hasta));
+    var flojos = Progreso.itemsFlojos(null, 30);
+
+    var silabasSuyas = [];
+    var suyas = [];
+    flojos.forEach(function (x) {
+      if (x.tipo === 'silaba') { silabasSuyas.push(x.item); return; }
+      suyas.push([x.item, emojiDe(x.item) || (x.tipo === 'inventada' ? '👽' : '📝')]);
+    });
+
+    /* Primera mitad: palabras al azar de lo que ya ha visto. Calienta, y de
+       paso repasa lo que le salió bien hace días y puede haberse enfriado. */
+    var azar = mezclar(general.slice()).slice(0, 6);
+
+    var pasos = [];
+    var listas = {};
+    var titulo = T.t('repaso');
+
+    if (azar.length >= 3) {
+      pasos.push('elige-dibujo', 'construir');
+      listas['elige-dibujo'] = azar;
+      listas['construir'] = azar;
     }
 
-    var flojas = Progreso.unidadesFlojas();
-    var titulo = T.t('repaso');
-    if (flojas.length) {
-      var deFlojas = [];
-      flojas.forEach(function (f) {
-        var u = Curriculo.unidades[Curriculo.indicePorId(f.id)];
-        if (u && u.palabras) deFlojas = deFlojas.concat(u.palabras);
-      });
-      if (deFlojas.length >= 3) {
-        /* Dos tercios de lo que falla, un tercio de repaso general. */
-        palabras = mezclar(deFlojas).slice(0, 8).concat(mezclar(palabras).slice(0, 4));
-        titulo = T.t('repasoFlojo');
-      }
+    /* Segunda mitad: lo suyo, exactamente lo que falló. */
+    if (silabasSuyas.length >= 3) pasos.push('quiz-silaba');
+    if (suyas.length) {
+      titulo = T.t('repasoTuyo');
+      pasos.push('palabras', 'leer-tu');
+      listas['palabras'] = suyas;
+      listas['leer-tu'] = suyas;
     }
+
+    if (!pasos.length) { narrar(T.es('todaviaNoHay')); return; }
+    /* Sin nada suyo que devolver, el repaso general se alarga un poco. */
+    if (!suyas.length && azar.length >= 3) pasos.push('leer-tu');
 
     leccion = {
       indice: hasta,
       unidad: {
         id: 'repaso', titulo: titulo, color: 2, emoji: '🔁',
-        silabas: Curriculo.silabasHasta(hasta),
-        palabras: mezclar(palabras).slice(0, 12),
+        silabas: silabasSuyas.length >= 3 ? silabasSuyas : Curriculo.silabasHasta(hasta),
+        palabras: azar.concat(suyas).slice(0, 12),
         frases: []
       },
-      pasos: ['elige-dibujo', 'construir', 'leer-tu'],
+      listas: listas,
+      pasos: pasos,
       paso: 0,
       estrellas: 0,
       repaso: true
@@ -572,8 +720,16 @@
     Voz.parar();
     enunciadoDicho = null;
     var l = leccion;
-    Progreso.completarPaso(l.unidad.id, l.pasos[l.paso], 1);
-    l.estrellas += 1;
+    /*
+     * Las estrellas salen de los fallos del paso, no de haberlo terminado.
+     * Sin esto, probar botones al azar hasta acertar puntuaba igual que
+     * hacerlo bien a la primera, y la recompensa dejaba de significar nada.
+     */
+    var fallos = l.erroresPaso || 0;
+    var gana = fallos === 0 ? 3 : (fallos <= 2 ? 2 : 1);
+    Progreso.completarPaso(l.unidad.id, l.pasos[l.paso], gana);
+    l.estrellas += gana;
+    l.erroresPaso = 0;
     l.paso += 1;
     if (l.paso >= l.pasos.length) return terminarUnidad();
     pintarPaso();
@@ -582,25 +738,56 @@
   function terminarUnidad() {
     var l = leccion;
     if (!l.repaso) Progreso.completarUnidad(l.unidad.id);
-    confeti();
-    var hayMas = !l.repaso && l.indice + 1 < Curriculo.unidades.length;
+    var nivel = l.repaso ? 3 : Progreso.nivelUnidad(l.unidad.id);
+    var sabida = nivel >= 2;
+    if (sabida) confeti();
+    var hayMas = !l.repaso && l.indice + 1 < Curriculo.unidades.length && sabida;
     setTimeout(function () { narrar(T.es('unidadHecha') + ' ¡Muy bien!'); }, 250);
 
     pintar([
       barra(tituloUnidad(l.unidad), verPortada),
       el('section', { class: 'resultado', style: '--u: var(--c' + (l.unidad.color || 0) + ')' }, [
-        el('div', { class: 'emo', text: '🏆' }),
-        el('h2', {}, etiqueta('unidadHecha')),
-        el('div', { class: 'estrellas-ganadas', text: new Array(Math.min(l.estrellas, 8) + 1).join('★') }),
+        el('div', { class: 'emo', text: sabida ? '🏆' : '💪' }),
+        el('h2', {}, etiqueta(l.repaso ? 'unidadHecha' : (sabida ? 'teLaSabes' : 'casiLaSabes'))),
+        el('div', { class: 'estrellas-ganadas', text: new Array(Math.min(l.estrellas, 12) + 1).join('★') }),
+        /* Lo que sabe de la unidad, aparte de lo que ha ganado hoy. */
+        l.repaso ? null : el('p', { class: 'dato', text: bilingue([
+          { clave: 'loQueSabes' }, ': ' + estrellasTexto(nivel)
+        ]) }),
+        l.repaso || sabida ? null : el('p', { class: 'dato', text: T.t('abreLaSiguiente') }),
+        pendientesDeRepasar(),
         el('div', { class: 'fila-botones' }, [
           hayMas ? el('button', {
             class: 'btn btn-principal',
             onclick: function () { abrirLeccion(l.indice + 1); }
           }, [el('span', { text: '▶️' })].concat(etiqueta('aLaSiguiente'))) : null,
+          l.repaso || sabida ? null : el('button', {
+            class: 'btn btn-principal',
+            onclick: function () { abrirLeccion(l.indice); }
+          }, [el('span', { text: '🔁' })].concat(etiqueta('repiteUnidad'))),
           el('button', { class: 'btn', onclick: verPortada }, [el('span', { text: '🗺️' })].concat(etiqueta('mapa')))
         ])
       ])
     ]);
+  }
+
+  /*
+   * Al acabar una unidad, lo que se le ha atragantado. Verlo escrito, y que
+   * el repaso se lo devuelva después, es lo que evita que terminar una
+   * unidad equivalga a haberla aprendido.
+   */
+  function pendientesDeRepasar() {
+    var flojos = Progreso.itemsFlojos(null, 6);
+    if (!flojos.length) return el('p', { class: 'dato', text: T.t('nadaQueRepasar') });
+    var caja = el('div', { class: 'a-repasar' }, [
+      el('p', { class: 'dato', text: T.t('aRepasar') })
+    ]);
+    var fila = el('div', { class: 'palabra-silabas' });
+    flojos.forEach(function (x) {
+      fila.appendChild(el('span', { class: 'trozo pal-casi', text: x.item }));
+    });
+    caja.appendChild(fila);
+    return caja;
   }
 
   /* Barra de puntitos con el avance dentro de la unidad. */
@@ -638,6 +825,7 @@
   }
 
   function pintarPaso() {
+    leccion.erroresPaso = 0;
     var paso = leccion.pasos[leccion.paso];
     ({
       'intro': pasoIntro,
@@ -723,12 +911,10 @@
       el('div', { class: 'tarjeta' }, [
         titular,
         u.nombre ? el('p', { class: 'dato' }, [
-          document.createTextNode(T.es('seLlama') + ' '),
-          el('b', { text: u.nombre })
+          el('b', { text: bilingue([{ clave: 'seLlama' }, ' ' + u.nombre]) })
         ]) : null,
         u.fonema ? el('p', { class: 'dato' }, [
-          document.createTextNode(T.t('sonido') + ' '),
-          el('b', { text: u.fonema })
+          el('b', { text: bilingue([{ clave: 'sonido' }, ' ' + u.fonema]) })
         ]) : null,
         el('p', { class: 'truco', text: u.truco }),
         T.usarChino() && u.trucoZh ? el('p', { class: 'truco zh', text: u.trucoZh }) : null,
@@ -816,7 +1002,7 @@
         }),
         siguiente
       ])
-    ], 'pasoSilabas', T.t('tocaTodas'));
+    ], 'pasoSilabas', T.es('tocaTodas'));
   }
 
   /* --- 3. Escucha y toca la sílaba ------------------------------------- */
@@ -825,13 +1011,11 @@
     var u = leccion.unidad;
     var propias = u.silabas.slice();
     var previas = Curriculo.silabasHasta(Math.max(0, leccion.indice - 1));
-    var rondas = Math.min(5, propias.length);
-    var orden = mezclar(propias).slice(0, rondas);
-    var i = 0;
+    var cola = crearCola(propias.slice(0, Math.min(5, propias.length)));
 
     function ronda() {
-      if (i >= orden.length) return siguientePaso();
-      var objetivo = orden[i];
+      var objetivo = cola.siguiente();
+      if (!objetivo) return siguientePaso();
       var otras = tomar(propias, 3, [objetivo]);
       while (otras.length < 3 && previas.length) {
         var extra = tomar(previas, 1, [objetivo].concat(otras))[0];
@@ -846,12 +1030,15 @@
         b.addEventListener('click', function () {
           if (s === objetivo) {
             b.classList.add('bien');
+            /* Sólo cuenta como sabida si la ha sacado a la primera. */
+            if (cola.resuelve()) Progreso.apuntarAciertoItem('silaba', objetivo);
             decir('¡Muy bien! ' + objetivo, 'frase');
-            i++;
             setTimeout(ronda, 1100);
           } else {
             b.classList.add('mal');
             setTimeout(function () { b.classList.remove('mal'); }, 500);
+            cola.falla(objetivo);
+            Progreso.apuntarFalloItem('silaba', objetivo, u.id);
             Voz.secuencia([
               { text: T.es('noEscuchaOtra'), tipo: 'frase', pausa: 300 },
               { text: objetivo, tipo: 'silaba' }
@@ -868,7 +1055,7 @@
             text: '🔊 ' + T.t('escuchar'),
             onclick: function () { decir(objetivo, 'silaba'); }
           }),
-          el('p', { class: 'dato', text: (i + 1) + ' / ' + orden.length })
+          el('p', { class: 'dato', text: cola.etiqueta() })
         ]),
         rejilla
       ], 'pasoQuizSilaba', null, function () { decir(objetivo, 'silaba'); });
@@ -880,12 +1067,11 @@
 
   function pasoVocalInicial() {
     var u = leccion.unidad;
-    var orden = mezclar(u.vocales.slice());
-    var i = 0;
+    var cola = crearCola(u.vocales.slice());
 
     function ronda() {
-      if (i >= orden.length) return siguientePaso();
-      var v = orden[i];
+      var v = cola.siguiente();
+      if (!v) return siguientePaso();
       var opciones = mezclar(u.vocales.slice());
 
       var rejilla = el('div', { class: 'rejilla-silabas' });
@@ -894,12 +1080,14 @@
         b.addEventListener('click', function () {
           if (o.letra === v.letra) {
             b.classList.add('bien');
+            if (cola.resuelve()) Progreso.apuntarAciertoItem('silaba', v.letra);
             decir('¡Sí! ' + v.palabra + ' empieza por ' + v.letra, 'frase');
-            i++;
             setTimeout(ronda, 1600);
           } else {
             b.classList.add('mal');
             setTimeout(function () { b.classList.remove('mal'); }, 500);
+            cola.falla(v);
+            Progreso.apuntarFalloItem('silaba', v.letra, u.id);
             decir(v.palabra, 'palabra');
           }
         });
@@ -916,8 +1104,7 @@
           })
         ]),
         rejilla
-      ], 'pasoQuizSilaba', 'Toca la vocal por la que empieza el dibujo',
-         function () { decir(v.palabra, 'palabra'); });
+      ], 'pasoVocalInicial', null, function () { decir(v.palabra, 'palabra'); });
     }
     ronda();
   }
@@ -926,7 +1113,7 @@
 
   function pasoPalabras() {
     var u = leccion.unidad;
-    var lista = u.palabras.slice(0, 8);
+    var lista = palabrasDelPaso().slice(0, 8);
     var i = 0;
 
     function ver() {
@@ -965,7 +1152,7 @@
             onclick: function () { Voz.parar(); i++; ver(); }
           })
         ])
-      ], 'pasoPalabras', T.t('tocaParaOir'), leerla);
+      ], 'pasoPalabras', T.es('tocaParaOir'), leerla);
     }
     ver();
   }
@@ -974,13 +1161,13 @@
 
   function pasoConstruir() {
     var u = leccion.unidad;
-    var lista = mezclar(u.palabras.slice()).slice(0, 4);
-    var i = 0;
+    var cola = crearCola(palabrasDelPaso().slice(0, 4));
 
     function ronda() {
-      if (i >= lista.length) return siguientePaso();
-      var palabra = lista[i][0];
-      var emoji = lista[i][1];
+      var par = cola.siguiente();
+      if (!par) return siguientePaso();
+      var palabra = par[0];
+      var emoji = par[1];
       var trozos = Silabas.syllabify(palabra);
       var puestas = 0;
 
@@ -1003,18 +1190,20 @@
             decir(s, 'silaba');
             if (puestas === trozos.length) {
               confeti();
+              if (cola.resuelve()) Progreso.apuntarAciertoItem('palabra', palabra);
               setTimeout(function () {
                 Voz.secuencia([
                   { text: '¡Muy bien!', tipo: 'frase', pausa: 250 },
                   { text: palabra, tipo: 'palabra' }
                 ]);
               }, 400);
-              i++;
               setTimeout(ronda, 2200);
             }
           } else {
             b.classList.add('mal');
             setTimeout(function () { b.classList.remove('mal'); }, 500);
+            cola.falla(par);
+            Progreso.apuntarFalloItem('palabra', palabra, u.id);
             leerPorSilabas(palabra);
           }
         });
@@ -1029,11 +1218,11 @@
           el('button', {
             class: 'btn btn-principal', text: '🔊 ' + T.t('escuchar'), onclick: escuchar
           }),
-          el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+          el('p', { class: 'dato', text: cola.etiqueta() })
         ]),
         hueco,
         banco
-      ], 'pasoConstruir', T.t('tocaSilabas'), escuchar);
+      ], 'pasoConstruir', T.es('tocaSilabas'), escuchar);
     }
     ronda();
   }
@@ -1043,13 +1232,12 @@
 
   function pasoEligeDibujo() {
     var u = leccion.unidad;
-    var banco = u.palabras.slice();
-    var lista = mezclar(banco).slice(0, Math.min(5, banco.length));
-    var i = 0;
+    var banco = palabrasDelPaso().slice();
+    var cola = crearCola(banco.slice(0, Math.min(5, banco.length)));
 
     function ronda() {
-      if (i >= lista.length) return siguientePaso();
-      var par = lista[i];
+      var par = cola.siguiente();
+      if (!par) return siguientePaso();
       var palabra = par[0];
       var otras = mezclar(banco.filter(function (p) { return p[1] !== par[1]; })).slice(0, 2);
       var opciones = mezclar([par].concat(otras));
@@ -1060,12 +1248,14 @@
         b.addEventListener('click', function () {
           if (o[0] === palabra) {
             b.classList.add('bien');
+            if (cola.resuelve()) Progreso.apuntarAciertoItem('palabra', palabra);
             decir('¡Sí! ' + palabra, 'frase');
-            i++;
             setTimeout(ronda, 1400);
           } else {
             b.classList.add('mal');
             setTimeout(function () { b.classList.remove('mal'); }, 500);
+            cola.falla(par);
+            Progreso.apuntarFalloItem('palabra', palabra, u.id);
             narrar(T.es('noEsEsta'));
           }
         });
@@ -1079,10 +1269,10 @@
             class: 'btn', text: '🔊 ' + T.t('escuchar'),
             onclick: function () { leerPorSilabas(palabra); }
           }),
-          el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+          el('p', { class: 'dato', text: cola.etiqueta() })
         ]),
         rejilla
-      ], 'pasoQuizPal', 'Lee la palabra y toca el dibujo');
+      ], 'pasoEligeDibujo');
     }
     ronda();
   }
@@ -1114,6 +1304,14 @@
     opciones = opciones || {};
     var caja = el('div', { class: 'micro' });
 
+    /*
+     * Si ha pedido oír la palabra antes de leerla, lo que venga después no es
+     * lectura: es repetir de memoria. La ayuda sigue ahí — a veces hace falta —,
+     * pero deja de poder valer la nota más alta.
+     */
+    var conAyuda = !!opciones.ayudaYa;
+    caja.marcarAyuda = function () { conAyuda = true; };
+
     function vaciar() { caja.innerHTML = ''; }
 
     function botonMicro(clase) {
@@ -1124,9 +1322,16 @@
     }
 
     function leerObjetivo() {
+      if (opciones.leer) return opciones.leer();
       return opciones.silabas === false
         ? decir(objetivo, 'frase')
         : leerPorSilabas(objetivo, opciones.nodos);
+    }
+
+    /* Oírlo ANTES es ayuda; oírlo después es aprender de la corrección. */
+    function oirAntes() {
+      caja.marcarAyuda();
+      return leerObjetivo();
     }
 
     function reposo(aviso) {
@@ -1136,7 +1341,7 @@
       caja.appendChild(boton);
       caja.appendChild(el('p', { class: 'micro-pie' }, etiqueta('tocaYLee')));
       caja.appendChild(el('div', { class: 'fila-botones' }, [
-        el('button', { class: 'btn', text: '🔊 ' + T.t('escuchalo'), onclick: leerObjetivo }),
+        el('button', { class: 'btn', text: '🔊 ' + T.t('escuchalo'), onclick: oirAntes }),
         opciones.alAcabar ? el('button', {
           class: 'btn', text: '⏭️ ' + T.t('saltar'),
           onclick: function () { opciones.alAcabar(null); }
@@ -1182,6 +1387,9 @@
 
     function mostrar(res, segundos) {
       vaciar();
+
+      /* Con ayuda de por medio, las tres estrellas no se dan. */
+      if (conAyuda && res.estrellas >= 3) { res.estrellas = 2; res.conAyuda = true; }
 
       /* Lo que falló se guarda: el repaso dejará de ser aleatorio. */
       if (opciones.unidad) {
@@ -1232,7 +1440,8 @@
           el('span', { class: 'ppm-texto', text: T.t('ppm') }),
           ppm > mejorAntes && mejorAntes > 0
             ? el('span', { class: 'ppm-mejora', text: '🎉 ' + T.t('mejorMarca') })
-            : (mejorAntes ? el('span', { class: 'ppm-mejora', text: T.t('mejorPpm') + ': ' + mejorAntes }) : null)
+            : (mejorAntes ? el('span', { class: 'ppm-mejora',
+                text: bilingue([{ clave: 'mejorPpm' }, ': ' + mejorAntes]) }) : null)
         ]);
       }
 
@@ -1240,9 +1449,15 @@
         el('div', { class: 'estrellas-ganadas', text: estrellasTexto(res.estrellas) }),
         marcaPpm,
         marcada,
-        res.oido ? el('p', { class: 'oido', text: T.t('heOido') + ': «' + res.oido + '»' }) : null,
-        comentario
+        res.oido ? el('p', { class: 'oido',
+          text: bilingue([{ clave: 'heOido' }, ': «' + res.oido + '»']) }) : null,
+        comentario,
+        res.conAyuda ? el('p', { class: 'micro-ayuda' }, etiqueta('conAyuda')) : null
       ]));
+
+      /* Ya ha leído: ahora el dibujo puede aparecer. Confirma el significado
+         sin haber hecho de chivato. */
+      if (opciones.alMostrar) opciones.alMostrar(res);
 
       caja.appendChild(el('div', { class: 'fila-botones' }, [
         el('button', { class: 'btn btn-audio', text: '🔊 ' + T.t('escuchalo'), onclick: leerObjetivo }),
@@ -1285,13 +1500,12 @@
 
   function pasoLeerTu() {
     var u = leccion.unidad;
-    var lista = mezclar(u.palabras.slice()).slice(0, 4);
-    var i = 0;
+    var cola = crearCola(palabrasDelPaso().slice(0, 4));
 
     function ronda() {
-      if (i >= lista.length) return siguientePaso();
-      var palabra = lista[i][0];
-      var emoji = lista[i][1];
+      var par = cola.siguiente();
+      if (!par) return siguientePaso();
+      var palabra = par[0];
       var trozos = Silabas.syllabify(palabra);
 
       var fila = el('div', { class: 'palabra-silabas' });
@@ -1302,19 +1516,44 @@
         fila.appendChild(n);
       });
 
+      /*
+       * Aquí NO se pone el dibujo delante.
+       *
+       * Con el pino a la vista, el niño dice «pino» sin haber leído nada: sabe
+       * hablar español, y la imagen le da la palabra hecha. Así no hay manera
+       * de saber si está leyendo. El dibujo aparece DESPUÉS, cuando ya ha
+       * leído, y entonces sí sirve: confirma qué significa lo que ha leído.
+       */
+      var dibujo = el('div', { class: 'palabra-emoji tapado', text: par[1] });
+      function revelar() { dibujo.classList.remove('tapado'); }
+
+      /* Con menos de dos estrellas la palabra vuelve: leerla mal y seguir
+         adelante sería darla por sabida. */
+      function juzgar(res) {
+        if (res && res.estrellas >= 2) {
+          if (cola.resuelve()) Progreso.apuntarAciertoItem('palabra', palabra);
+        } else {
+          cola.falla(par);
+          Progreso.apuntarFalloItem('palabra', palabra, u.id);
+        }
+        ronda();
+      }
+
       /* Con micrófono, la app escucha y puntúa; sin él, se autoevalúa. */
       if (micDisponible()) {
         marco([
           el('div', { class: 'palabra-tarjeta' }, [
-            el('div', { class: 'palabra-emoji', text: emoji }),
             fila,
-            el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+            dibujo,
+            el('p', { class: 'dato', text: cola.etiqueta() })
           ]),
           bloqueMicro(palabra, {
             nodos: nodos,
-            alAcabar: function () { i++; ronda(); }
+            unidad: u.id,
+            alMostrar: revelar,
+            alAcabar: juzgar
           })
-        ], 'pasoLeerVoz', T.t('tocaYLee'));
+        ], 'soloLaPalabra');
         return;
       }
 
@@ -1322,11 +1561,12 @@
       var acciones = el('div', { class: 'fila-botones' });
 
       function mostrarValoracion() {
+        revelar();
         acciones.innerHTML = '';
         acciones.appendChild(el('button', {
           class: 'btn btn-principal',
           text: '😀 ' + T.t('loDijeBien'),
-          onclick: function () { i++; ronda(); }
+          onclick: function () { cola.resuelve(); ronda(); }
         }));
         acciones.appendChild(el('button', {
           class: 'btn',
@@ -1347,12 +1587,12 @@
 
       marco([
         el('div', { class: 'palabra-tarjeta' }, [
-          el('div', { class: 'palabra-emoji', text: emoji }),
           fila,
-          el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+          dibujo,
+          el('p', { class: 'dato', text: cola.etiqueta() })
         ]),
         acciones
-      ], 'pasoLeerTu', T.t('ahoraLeeTu'));
+      ], 'pasoLeerTu', T.es('ahoraLeeTu'));
     }
     ronda();
   }
@@ -1399,17 +1639,95 @@
     })).then(function () { return decir(texto, 'frase'); });
   }
 
+  /*
+   * Leer una frase entera es otra cosa que leer una palabra: hay que encadenar,
+   * respetar los puntos y no comerse las palabras pequeñas (el, un, en, se),
+   * que son justo las que se adivinan de memoria. Por eso aquí el micrófono no
+   * es un extra opcional: es la manera de saber si ha leído la frase o se la ha
+   * imaginado. Y lo que salga mal se apunta palabra por palabra, así el repaso
+   * le devuelve exactamente esas.
+   */
+  /*
+   * Una lectura de corrido dice una cosa por palabra, no una en total: si lee
+   * bien la frase pero se atasca en «mamá», lo que hay que repasar es «mamá».
+   */
+  function apuntarPalabrasDe(res, idUnidad) {
+    if (!res || !res.palabras) return;
+    res.palabras.forEach(function (p) {
+      var w = p.texto.toLowerCase();
+      if (p.estado === 'bien') Progreso.apuntarAciertoItem('palabra', w);
+      else Progreso.apuntarFalloItem('palabra', w, idUnidad);
+    });
+  }
+
   function pasoFrases() {
     var u = leccion.unidad;
+    var separar = true;
+
+    if (!micDisponible()) return frasesSinMicro(u, separar);
+
+    var cola = crearCola(u.frases.slice());
+
+    /* La ayuda es de la frase, no de la pantalla: si se olvidara al cambiar
+       entre sílabas y todo junto, bastaría con oírla y darle al botón. */
+    var ayudado = false;
+
+    function ronda() {
+      var texto = cola.siguiente();
+      if (!texto) return siguientePaso();
+      ayudado = false;
+      ver(texto);
+    }
+
+    function juzgar(texto, res) {
+      apuntarPalabrasDe(res, u.id);
+      if (res && res.estrellas >= 2) cola.resuelve();
+      else cola.falla(texto);
+      ronda();
+    }
+
+    function ver(texto) {
+      var pintada = frasePintada(texto, separar);
+      var micro = bloqueMicro(texto, {
+        silabas: false,
+        unidad: u.id,
+        ayudaYa: ayudado,
+        /* Que se oiga palabra a palabra, resaltando, como en el resto del paso. */
+        leer: function () { return leerFrase(pintada, texto); },
+        alAcabar: function (res) { juzgar(texto, res); }
+      });
+
+      /* Tocar las palabras para oírlas sigue estando: es la ayuda de siempre.
+         Pero si la usa antes de leer, esa lectura ya no vale tres estrellas. */
+      var marcar = micro.marcarAyuda;
+      micro.marcarAyuda = function () { ayudado = true; marcar(); };
+      pintada.caja.addEventListener('click', function () { micro.marcarAyuda(); }, true);
+
+      marco([
+        pintada.caja,
+        el('div', { class: 'fila-botones' }, [
+          el('button', {
+            class: 'btn', text: separar ? '🔗 ' + T.t('verJunto') : '✂️ ' + T.t('verSilabas'),
+            onclick: function () { Voz.parar(); separar = !separar; ver(texto); }
+          })
+        ]),
+        micro,
+        el('p', { class: 'dato', style: 'text-align:center', text: cola.etiqueta() })
+      ], 'leeLaFrase');
+    }
+
+    ronda();
+  }
+
+  /* Sin micrófono no hay nada que medir: queda oírlas y tocarlas. */
+  function frasesSinMicro(u, separar) {
     var lista = u.frases.slice();
     var i = 0;
-    var separar = true;
 
     function ver() {
       if (i >= lista.length) return siguientePaso();
       var texto = lista[i];
       var pintada = frasePintada(texto, separar);
-      var zonaMicro = el('div', {});
 
       marco([
         pintada.caja,
@@ -1422,25 +1740,14 @@
             class: 'btn', text: separar ? '🔗 ' + T.t('verJunto') : '✂️ ' + T.t('verSilabas'),
             onclick: function () { separar = !separar; ver(); }
           }),
-          micDisponible() ? el('button', {
-            class: 'btn', text: '🎤 ' + T.t('leerlaTu'),
-            onclick: function (ev) {
-              Voz.parar();
-              ev.currentTarget.disabled = true;
-              zonaMicro.innerHTML = '';
-              zonaMicro.appendChild(bloqueMicro(texto, { silabas: false }));
-              zonaMicro.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-          }) : null,
           el('button', {
             class: 'btn btn-principal',
             text: '➡️ ' + T.t('siguiente'),
             onclick: function () { Voz.parar(); i++; ver(); }
           })
         ]),
-        zonaMicro,
         el('p', { class: 'dato', style: 'text-align:center', text: (i + 1) + ' / ' + lista.length })
-      ], 'pasoFrases', T.t('tocaPalabra'));
+      ], 'pasoFrases', T.es('tocaPalabra'));
     }
     ver();
   }
@@ -1488,7 +1795,7 @@
             onclick: function () { Voz.parar(); i++; ver(); }
           })
         ])
-      ], 'pasoTexto', T.t('tocaPalabra'));
+      ], 'pasoTexto', T.es('tocaPalabra'));
     }
 
     /*
@@ -1506,9 +1813,13 @@
         pintada.caja,
         bloqueMicro(linea, {
           silabas: false,
-          alAcabar: function () { porLineas(cuento, k + 1); }
+          unidad: u.id,
+          alAcabar: function (res) {
+            apuntarPalabrasDe(res, u.id);
+            porLineas(cuento, k + 1);
+          }
         })
-      ], 'pasoLeerVoz', T.t('tocaYLee'));
+      ], 'pasoLeerVoz', T.es('tocaYLee'));
     }
 
     ver();
@@ -1593,11 +1904,11 @@
     Avanzado.inventadas.forEach(function (n) {
       lista = lista.concat(mezclar(n.lista).slice(0, 3));
     });
-    var i = 0;
+    var cola = crearCola(lista);
 
     function ronda() {
-      if (i >= lista.length) return siguientePaso();
-      var palabra = lista[i];
+      var palabra = cola.siguiente();
+      if (!palabra) return siguientePaso();
       var trozos = Silabas.syllabify(palabra);
 
       var fila = el('div', { class: 'palabra-silabas' });
@@ -1611,7 +1922,7 @@
       var tarjeta = el('div', { class: 'palabra-tarjeta' }, [
         el('div', { class: 'palabra-emoji', text: '👽' }),
         fila,
-        el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+        el('p', { class: 'dato', text: cola.etiqueta() })
       ]);
 
       if (micDisponible()) {
@@ -1620,9 +1931,17 @@
           bloqueMicro(palabra, {
             nodos: nodos,
             unidad: 'inventadas',
-            alAcabar: function () { i++; ronda(); }
+            alAcabar: function (res) {
+              if (res && res.estrellas >= 2) {
+                if (cola.resuelve()) Progreso.apuntarAciertoItem('inventada', palabra);
+              } else {
+                cola.falla(palabra);
+                Progreso.apuntarFalloItem('inventada', palabra, 'inventadas');
+              }
+              ronda();
+            }
           })
-        ], 'pasoInventadas', T.t('tocaYLee'));
+        ], 'pasoInventadas', T.es('tocaYLee'));
         return;
       }
 
@@ -1635,10 +1954,10 @@
           }),
           el('button', {
             class: 'btn btn-principal', text: '➡️ ' + T.t('siguiente'),
-            onclick: function () { Voz.parar(); i++; ronda(); }
+            onclick: function () { Voz.parar(); cola.resuelve(); ronda(); }
           })
         ])
-      ], 'pasoInventadas', T.t('ahoraLeeTu'));
+      ], 'pasoInventadas', T.es('ahoraLeeTu'));
     }
     ronda();
   }
@@ -1647,12 +1966,11 @@
 
   /* Oye una de las dos y toca cuál era: obliga a mirar dentro de la palabra. */
   function pasoParesOir() {
-    var lista = mezclar(Avanzado.pares.slice()).slice(0, 6);
-    var i = 0;
+    var cola = crearCola(Avanzado.pares.slice(0, 6));
 
     function ronda() {
-      if (i >= lista.length) return siguientePaso();
-      var par = lista[i];
+      var par = cola.siguiente();
+      if (!par) return siguientePaso();
       var cual = Math.random() < 0.5 ? 'a' : 'b';
       var objetivo = par[cual][0];
       var opciones = mezclar([par.a, par.b]);
@@ -1666,14 +1984,18 @@
         b.addEventListener('click', function () {
           if (o[0] === objetivo) {
             b.classList.add('bien');
-            Progreso.apuntarAcierto('pares');
+            if (cola.resuelve()) {
+              Progreso.apuntarAcierto('pares');
+              Progreso.apuntarAciertoItem('palabra', objetivo);
+            }
             decir('¡Sí! ' + objetivo, 'frase');
-            i++;
             setTimeout(ronda, 1300);
           } else {
             b.classList.add('mal');
             setTimeout(function () { b.classList.remove('mal'); }, 500);
+            cola.falla(par);
             Progreso.apuntarFallo('par-minimo', 'pares');
+            Progreso.apuntarFalloItem('palabra', objetivo, 'pares');
             Voz.secuencia([
               { text: T.es('noEscuchaOtra') + '. ' + T.es('cambianEn') + ' ' + par.diferencia, tipo: 'frase', pausa: 300 },
               { text: objetivo, tipo: 'palabra' }
@@ -1689,8 +2011,10 @@
             class: 'btn btn-principal btn-grande', text: '🔊 ' + T.t('escuchar'),
             onclick: function () { decir(objetivo, 'palabra'); }
           }),
-          el('p', { class: 'dato', text: T.t('enQueCambian') + ': ' + par.diferencia }),
-          el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+          el('p', { class: 'dato',
+            text: bilingue([{ clave: 'enQueCambian' }, ': ',
+                            { es: par.diferencia, zh: par.diferenciaZh }]) }),
+          el('p', { class: 'dato', text: cola.etiqueta() })
         ]),
         rejilla
       ], 'pasoPares', null, function () { decir(objetivo, 'palabra'); });
@@ -1700,30 +2024,37 @@
 
   /* Ahora al revés: lee tú una de las dos y a ver cuál te sale. */
   function pasoParesLeer() {
-    var lista = mezclar(Avanzado.pares.slice()).slice(0, 4);
-    var i = 0;
+    var cola = crearCola(Avanzado.pares.slice(0, 4));
 
     function ronda() {
-      if (i >= lista.length) return siguientePaso();
-      var par = lista[i];
+      var par = cola.siguiente();
+      if (!par) return siguientePaso();
       var cual = Math.random() < 0.5 ? 'a' : 'b';
       var objetivo = par[cual][0];
       var otra = par[cual === 'a' ? 'b' : 'a'][0];
 
+      /* Un par mínimo se juega en una letra: con el dibujo delante no hay
+         que mirar la letra para acertar. Se ve al terminar. */
+      var dibujo = el('div', { class: 'palabra-emoji tapado', text: par[cual][1] });
+      function revelar() { dibujo.classList.remove('tapado'); }
+
       var tarjeta = el('div', { class: 'palabra-tarjeta' }, [
-        el('div', { class: 'palabra-emoji', text: par[cual][1] }),
         el('div', { class: 'palabra-entera', text: objetivo }),
-        el('p', { class: 'dato', text: T.t('noEsSino') + ' «' + otra + '». ' + T.t('fijateEn') + ' ' + par.diferencia + '.' }),
-        el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+        dibujo,
+        el('p', { class: 'dato', text: bilingue([
+          { clave: 'noEsSino' }, ' «' + otra + '». ',
+          { clave: 'fijateEn' }, ' ', { es: par.diferencia, zh: par.diferenciaZh }, '.'
+        ]) }),
+        el('p', { class: 'dato', text: cola.etiqueta() })
       ]);
 
       if (!micDisponible()) {
         marco([tarjeta, el('div', { class: 'fila-botones' }, [
           el('button', { class: 'btn btn-audio', text: '🔊 ' + T.t('comprobar'),
-            onclick: function () { decir(objetivo, 'palabra'); } }),
+            onclick: function () { revelar(); decir(objetivo, 'palabra'); } }),
           el('button', { class: 'btn btn-principal', text: '➡️ ' + T.t('siguiente'),
-            onclick: function () { Voz.parar(); i++; ronda(); } })
-        ])], 'pasoLeerVoz', T.t('ahoraLeeTu'));
+            onclick: function () { Voz.parar(); cola.resuelve(); ronda(); } })
+        ])], 'pasoLeerVoz', T.es('ahoraLeeTu'));
         return;
       }
 
@@ -1732,9 +2063,18 @@
         bloqueMicro(objetivo, {
           unidad: 'pares',
           rival: otra,          /* si dice la otra, hay que decírselo */
-          alAcabar: function () { i++; ronda(); }
+          alMostrar: revelar,
+          alAcabar: function (res) {
+            if (res && res.estrellas >= 2) {
+              if (cola.resuelve()) Progreso.apuntarAciertoItem('palabra', objetivo);
+            } else {
+              cola.falla(par);
+              Progreso.apuntarFalloItem('palabra', objetivo, 'pares');
+            }
+            ronda();
+          }
         })
-      ], 'pasoLeerVoz', T.t('tocaYLee'));
+      ], 'soloLaPalabra');
     }
     ronda();
   }
@@ -1752,11 +2092,11 @@
     Avanzado.dictado.forEach(function (n) {
       lista = lista.concat(mezclar(n.lista).slice(0, 3));
     });
-    var i = 0;
+    var cola = crearCola(lista);
 
     function ronda() {
-      if (i >= lista.length) return siguientePaso();
-      var palabra = lista[i];
+      var palabra = cola.siguiente();
+      if (!palabra) return siguientePaso();
 
       var campo = el('input', {
         type: 'text', class: 'campo-codigo campo-dictado', placeholder: T.es('escribeAqui'),
@@ -1774,16 +2114,22 @@
 
         veredicto.innerHTML = '';
         if (exacto) {
-          Progreso.apuntarAcierto('dictado');
+          if (cola.resuelve()) {
+            Progreso.apuntarAcierto('dictado');
+            Progreso.apuntarAciertoItem('dictado', palabra);
+          }
           veredicto.appendChild(el('div', { class: 'veredicto v3' }, [
             el('div', { class: 'estrellas-ganadas', text: '★★★' }),
-            el('p', { class: 'comentario', text: T.t('perfectoCorto') + ' ' + palabra })
+            el('p', { class: 'comentario', text: bilingue([{ clave: 'perfectoCorto' }, ' ' + palabra]) })
           ]));
           narrar('¡Perfecto!');
           confeti();
         } else if (suena) {
-          /* Lo ha oído bien: el fallo es de ortografía, no de lectura. */
+          /* Lo ha oído bien: el fallo es de ortografía, no de lectura.
+             Vuelve igual: escribirla bien es justo lo que se practica. */
+          cola.falla(palabra);
           Progreso.apuntarFallo('ortografia', 'dictado');
+          Progreso.apuntarFalloItem('dictado', palabra, 'dictado');
           veredicto.appendChild(el('div', { class: 'veredicto v2' }, [
             el('div', { class: 'estrellas-ganadas', text: '★★☆' }),
             el('p', { class: 'lectura-marcada' }, [
@@ -1791,11 +2137,13 @@
               document.createTextNode(' → '),
               el('span', { class: 'pal-bien', text: palabra })
             ]),
-            el('p', { class: 'comentario', text: T.t('ortografia') + '.' })
+            el('p', { class: 'comentario', text: bilingue([{ clave: 'ortografia' }, '.']) })
           ]));
           narrar(T.es('ortografia') + '. Se escribe ' + palabra);
         } else {
+          cola.falla(palabra);
           Progreso.apuntarFallo('dictado-mal', 'dictado');
+          Progreso.apuntarFalloItem('dictado', palabra, 'dictado');
           veredicto.appendChild(el('div', { class: 'veredicto v0' }, [
             el('div', { class: 'estrellas-ganadas', text: '★☆☆' }),
             el('p', { class: 'lectura-marcada' }, [
@@ -1813,7 +2161,7 @@
           el('button', { class: 'btn btn-audio', text: '🔊 ' + T.t('escuchar'), onclick: decirla }),
           el('button', {
             class: 'btn btn-principal', text: '➡️ ' + T.t('siguiente'),
-            onclick: function () { Voz.parar(); i++; ronda(); }
+            onclick: function () { Voz.parar(); ronda(); }
           })
         ]));
       }
@@ -1825,7 +2173,7 @@
           el('button', {
             class: 'btn btn-principal btn-grande', text: '🔊 ' + T.t('escuchar'), onclick: decirla
           }),
-          el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
+          el('p', { class: 'dato', text: cola.etiqueta() })
         ]),
         campo,
         el('button', { class: 'btn btn-grande', text: '✅ ' + T.t('revisar'), onclick: revisar }),
@@ -1849,7 +2197,7 @@
     [1, 2, 3].forEach(function (n) {
       var lista = Avanzado.cuentosDeNivel(n);
       if (!lista.length) return;
-      bloques.push(el('h2', { class: 'nivel-titulo', text: T.t('nivel') + ' ' + n }));
+      bloques.push(el('h2', { class: 'nivel-titulo', text: bilingue([{ clave: 'nivel' }, ' ' + n]) }));
       var rejilla = el('div', { class: 'rejilla-cuentos' });
       lista.forEach(function (c) {
         var palabras = c.lineas.join(' ').split(/\s+/).length;
@@ -1996,7 +2344,7 @@
       ]));
       Voz.secuencia([
         { text: '¡Muy bien!', tipo: 'frase', pausa: 300 },
-        { text: T.t('moraleja') + ': ' + c.moraleja, tipo: 'frase' }
+        { text: T.es('moraleja') + ': ' + c.moraleja, tipo: 'frase' }
       ]);
     }
 
@@ -2047,8 +2395,7 @@
       vel.appendChild(el('p', { class: 'dato', text: T.t('sinDatos') }));
     } else {
       vel.appendChild(el('p', { class: 'dato' }, [
-        document.createTextNode(T.t('mejorPpm') + ': '),
-        el('b', { text: e.ppmMejor + ' ' + T.t('ppm') })
+        el('b', { text: bilingue([{ clave: 'mejorPpm' }, ': ' + e.ppmMejor + ' ', { clave: 'ppm' }]) })
       ]));
       var barras = el('div', { class: 'barras' });
       var tope = Math.max.apply(null, e.historial.map(function (l) { return l.ppm; })) || 1;
@@ -2091,9 +2438,16 @@
         ]));
       });
       fal.appendChild(ul);
-      if (e.flojas.length) {
-        fal.appendChild(el('p', { class: 'dato',
-          text: T.t('repasoTrae') + ': ' + e.flojas.map(function (f) { return f.id; }).join(', ') }));
+      if (e.items && e.items.length) {
+        fal.appendChild(el('p', { class: 'dato', text: bilingue([{ clave: 'repasoTrae' }, ':']) }));
+        var listaItems = el('div', { class: 'palabra-silabas', style: 'justify-content:flex-start' });
+        e.items.forEach(function (x) {
+          listaItems.appendChild(el('span', {
+            class: 'trozo pal-casi', style: 'font-size:1.1rem;padding:4px 10px',
+            text: x.item + ' ×' + x.veces
+          }));
+        });
+        fal.appendChild(listaItems);
       }
     }
     panel.appendChild(fal);
@@ -2246,7 +2600,7 @@
     var enlace = location.href.split('#')[0] + '#p=' + Progreso.exportarCompleto();
 
     caja.appendChild(el('label', {}, etiqueta('traspaso')));
-    caja.appendChild(el('p', { class: 'dato', text: T.t('tuCodigo') + ':' }));
+    caja.appendChild(el('p', { class: 'dato', text: bilingue([{ clave: 'tuCodigo' }, ':']) }));
     caja.appendChild(el('div', { class: 'codigo', text: codigo }));
 
     caja.appendChild(el('p', { class: 'dato', text: T.t('traspasoAyuda') }));
@@ -2261,6 +2615,22 @@
           navigator.clipboard.writeText(enlace).then(hecho, function () { aviso.textContent = enlace; });
         } else {
           aviso.textContent = enlace;   // sin portapapeles: que al menos se vea
+        }
+      }
+    }));
+    /* Dos maneras, porque se usan en sitios distintos: el enlace para
+       mandarlo por mensaje, y el código suelto para escribirlo o pegarlo
+       en la app ya instalada, donde no hay barra de direcciones. */
+    caja.appendChild(el('button', {
+      class: 'btn btn-grande',
+      text: '📋 ' + T.t('copiarCodigo'),
+      onclick: function (ev) {
+        var boton = ev.currentTarget;
+        function hecho() { boton.textContent = '✅ ' + T.t('copiado'); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(codigo).then(hecho, function () { aviso.textContent = codigo; });
+        } else {
+          aviso.textContent = codigo;
         }
       }
     }));
@@ -2397,10 +2767,13 @@
       selector.innerHTML = '';
       var actual = Voz.vozActual();
       Voz.voces().forEach(function (v) {
+        /* Que se vea cuál NO es española: es la diferencia entre aprender
+           "pato" y aprender "patu". */
+        var marca = Voz.esEspanola(v) ? '' : '  ⚠️ ' + T.es('noEsEspanola');
         selector.appendChild(el('option', {
           value: v.voiceURI,
           selected: actual && v.voiceURI === actual.voiceURI ? 'selected' : null,
-          text: v.name + ' (' + v.lang + ')'
+          text: v.name + ' (' + v.lang + ')' + marca
         }));
       });
       if (!Voz.voces().length) selector.appendChild(el('option', { text: '—' }));
@@ -2408,7 +2781,7 @@
     rellenarVoces();
     Voz.alCargarVoces(rellenarVoces);
     selector.addEventListener('change', function () {
-      Voz.elegirVoz(selector.value);
+      Voz.elegirVoz(selector.value, true);     /* elegida a mano: manda */
       Progreso.ajuste('voz', selector.value);
       decir('Hola, vamos a leer', 'frase');
     });

@@ -42,6 +42,10 @@
     pasoPalabras:   ['Lee las palabras', '讀單字'],
     pasoConstruir:  ['Construye la palabra', '拼出這個單字'],
     pasoQuizPal:    ['Escucha y toca la palabra', '聽並點擊正確的單字'],
+    /* Dos pasos decían en pantalla una cosa y hacían otra: mandaban
+       escuchar cuando de lo que se trataba era de leer. */
+    pasoEligeDibujo:['Lee la palabra y toca el dibujo', '讀這個字，然後點對的圖'],
+    pasoVocalInicial:['Toca la vocal por la que empieza el dibujo', '點這張圖開頭的母音'],
     pasoLeerTu:     ['Léelo tú en voz alta', '你大聲讀出來'],
     pasoFrases:     ['Lee las frases', '讀句子'],
     pasoTexto:      ['Lee el cuento', '讀故事'],
@@ -81,10 +85,21 @@
     borrarSeguro:   ['¿Seguro? Se perderán las estrellas.', '確定嗎？星星會消失。'],
     sinVoz:         ['Este navegador no puede hablar. Prueba con Chrome, Safari o Edge.',
                      '這個瀏覽器不能朗讀。請使用 Chrome、Safari 或 Edge。'],
-    sinVozEs:       ['No hay una voz en español instalada. La pronunciación puede sonar rara.',
-                     '沒有安裝西班牙語語音，發音可能不準確。'],
+    sinVozEs:       ['Este aparato no tiene voz en español: dirá «patu» en vez de «pato».',
+                     '這台裝置沒有西班牙語語音：它會把 pato 唸成 patu。'],
+    comoPonerVoz:   ['Android: Ajustes → Texto a voz → instalar español. ' +
+                     'iPhone: Ajustes → Accesibilidad → Contenido hablado → Voces → Español.',
+                     'Android：設定 → 文字轉語音 → 安裝西班牙語。' +
+                     'iPhone：設定 → 輔助使用 → 朗讀內容 → 語音 → 西班牙語。'],
+    vozEnUso:       ['Voz que está usando', '目前使用的聲音'],
+    noEsEspanola:   ['no es española', '不是西班牙語'],
     progreso:       ['Progreso', '進度'],
-    bloqueada:      ['Termina la unidad anterior', '先完成上一課'],
+    bloqueada:      ['Todavía no: primero hay que saberse la anterior', '還不行：要先學會上一課'],
+    teLaSabes:      ['¡Te la sabes!', '你學會了！'],
+    casiLaSabes:    ['Casi. Repítela y te saldrá sola.', '差一點。再練一次就會了。'],
+    repiteUnidad:   ['Repetir esta unidad', '再練這一課'],
+    abreLaSiguiente:['Repítela bien y se abrirá la siguiente', '練好這一課，下一課就會打開'],
+    loQueSabes:     ['Lo que sabes de esta unidad', '這一課你學會了多少'],
     letras:         ['letras', '字母'],
     sonido:         ['Suena', '發音'],
     seLlama:        ['Se llama', '名字叫'],
@@ -94,6 +109,11 @@
     /* Lectura en voz alta con micrófono */
     pasoLeerVoz:    ['Lee en voz alta al micrófono', '對著麥克風大聲讀'],
     tocaYLee:       ['Toca el micrófono y lee', '點麥克風，然後讀出來'],
+    soloLaPalabra:  ['Lee tú la palabra, sin dibujo', '沒有圖片，自己讀出這個字'],
+    leeLaFrase:     ['Lee la frase entera en voz alta al micrófono',
+                     '對著麥克風大聲讀出整個句子'],
+    conAyuda:       ['Lo has oído antes de leer, así que esta vez no van las tres estrellas.',
+                     '你先聽過才讀，所以這次沒有三顆星。'],
     teEscucho:      ['Te escucho…', '我在聽…'],
     heOido:         ['He oído', '我聽到的是'],
     leerlaTu:       ['Léela tú en voz alta', '你大聲讀一遍'],
@@ -121,6 +141,7 @@
     /* Pasar el progreso a otro dispositivo */
     traspaso:       ['Cambiar de dispositivo', '換一台裝置'],
     tuCodigo:       ['Tu código', '你的代碼'],
+    copiarCodigo:   ['Copiar el código', '複製代碼'],
     copiarEnlace:   ['Copiar el enlace', '複製連結'],
     copiado:        ['¡Copiado!', '已複製！'],
     vienesDeOtro:   ['¿Vienes de otro aparato?', '從別的裝置來的嗎？'],
@@ -197,6 +218,9 @@
     sinDatos:       ['Todavía no hay datos. Cuando lea en voz alta, aparecerán aquí.',
                      '還沒有資料。等他大聲讀過之後就會出現。'],
     repasoFlojo:    ['Repaso de lo que falla', '複習容易錯的地方'],
+    repasoTuyo:     ['Tu repaso', '你的複習'],
+    aRepasar:       ['Esto hay que repetirlo', '這些要再練一次'],
+    nadaQueRepasar: ['Nada que repasar: te ha salido todo bien.', '沒有要複習的：你全都做對了。'],
 
     /* Bienvenida y varios niños en el mismo aparato */
     holaBienvenida: ['¡Hola!', '你好！'],
@@ -249,6 +273,10 @@
     usarChino: function (v) {
       if (arguments.length) idioma = v ? 1 : 0;
       return idioma === 1;
-    }
+    },
+    /* Para las pruebas: la tabla entera, y así se comprueba que no hay ni un
+       texto sin su chino. Es la regla de la que depende que el niño pueda usar
+       la app solo. */
+    tabla: function () { return T; }
   };
 })(window);

@@ -32,6 +32,30 @@
   function isEnglish(v) { return /^en(\b|[-_])/i.test(v.lang || ''); }
 
   /*
+   * Voces que estropean el español sin que se note.
+   *
+   * El portugués, el catalán y el gallego cierran la "o" final en "u": leen
+   * "pato" como "patu" y "lobo" como "lobu". Si el aparato no trae voz
+   * española y la app coge "la que haya" — que es lo que hacía —, el niño
+   * aprende la vocal que no es y encima nadie se entera, porque suena a
+   * idioma parecido. Con el inglés o el chino el destrozo es evidente; con
+   * estos tres, no.
+   */
+  function estropeaVocales(v) {
+    return /^(pt|ca|gl|oc|fr|en|zh|yue|ja|ko|th|vi|nl|de|da|sv|nb|no)(\b|[-_])/i.test(v.lang || '');
+  }
+
+  /*
+   * Lenguas que no son español pero tienen sus mismas cinco vocales y no las
+   * cierran al final. Si no hay más remedio, un italiano lee "pato" bastante
+   * mejor que un portugués.
+   */
+  function apaña(v) { return /^(it|eu|id|ms|sw|fi|ro|tr|cs|sk|pl)(\b|[-_])/i.test(v.lang || ''); }
+
+  var hayEspanol = false;
+  var motorDecide = false;   // sin voz española, que elija el motor por idioma
+
+  /*
    * Para enseñar los falsos amigos del alfabeto hace falta decir la misma
    * letra en inglés y en español, una detrás de otra. Guardamos aparte una
    * voz inglesa; si el aparato no tiene ninguna, quien llama se entera y
@@ -52,15 +76,41 @@
     return s;
   }
 
+  function mejorDe(lista) {
+    return lista.slice().sort(function (a, b) { return score(b) - score(a); })[0] || null;
+  }
+
   function loadVoices() {
     if (!supported) return;
     var all = synth.getVoices() || [];
     if (!all.length) return;
-    voices = all.filter(isSpanish);
-    if (!voices.length) voices = all;   // sin voces españolas, usamos lo que haya
 
-    var saved = preferredURI && voices.filter(function (v) { return v.voiceURI === preferredURI; })[0];
-    chosen = saved || voices.slice().sort(function (a, b) { return score(b) - score(a); })[0] || null;
+    var espanolas = all.filter(isSpanish);
+    hayEspanol = espanolas.length > 0;
+
+    /* En los ajustes se ofrecen todas, pero las españolas primero. */
+    voices = espanolas.concat(all.filter(function (v) { return !isSpanish(v); }));
+
+    /* Una voz elegida a mano se respeta, salvo que sea de las que cierran
+       las vocales habiendo española disponible: eso fue un despiste. */
+    var saved = preferredURI && all.filter(function (v) { return v.voiceURI === preferredURI; })[0];
+    if (saved && (isSpanish(saved) || !hayEspanol)) {
+      chosen = saved;
+      motorDecide = false;
+    } else if (hayEspanol) {
+      chosen = mejorDe(espanolas);
+      motorDecide = false;
+    } else {
+      /*
+       * Sin voz española: primero que lo intente el motor pidiéndole es-ES
+       * sin imponerle voz; muchos aparatos tienen una remota aunque no
+       * aparezca en la lista. Si falla, se usa la suplente menos mala.
+       */
+      motorDecide = true;
+      var suplentes = all.filter(apaña);
+      chosen = mejorDe(suplentes.length ? suplentes : all.filter(function (v) { return !estropeaVocales(v); }))
+               || mejorDe(all);
+    }
 
     var inglesas = all.filter(isEnglish);
     vozInglesa = inglesas.filter(function (v) { return v.localService; })[0] || inglesas[0] || null;
@@ -118,8 +168,14 @@
       u.rate = Math.max(0.1, Math.min(2, base * rateScale));
       u.pitch = typeof opts.pitch === 'number' ? opts.pitch : 1.05;   // algo agudo: suena más amable
       u.volume = 1;
-      u.lang = (chosen && chosen.lang) || 'es-ES';
-      if (chosen) u.voice = chosen;
+      /*
+       * El idioma es siempre español. Sólo se impone una voz concreta si es
+       * española o si ya sabemos que el motor no sabe hacerlo solo: poner una
+       * voz portuguesa aquí es decirle al motor "léelo en portugués".
+       */
+      u.lang = 'es-ES';
+      if (chosen && isSpanish(chosen)) { u.voice = chosen; u.lang = chosen.lang; }
+      else if (chosen && !motorDecide) { u.voice = chosen; }
 
       var done = false;
       function finish(ok) {
@@ -130,7 +186,25 @@
         resolve(ok);
       }
       u.onend = function () { finish(true); };
-      u.onerror = function () { finish(false); };
+      u.onerror = function (ev) {
+        /* El motor no sabe español por su cuenta: a partir de ahora, suplente. */
+        var causa = (ev && ev.error) || '';
+        if (motorDecide && /language|voice|not-allowed|synthesis/i.test(causa)) {
+          motorDecide = false;
+          if (chosen) {
+            try {
+              var r = new global.SpeechSynthesisUtterance(String(text));
+              r.rate = u.rate; r.pitch = u.pitch; r.volume = 1;
+              r.voice = chosen; r.lang = chosen.lang;
+              r.onend = function () { finish(true); };
+              r.onerror = function () { finish(false); };
+              synth.speak(r);
+              return;
+            } catch (e) {}
+          }
+        }
+        finish(false);
+      };
 
       // Red de seguridad: si el motor nunca contesta, no bloqueamos la actividad.
       var guard = setTimeout(function () { finish(false); },
@@ -220,10 +294,18 @@
     preparar: prime,
     voces: function () { return voices.slice(); },
     vozActual: function () { return chosen; },
-    elegirVoz: function (uri) {
-      preferredURI = uri || null;
+    /*
+     * "aMano" distingue al adulto eligiendo en los ajustes de la app
+     * restaurando lo que había guardado. Lo segundo se filtra: si un día no
+     * había voz española y quedó apuntada una portuguesa, el día que se
+     * instale la española tiene que ganar la española, sin que nadie tenga
+     * que acordarse de volver a los ajustes.
+     */
+    elegirVoz: function (uri, aMano) {
       var v = voices.filter(function (x) { return x.voiceURI === uri; })[0];
-      if (v) chosen = v; else loadVoices();
+      if (v && !aMano && hayEspanol && !isSpanish(v)) { loadVoices(); return chosen; }
+      preferredURI = uri || null;
+      if (v) { chosen = v; motorDecide = false; } else loadVoices();
       return chosen;
     },
     velocidad: function (v) {
@@ -234,6 +316,20 @@
       listeners.push(fn);
       if (chosen) fn(voices, chosen);
     },
-    hayVozEspanola: function () { return !!chosen && isSpanish(chosen); }
+    hayVozEspanola: function () { return hayEspanol; },
+
+    /* Lo que hace falta para poder avisar al adulto con detalle: sin esto,
+       un aparato sin español suena raro y nadie sabe por qué. */
+    estado: function () {
+      var todas = (supported && synth.getVoices && synth.getVoices()) || [];
+      return {
+        soportado: supported,
+        hayEspanol: hayEspanol,
+        motorDecide: motorDecide,
+        cuantas: todas.length,
+        usando: chosen ? { nombre: chosen.name, lang: chosen.lang, espanol: isSpanish(chosen) } : null
+      };
+    },
+    esEspanola: function (v) { return !!v && isSpanish(v); }
   };
 })(window);

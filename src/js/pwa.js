@@ -99,7 +99,17 @@
       if (!r.ok) return;
       var tipo = r.headers.get('content-type') || '';
       if (tipo.indexOf('javascript') === -1) return;
-      return navigator.serviceWorker.register(url).then(function () { swListo = true; });
+      return navigator.serviceWorker.register(url).then(function (reg) {
+        swListo = true;
+        /*
+         * La app instalada no siempre recarga al abrirse: puede volver a la
+         * pantalla donde se quedó. Con esto se comprueba en cada arranque si
+         * hay versión nueva, y como el sw sirve primero de la red, la
+         * siguiente vez que se abra ya será la nueva.
+         */
+        try { reg.update(); } catch (e) {}
+        return reg;
+      });
     }).catch(function () { /* sin sw.js al lado: es lo normal en el archivo suelto */ });
   }
 
