@@ -23,6 +23,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const raiz = __dirname;                    // src/
 const sitio = path.join(raiz, '..');       // la raíz del repositorio
@@ -83,8 +84,13 @@ ${CUERPO}
  * hay, lo que haya en caché. Así la app se actualiza sola cuando hay wifi y
  * sigue abriéndose cuando no lo hay.
  */
+/* La versión de la caché sale del contenido, no de la hora: así la compilación
+   es reproducible y el service worker sólo se renueva cuando algo cambia
+   de verdad. */
+const VERSION = crypto.createHash('sha1').update(completo).digest('hex').slice(0, 12);
+
 const SW = `/*! Service worker de "Aprendo a leer en español". Generado por build.js. */
-const CACHE = 'aprendo-a-leer-v${Date.now()}';
+const CACHE = 'aprendo-a-leer-${VERSION}';
 const BASE = new URL('./', self.location).pathname;
 
 self.addEventListener('install', e => {
