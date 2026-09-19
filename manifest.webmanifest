@@ -1,0 +1,42 @@
+{
+  "name": "Aprendo a leer en español",
+  "short_name": "Aprendo a leer",
+  "description": "Aprender a leer español desde cero, con la voz y el micrófono del navegador.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fdf8f2",
+  "theme_color": "#e0632e",
+  "categories": [
+    "education",
+    "kids"
+  ],
+  "icons": [
+    {
+      "src": "icono-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icono-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Leer cualquier cosa",
+      "short_name": "Leer",
+      "url": "./#lector"
+    }
+  ]
+}

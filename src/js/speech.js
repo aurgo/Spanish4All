@@ -1,0 +1,206 @@
+/*!
+ * voz.js — Envoltorio sobre la API SpeechSynthesis del navegador.
+ *
+ * Toda la aplicación habla: el niño todavía no sabe leer, así que ninguna
+ * instrucción puede depender de que la lea. Este módulo se encarga de:
+ *
+ *   - elegir la mejor voz española disponible (prioriza es-ES, luego es-*)
+ *   - esperar a que el navegador cargue la lista de voces (llega tarde)
+ *   - hablar en secuencia con pausas (sílaba… sílaba… palabra entera)
+ *   - sortear las rarezas conocidas: el gesto inicial obligatorio en iOS y
+ *     el sintetizador que se "duerme" en Chrome de escritorio
+ */
+(function (global) {
+  'use strict';
+
+  var synth = global.speechSynthesis;
+  var supported = !!synth && typeof global.SpeechSynthesisUtterance === 'function';
+
+  var voices = [];
+  var chosen = null;
+  var preferredURI = null;
+  var listeners = [];
+  var primed = false;
+  var keepAlive = null;
+  var currentToken = 0;
+
+  /* Ritmos por defecto. Un lector principiante necesita ir MUY despacio. */
+  var RATES = { letra: 0.65, silaba: 0.7, palabra: 0.8, frase: 0.95, voz: 1 };
+  var rateScale = 1;   // el ajuste global de velocidad multiplica los anteriores
+
+  function isSpanish(v) { return /^es(\b|[-_])/i.test(v.lang || ''); }
+
+  /* Puntuación de una voz: preferimos español de España y voces locales. */
+  function score(v) {
+    var s = 0;
+    var lang = (v.lang || '').toLowerCase().replace('_', '-');
+    if (lang.indexOf('es-es') === 0) s += 100;
+    else if (lang.indexOf('es') === 0) s += 60;
+    if (v.localService) s += 10;
+    if (/google/i.test(v.name)) s += 8;      // suelen ser las más naturales
+    if (/microsoft|helena|elvira|pablo|alvaro|álvaro/i.test(v.name)) s += 6;
+    if (v.default) s += 2;
+    return s;
+  }
+
+  function loadVoices() {
+    if (!supported) return;
+    var all = synth.getVoices() || [];
+    if (!all.length) return;
+    voices = all.filter(isSpanish);
+    if (!voices.length) voices = all;   // sin voces españolas, usamos lo que haya
+
+    var saved = preferredURI && voices.filter(function (v) { return v.voiceURI === preferredURI; })[0];
+    chosen = saved || voices.slice().sort(function (a, b) { return score(b) - score(a); })[0] || null;
+
+    listeners.forEach(function (fn) { try { fn(voices, chosen); } catch (e) {} });
+  }
+
+  if (supported) {
+    loadVoices();
+    if (typeof synth.addEventListener === 'function') synth.addEventListener('voiceschanged', loadVoices);
+    else synth.onvoiceschanged = loadVoices;
+    // Algunos navegadores tardan en poblar la lista aunque no emitan el evento.
+    var tries = 0;
+    var poll = setInterval(function () {
+      if (chosen || tries++ > 20) { clearInterval(poll); return; }
+      loadVoices();
+    }, 250);
+  }
+
+  /*
+   * Chrome de escritorio detiene el sintetizador tras unos segundos si nadie
+   * lo "despierta". Un resume() periódico mientras hablamos lo evita.
+   */
+  function startKeepAlive() {
+    if (keepAlive || !supported) return;
+    keepAlive = setInterval(function () {
+      if (synth.speaking && !synth.paused) { synth.pause(); synth.resume(); }
+      else stopKeepAlive();
+    }, 5000);
+  }
+  function stopKeepAlive() {
+    if (keepAlive) { clearInterval(keepAlive); keepAlive = null; }
+  }
+
+  function cancel() {
+    currentToken++;
+    stopKeepAlive();
+    if (supported) { try { synth.cancel(); } catch (e) {} }
+  }
+
+  /*
+   * Pronuncia un texto. Devuelve una promesa que se resuelve al terminar
+   * (o al cancelarse), para poder encadenar sílabas cómodamente.
+   */
+  function say(text, opts) {
+    opts = opts || {};
+    if (!supported || !text) return Promise.resolve(false);
+
+    if (opts.interrupt !== false) cancel();
+    var token = currentToken;
+
+    return new Promise(function (resolve) {
+      var u = new global.SpeechSynthesisUtterance(String(text));
+      var base = typeof opts.rate === 'number' ? opts.rate : (RATES[opts.tipo] || RATES.palabra);
+      u.rate = Math.max(0.1, Math.min(2, base * rateScale));
+      u.pitch = typeof opts.pitch === 'number' ? opts.pitch : 1.05;   // algo agudo: suena más amable
+      u.volume = 1;
+      u.lang = (chosen && chosen.lang) || 'es-ES';
+      if (chosen) u.voice = chosen;
+
+      var done = false;
+      function finish(ok) {
+        if (done) return;
+        done = true;
+        clearTimeout(guard);
+        stopKeepAlive();
+        resolve(ok);
+      }
+      u.onend = function () { finish(true); };
+      u.onerror = function () { finish(false); };
+
+      // Red de seguridad: si el motor nunca contesta, no bloqueamos la actividad.
+      var guard = setTimeout(function () { finish(false); },
+        2500 + String(text).length * 220 / Math.max(0.3, u.rate));
+
+      try {
+        synth.speak(u);
+        startKeepAlive();
+      } catch (e) { finish(false); }
+
+      // Si alguien cancela mientras hablábamos, liberamos la promesa.
+      var watch = setInterval(function () {
+        if (token !== currentToken) { clearInterval(watch); finish(false); }
+        else if (done) clearInterval(watch);
+      }, 120);
+    });
+  }
+
+  /*
+   * Encadena varios textos con pausas entre ellos.
+   * partes: [{ text, tipo, pausa, antes(), despues() }]
+   */
+  function sequence(parts, opts) {
+    opts = opts || {};
+    cancel();
+    var token = currentToken;
+    var i = 0;
+
+    function step() {
+      if (token !== currentToken || i >= parts.length) return Promise.resolve(token === currentToken);
+      var part = parts[i++];
+      if (typeof part === 'string') part = { text: part };
+      if (part.antes) part.antes(part);
+      return say(part.text, { tipo: part.tipo || opts.tipo, rate: part.rate, interrupt: false })
+        .then(function () {
+          if (part.despues) part.despues(part);
+          var pausa = typeof part.pausa === 'number' ? part.pausa : (opts.pausa || 260);
+          return new Promise(function (r) { setTimeout(r, pausa); });
+        })
+        .then(step);
+    }
+    return step();
+  }
+
+  /*
+   * iOS y algunos Android exigen que la primera locución nazca de un gesto del
+   * usuario. Lanzamos una locución vacía en el primer toque para desbloquear.
+   */
+  function prime() {
+    if (primed || !supported) return;
+    primed = true;
+    try {
+      var u = new global.SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      u.lang = 'es-ES';
+      synth.speak(u);
+    } catch (e) {}
+    loadVoices();
+  }
+
+  global.Voz = {
+    soportado: supported,
+    hablar: say,
+    secuencia: sequence,
+    parar: cancel,
+    preparar: prime,
+    voces: function () { return voices.slice(); },
+    vozActual: function () { return chosen; },
+    elegirVoz: function (uri) {
+      preferredURI = uri || null;
+      var v = voices.filter(function (x) { return x.voiceURI === uri; })[0];
+      if (v) chosen = v; else loadVoices();
+      return chosen;
+    },
+    velocidad: function (v) {
+      if (typeof v === 'number') rateScale = Math.max(0.4, Math.min(1.8, v));
+      return rateScale;
+    },
+    alCargarVoces: function (fn) {
+      listeners.push(fn);
+      if (chosen) fn(voices, chosen);
+    },
+    hayVozEspanola: function () { return !!chosen && isSpanish(chosen); }
+  };
+})(window);
