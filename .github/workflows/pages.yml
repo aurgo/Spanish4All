@@ -1,46 +1,39 @@
-# Publica la app en GitHub Pages en cada push a main.
+# Comprobaciones en cada push.
 #
-# "enablement: true" pide a GitHub que active Pages por su cuenta si aún no lo
-# está, así que no hace falta tocar Settings a mano.
+# La publicación NO se hace desde aquí: GitHub Pages sirve la rama main
+# directamente (Settings → Pages → Deploy from a branch → main / (root)),
+# que no depende de ningún token y se actualiza solo en cada push.
 #
-# Antes de publicar se pasan las comprobaciones: si el silabeador o el
-# currículo se rompen, la web no se actualiza con algo roto.
-name: Publicar en GitHub Pages
+# Se intentó desplegar desde el workflow con actions/deploy-pages, pero crear
+# el sitio por API falla con "Resource not accessible by integration": el
+# token no tiene permiso de Pages. Activarlo una vez a mano en Settings sale
+# más barato que pelearse con eso.
+name: Comprobaciones
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
-  publicar:
+  comprobar:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.despliegue.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Comprobaciones (silabeador, currículo, lectura en voz alta)
+      - name: Silabeador, currículo y lectura en voz alta
         run: node src/test/run.js
 
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      # La raíz del repositorio es el sitio: index.html, sw.js, manifest e iconos.
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-
-      - id: despliegue
-        uses: actions/deploy-pages@v4
+      - name: El sitio publicado coincide con el código fuente
+        run: |
+          node src/build.js
+          if ! git diff --quiet; then
+            echo "La raíz no coincide con src/. Ejecuta 'node src/build.js' y haz commit." >&2
+            git diff --stat >&2
+            exit 1
+          fi
+          echo "index.html y aprendo-a-leer.html están al día."
