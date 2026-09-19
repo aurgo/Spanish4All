@@ -1,0 +1,46 @@
+# Publica la app en GitHub Pages en cada push a main.
+#
+# "enablement: true" pide a GitHub que active Pages por su cuenta si aún no lo
+# está, así que no hace falta tocar Settings a mano.
+#
+# Antes de publicar se pasan las comprobaciones: si el silabeador o el
+# currículo se rompen, la web no se actualiza con algo roto.
+name: Publicar en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Comprobaciones (silabeador, currículo, lectura en voz alta)
+        run: node src/test/run.js
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # La raíz del repositorio es el sitio: index.html, sw.js, manifest e iconos.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: despliegue
+        uses: actions/deploy-pages@v4
