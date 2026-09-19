@@ -1,5 +1,5 @@
 /*! Service worker de "Aprendo a leer en español". Generado por build.js. */
-const CACHE = 'aprendo-a-leer-81227b90eea9';
+const CACHE = 'aprendo-a-leer-04273a40ee8f';
 const BASE = new URL('./', self.location).pathname;
 
 self.addEventListener('install', e => {

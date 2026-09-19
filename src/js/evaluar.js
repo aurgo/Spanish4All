@@ -139,7 +139,7 @@
    * Sólo señalamos diferencias que son errores de LECTURA de verdad.
    */
   function diagnosticar(esperada, oida) {
-    if (!oida) return { clave: 'falta', texto: 'Te has saltado una palabra.' };
+    if (!oida) return { clave: 'falta', texto: 'Te has saltado una palabra.', zh: '你漏掉了一個字。' };
     var a = esperada.fon, b = oida.fon;
     if (a === b) return null;
 
@@ -147,29 +147,37 @@
     var silB = global.Silabas ? global.Silabas.syllabify(oida.texto).length : 0;
 
     if (a.indexOf('R') !== -1 && b.indexOf('R') === -1 && b.indexOf('r') !== -1) {
-      return { clave: 'rr', texto: 'Ojo con la erre fuerte: hay que hacerla vibrar, rrr.' };
+      return { clave: 'rr', texto: 'Ojo con la erre fuerte: hay que hacerla vibrar, rrr.',
+               zh: '注意強音的 r：舌頭要振動，rrr。' };
     }
     if (a.indexOf('R') === -1 && a.indexOf('r') !== -1 && b.indexOf('R') !== -1) {
-      return { clave: 'r', texto: 'Esa erre es suave: un solo golpecito de lengua.' };
+      return { clave: 'r', texto: 'Esa erre es suave: un solo golpecito de lengua.',
+               zh: '這個 r 是輕音：舌頭只彈一下。' };
     }
     if (silA && silB && silB < silA) {
-      return { clave: 'silabas-menos', texto: 'Te has comido una sílaba. Léela despacio, trozo a trozo.' };
+      return { clave: 'silabas-menos', texto: 'Te has comido una sílaba. Léela despacio, trozo a trozo.',
+               zh: '你少讀了一個音節。慢慢讀，一段一段來。' };
     }
     if (silA && silB && silB > silA) {
-      return { clave: 'silabas-mas', texto: 'Has dicho una sílaba de más. Mira bien los trozos.' };
+      return { clave: 'silabas-mas', texto: 'Has dicho una sílaba de más. Mira bien los trozos.',
+               zh: '你多讀了一個音節。看清楚每一段。' };
     }
     /* Por debajo de este parecido, lo dicho no tiene que ver con lo escrito:
        afinar el diagnóstico sólo produciría pistas absurdas. */
     if (similitud(a, b) < 0.45) {
-      return { clave: 'otra', texto: 'Esa no era. Escucha cómo suena y vuelve a intentarlo.' };
+      return { clave: 'otra', texto: 'Esa no era. Escucha cómo suena y vuelve a intentarlo.',
+               zh: '不是這個。聽聽看怎麼唸，再試一次。' };
     }
     if (a.replace(/[aeiou]/g, '') === b.replace(/[aeiou]/g, '')) {
-      return { clave: 'vocal', texto: 'Las consonantes están bien; falla alguna vocal.' };
+      return { clave: 'vocal', texto: 'Las consonantes están bien; falla alguna vocal.',
+               zh: '子音都對了，元音有一個不對。' };
     }
     if (a.replace(/[^aeiou]/g, '') === b.replace(/[^aeiou]/g, '')) {
-      return { clave: 'consonante', texto: 'Las vocales están bien; repasa alguna consonante.' };
+      return { clave: 'consonante', texto: 'Las vocales están bien; repasa alguna consonante.',
+               zh: '元音都對了，再看一下子音。' };
     }
-    return { clave: 'otra', texto: 'Casi. Escucha cómo suena y vuelve a intentarlo.' };
+    return { clave: 'otra', texto: 'Casi. Escucha cómo suena y vuelve a intentarlo.',
+             zh: '差一點。聽聽看怎麼唸，再試一次。' };
   }
 
   var BIEN = 0.90;
@@ -241,16 +249,20 @@
     return mejor;
   }
 
+  /* Cada ánimo con su versión china: el niño lo LEE en pantalla, y en español
+     todavía no puede. */
   var ANIMOS = {
-    3: ['¡Perfecto!', '¡Muy bien leído!', '¡Clavado!'],
-    2: ['¡Casi perfecto!', '¡Muy bien, casi entero!'],
-    1: ['Vas por buen camino.', 'Poco a poco.'],
-    0: ['Vamos a escucharlo otra vez.', 'Escucha y repite conmigo.']
+    3: [['¡Perfecto!', '完美！'], ['¡Muy bien leído!', '讀得很好！'], ['¡Clavado!', '一模一樣！']],
+    2: [['¡Casi perfecto!', '差一點就完美！'], ['¡Muy bien, casi entero!', '很好，幾乎全對！']],
+    1: [['Vas por buen camino.', '你走在對的路上。'], ['Poco a poco.', '慢慢來。']],
+    0: [['Vamos a escucharlo otra vez.', '我們再聽一次。'], ['Escucha y repite conmigo.', '聽我說，跟著唸。']]
   };
 
+  /* Devuelve { es, zh } para que quien llama decida qué muestra y qué habla. */
   function animo(estrellas) {
     var lista = ANIMOS[estrellas] || ANIMOS[0];
-    return lista[Math.floor(Math.random() * lista.length)];
+    var x = lista[Math.floor(Math.random() * lista.length)];
+    return { es: x[0], zh: x[1] };
   }
 
   global.Evaluar = {

@@ -30,6 +30,29 @@ Nada de eso la hace inservible para otros: un niño hispanohablante que no lea
 chino ni sepa inglés puede usarla igual, apagando en la primera pantalla las
 dos ayudas que no le tocan.
 
+## Qué va en chino y qué no
+
+La distinción que gobierna toda la interfaz: **el niño entiende el español
+hablado pero no sabe leerlo**. De ahí salen dos reglas:
+
+- **Lo que suena va en español.** Instrucciones, ánimos, correcciones: las
+  entiende perfectamente de oído, y oírlas es parte de aprender.
+- **Lo que se ve escrito va en las dos lenguas.** Botones, enunciados,
+  avisos, comentarios sobre su lectura, mensajes de error del micrófono,
+  títulos de unidad y de cuento, el panel del adulto. Si sólo estuviera en
+  español, la primera unidad —la de las vocales— ya sería inservible: tendría
+  las instrucciones para usarla escritas en el idioma que todavía no lee.
+
+Con **una excepción deliberada: lo que tiene que descifrar**. Las sílabas, las
+palabras, las frases, los cuentos y las respuestas de comprensión van sólo en
+español. Traducirlas sería quitarle el ejercicio.
+
+En el código esto son dos funciones distintas y no se pueden confundir:
+`Textos.t()` devuelve las dos lenguas y es para pintar; `Textos.es()` devuelve
+sólo español y es para hablar y para atributos de una línea. Usar una donde va
+la otra hace que el sintetizador intente pronunciar el chino con voz española,
+o deja al niño sin poder leer un botón.
+
 ## Varios niños en el mismo aparato
 
 Hermanos, o un amigo que viene a casa y quiere probar. Cada niño tiene su
@@ -258,10 +281,9 @@ o pegado, y recibir su nota.
 
 - **Velocidad de la voz** — por defecto va lenta, que es como hay que empezar.
 - **Voz** — elige entre las voces españolas instaladas en el sistema.
-- **繁體中文** — muestra los enunciados también en chino tradicional. El niño
-  lee chino con soltura, así que esto es la diferencia entre necesitar un
-  adulto al lado y poder avanzar solo. Los enunciados **siempre** se dicen
-  además en voz alta.
+- **繁體中文** — viene **activado por defecto**, porque el público de esta app
+  lee chino. Ver más abajo qué se traduce y qué no, que es donde está la
+  decisión de diseño.
 - **Ejercicios con micrófono** — se pueden desactivar; entonces vuelve la
   autoevaluación.
 - **Comentarios del modelo del navegador** — informa de si este navegador

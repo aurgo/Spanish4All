@@ -120,7 +120,9 @@
       ajustes: {
         velocidad: 0.85,
         voz: null,
-        chino: false,
+        /* El público de esta app lee chino: mejor pasarse que quedarse corto.
+           La pantalla de bienvenida lo pregunta igualmente. */
+        chino: true,
         desbloquearTodo: false,
         mayusculas: false,
         micro: true,

@@ -38,6 +38,23 @@
 
   /* ------------------------------------------------------------ utilería */
 
+  /*
+   * Textos.t() devuelve las dos lenguas separadas por un salto de línea cuando
+   * el chino está activado. Aquí se parten en dos nodos, para que el chino
+   * lleve su propio estilo —más pequeño y más tenue— en toda la app sin tener
+   * que tocar cada sitio donde se pinta un texto.
+   */
+  function ponerTexto(nodo, valor) {
+    var texto = String(valor);
+    var corte = texto.indexOf('\n');
+    if (corte === -1) { nodo.textContent = texto; return; }
+    nodo.textContent = texto.slice(0, corte);
+    var zh = document.createElement('span');
+    zh.className = 'zh';
+    zh.textContent = texto.slice(corte + 1).replace(/\n/g, ' ');
+    nodo.appendChild(zh);
+  }
+
   function el(tag, attrs, hijos) {
     var n = document.createElement(tag);
     if (attrs) {
@@ -45,7 +62,7 @@
         var v = attrs[k];
         if (v === null || v === undefined || v === false) return;
         if (k === 'class') n.className = v;
-        else if (k === 'text') n.textContent = v;
+        else if (k === 'text') ponerTexto(n, v);
         else if (k === 'html') n.innerHTML = v;
         else if (k === 'style') n.setAttribute('style', v);
         else if (k.indexOf('on') === 0) n.addEventListener(k.slice(2), v);
@@ -84,7 +101,7 @@
    * otro y el chino saldría aplastado en una columna de un carácter.
    */
   function etiqueta(clave) {
-    var hijos = [el('span', { text: T.t(clave) })];
+    var hijos = [el('span', { text: T.es(clave) })];
     if (T.usarChino()) hijos.push(el('span', { class: 'zh', text: T.zh(clave) }));
     return [el('span', { class: 'etq' }, hijos)];
   }
@@ -163,13 +180,19 @@
     global.scrollTo(0, 0);
   }
 
+  /* El título de la unidad también tiene que poder leerlo. */
+  function tituloUnidad(u) {
+    if (!u) return '';
+    return (T.usarChino() && u.tituloZh) ? u.titulo + '\n' + u.tituloZh : u.titulo;
+  }
+
   function barra(titulo, alVolver, extra) {
     return el('header', { class: 'barra' }, [
       alVolver ? el('button', {
-        class: 'btn btn-icono', 'aria-label': T.t('volver'), onclick: alVolver, text: '←'
+        class: 'btn btn-icono', 'aria-label': T.es('volver'), onclick: alVolver, text: '←'
       }) : null,
       el('h1', { text: titulo }),
-      extra || el('div', { class: 'marcador', title: T.t('estrellas') }, [
+      extra || el('div', { class: 'marcador', title: T.es('estrellas') }, [
         el('span', { text: '★' }),
         el('b', { text: String(Progreso.datos().estrellas) })
       ])
@@ -184,10 +207,10 @@
    * ejercicio ni cansar con la misma frase cinco veces seguidas.
    */
   function enunciado(clave, textoExtra) {
-    var frase = T.t(clave) + (textoExtra ? '. ' + textoExtra : '');
+    var frase = T.es(clave) + (textoExtra ? '. ' + textoExtra : '');
     var caja = el('div', { class: 'enunciado' }, [
       el('button', {
-        class: 'btn btn-icono btn-audio', 'aria-label': T.t('escuchar'), text: '🔊',
+        class: 'btn btn-icono btn-audio', 'aria-label': T.es('escuchar'), text: '🔊',
         onclick: function () { narrar(frase); }
       }),
       el('div', { class: 'txt' }, etiqueta(clave))
@@ -221,7 +244,7 @@
     var elegido = perfil.emoji || '🙂';
 
     var campo = el('input', {
-      type: 'text', class: 'campo-nombre', placeholder: T.t('tuNombre'),
+      type: 'text', class: 'campo-nombre', placeholder: T.es('tuNombre'),
       maxlength: '20', autocomplete: 'off', value: perfil.nombre || ''
     });
 
@@ -381,7 +404,7 @@
         'aria-label': (i + 1) + '. ' + u.titulo + (libre ? '' : ' — ' + T.t('bloqueada')),
         onclick: function () {
           if (!libre) {
-            narrar(T.t('bloqueada'));
+            narrar(T.es('bloqueada'));
             return;
           }
           abrirLeccion(i);
@@ -397,7 +420,7 @@
 
     var yo = Progreso.perfilActivo();
     var chapa = el('button', {
-      class: 'marcador marcador-perfil', 'aria-label': T.t('cambiarNino'),
+      class: 'marcador marcador-perfil', 'aria-label': T.es('cambiarNino'),
       onclick: verPerfiles
     }, [
       el('span', { class: 'perfil-mini', text: yo.emoji || '🙂' }),
@@ -442,7 +465,7 @@
           : el('button', { class: 'btn', onclick: verInstalar },
                [el('span', { text: '📲' })].concat(etiqueta('instalar')))
       ]),
-      el('p', { class: 'pie', text: 'Hecho con la voz del propio navegador · sin internet, sin cuentas' })
+      el('p', { class: 'pie', text: T.t('hechoCon') })
     ]);
   }
 
@@ -508,7 +531,7 @@
     var hasta = Progreso.siguienteUnidad(Curriculo.unidades);
     var palabras = Curriculo.palabrasHasta(Math.max(0, hasta));
     if (palabras.length < 4) {
-      narrar('Todavía no hay palabras suficientes para repasar. Aprende una unidad más.');
+      narrar(T.es('todaviaNoHay'));
       return;
     }
 
@@ -561,10 +584,10 @@
     if (!l.repaso) Progreso.completarUnidad(l.unidad.id);
     confeti();
     var hayMas = !l.repaso && l.indice + 1 < Curriculo.unidades.length;
-    setTimeout(function () { narrar(T.t('unidadHecha') + ' ¡Muy bien!'); }, 250);
+    setTimeout(function () { narrar(T.es('unidadHecha') + ' ¡Muy bien!'); }, 250);
 
     pintar([
-      barra(l.unidad.titulo, verPortada),
+      barra(tituloUnidad(l.unidad), verPortada),
       el('section', { class: 'resultado', style: '--u: var(--c' + (l.unidad.color || 0) + ')' }, [
         el('div', { class: 'emo', text: '🏆' }),
         el('h2', {}, etiqueta('unidadHecha')),
@@ -601,7 +624,7 @@
       indicadorPasos(),
       claveEnunciado ? enunciado(claveEnunciado, extraNarracion) : null
     ].concat(hijos));
-    pintar([barra(l.unidad.titulo, verPortada), seccion]);
+    pintar([barra(tituloUnidad(l.unidad), verPortada), seccion]);
     if (alEntrar) trasNarrar(alEntrar, 320);
     return seccion;
   }
@@ -687,7 +710,7 @@
       var partes = [];
       if (u.nombre) partes.push({ text: 'Se llama ' + u.nombre, tipo: 'frase', pausa: 400 });
       if (u.silabas && u.silabas.length) {
-        partes.push({ text: 'Suena así', tipo: 'frase', pausa: 320 });
+        partes.push({ text: T.es('suenaAsi'), tipo: 'frase', pausa: 320 });
         u.silabas.slice(0, 6).forEach(function (s) {
           partes.push({ text: s, tipo: 'silaba', pausa: 300 });
         });
@@ -700,7 +723,7 @@
       el('div', { class: 'tarjeta' }, [
         titular,
         u.nombre ? el('p', { class: 'dato' }, [
-          document.createTextNode(T.t('seLlama') + ' '),
+          document.createTextNode(T.es('seLlama') + ' '),
           el('b', { text: u.nombre })
         ]) : null,
         u.fonema ? el('p', { class: 'dato' }, [
@@ -732,6 +755,7 @@
       el('span', { text: '🇬🇧' }),
       el('div', {}, [
         el('p', { text: f.nota }),
+        T.usarChino() && f.notaZh ? el('p', { class: 'zh', text: f.notaZh }) : null,
         el('button', {
           class: 'btn', text: '🔊 ' + f.muestraEn + ' → ' + f.muestraEs,
           onclick: function () {
@@ -765,7 +789,7 @@
           b.classList.add('tocada');
           if (Object.keys(tocadas).length === silabas.length) {
             siguiente.removeAttribute('disabled');
-            setTimeout(function () { narrar(T.t('muyBien')); }, 500);
+            setTimeout(function () { narrar(T.es('muyBien')); }, 500);
           }
         }
       });
@@ -829,7 +853,7 @@
             b.classList.add('mal');
             setTimeout(function () { b.classList.remove('mal'); }, 500);
             Voz.secuencia([
-              { text: 'No. Escucha otra vez', tipo: 'frase', pausa: 300 },
+              { text: T.es('noEscuchaOtra'), tipo: 'frase', pausa: 300 },
               { text: objetivo, tipo: 'silaba' }
             ]);
           }
@@ -1042,7 +1066,7 @@
           } else {
             b.classList.add('mal');
             setTimeout(function () { b.classList.remove('mal'); }, 500);
-            narrar('Ese no. Lee otra vez.');
+            narrar(T.es('noEsEsta'));
           }
         });
         rejilla.appendChild(b);
@@ -1095,7 +1119,7 @@
     function botonMicro(clase) {
       return el('button', {
         class: 'micro-btn' + (clase ? ' ' + clase : ''),
-        'aria-label': T.t('tocaYLee')
+        'aria-label': T.es('tocaYLee')
       }, [el('span', { class: 'micro-icono', text: '🎤' })]);
     }
 
@@ -1148,9 +1172,8 @@
         onParcial: function (t) { eco.textContent = t; }
       }).then(function (r) {
         if (!r.ok) {
-          var m = Escucha.mensaje(r.error);
-          reposo(m);
-          narrar(m);
+          reposo(Escucha.mensaje(r.error));
+          narrar(Escucha.mensajeEs(r.error));
           return;
         }
         mostrar(Evaluar.puntuar(objetivo, r.textos), r.segundos);
@@ -1180,7 +1203,12 @@
         marcada.appendChild(el('span', { class: 'pal-' + p.estado, text: p.texto }));
       });
 
-      var base = Evaluar.animo(res.estrellas) + (res.pista ? ' ' + res.pista.texto : '');
+      /* Lo que se HABLA va en español; lo que se LEE, en las dos lenguas. */
+      var an = Evaluar.animo(res.estrellas);
+      var base = an.es + (res.pista ? ' ' + res.pista.texto : '');
+      var baseVer = T.usarChino()
+        ? base + '\n' + an.zh + (res.pista && res.pista.zh ? ' ' + res.pista.zh : '')
+        : base;
 
       /* En un par mínimo, decir la otra palabra no es un fallo cualquiera:
          conviene nombrarlo, que es justo lo que el ejercicio entrena. */
@@ -1189,7 +1217,7 @@
           Evaluar.similitud(Evaluar.fonetica(res.oido), Evaluar.fonetica(objetivo))) {
         base = 'Has dicho «' + opciones.rival + '», pero pone «' + objetivo + '». Mira bien la diferencia.';
       }
-      var comentario = el('p', { class: 'comentario', text: base });
+      var comentario = el('p', { class: 'comentario', text: baseVer });
 
       var marcaPpm = null;
       if (ppm) {
@@ -1238,7 +1266,9 @@
         var texto = base;
         if (delModelo && caja.contains(comentario)) {
           texto = delModelo;
-          comentario.textContent = delModelo;
+          /* El modelo sólo escribe español: la pista china se conserva debajo. */
+          comentario.textContent = T.usarChino() && res.pista && res.pista.zh
+            ? delModelo + '\n' + res.pista.zh : delModelo;
           comentario.appendChild(el('span', { class: 'sello-modelo', text: ' ✨' }));
         }
         return narrar(texto);
@@ -1533,6 +1563,7 @@
             ])
           ]),
           el('p', { class: 'truco', text: f.nota }),
+          T.usarChino() && f.notaZh ? el('p', { class: 'truco zh', text: f.notaZh }) : null,
           hayIngles ? null : el('p', { class: 'dato', text: T.t('sinVozInglesa') }),
           el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
         ]),
@@ -1644,7 +1675,7 @@
             setTimeout(function () { b.classList.remove('mal'); }, 500);
             Progreso.apuntarFallo('par-minimo', 'pares');
             Voz.secuencia([
-              { text: 'No. Cambian en ' + par.diferencia, tipo: 'frase', pausa: 300 },
+              { text: T.es('noEscuchaOtra') + '. ' + T.es('cambianEn') + ' ' + par.diferencia, tipo: 'frase', pausa: 300 },
               { text: objetivo, tipo: 'palabra' }
             ]);
           }
@@ -1682,7 +1713,7 @@
       var tarjeta = el('div', { class: 'palabra-tarjeta' }, [
         el('div', { class: 'palabra-emoji', text: par[cual][1] }),
         el('div', { class: 'palabra-entera', text: objetivo }),
-        el('p', { class: 'dato', text: 'No es "' + otra + '". Fíjate en ' + par.diferencia + '.' }),
+        el('p', { class: 'dato', text: T.t('noEsSino') + ' «' + otra + '». ' + T.t('fijateEn') + ' ' + par.diferencia + '.' }),
         el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
       ]);
 
@@ -1728,7 +1759,7 @@
       var palabra = lista[i];
 
       var campo = el('input', {
-        type: 'text', class: 'campo-codigo campo-dictado', placeholder: T.t('escribeAqui'),
+        type: 'text', class: 'campo-codigo campo-dictado', placeholder: T.es('escribeAqui'),
         autocomplete: 'off', autocorrect: 'off', spellcheck: 'false', autocapitalize: 'off'
       });
       var veredicto = el('div', {});
@@ -1746,7 +1777,7 @@
           Progreso.apuntarAcierto('dictado');
           veredicto.appendChild(el('div', { class: 'veredicto v3' }, [
             el('div', { class: 'estrellas-ganadas', text: '★★★' }),
-            el('p', { class: 'comentario', text: '¡Perfecto! ' + palabra })
+            el('p', { class: 'comentario', text: T.t('perfectoCorto') + ' ' + palabra })
           ]));
           narrar('¡Perfecto!');
           confeti();
@@ -1762,7 +1793,7 @@
             ]),
             el('p', { class: 'comentario', text: T.t('ortografia') + '.' })
           ]));
-          narrar(T.t('ortografia') + '. Se escribe ' + palabra);
+          narrar(T.es('ortografia') + '. Se escribe ' + palabra);
         } else {
           Progreso.apuntarFallo('dictado-mal', 'dictado');
           veredicto.appendChild(el('div', { class: 'veredicto v0' }, [
@@ -1774,7 +1805,7 @@
             ])
           ]));
           Voz.secuencia([
-            { text: 'Escucha otra vez', tipo: 'frase', pausa: 260 },
+            { text: T.es('escuchaOtraVez'), tipo: 'frase', pausa: 260 },
             { text: palabra, tipo: 'palabra' }
           ]);
         }
@@ -1830,7 +1861,8 @@
         }, [
           el('span', { class: 'cuento-emo', text: c.emoji }),
           el('span', { class: 'cuento-titulo', text: c.titulo }),
-          el('span', { class: 'cuento-dato', text: palabras + ' palabras' +
+          T.usarChino() && c.tituloZh ? el('span', { class: 'zh', text: c.tituloZh }) : null,
+          el('span', { class: 'cuento-dato', text: palabras + ' ' + T.es('palabrasCorto') +
             (mejor ? ' · ' + mejor + ' ppm' : '') }),
           leidoCuento(c) ? el('span', { class: 'hecha', text: '✓' }) : null
         ]));
@@ -1897,12 +1929,12 @@
     ]);
 
     pintar([
-      barra(c.titulo, verBiblioteca),
+      barra(T.usarChino() && c.tituloZh ? c.titulo + '\n' + c.tituloZh : c.titulo, verBiblioteca),
       el('section', { style: '--u: var(--c4)' }, [
         el('div', { class: 'enunciado' }, [
           el('button', {
             class: 'btn btn-icono btn-audio', text: '🔊',
-            onclick: function () { narrar(T.t('tocaPalabra')); }
+            onclick: function () { narrar(T.es('tocaPalabra')); }
           }),
           el('div', { class: 'txt' }, etiqueta('tocaPalabra'))
         ]),
@@ -1940,7 +1972,7 @@
         } else {
           b.classList.add('mal');
           Progreso.apuntarFallo('comprension', 'lectura');
-          narrar('Ésa no. Vuelve a leer el cuento y fíjate.');
+          narrar(T.es('noEsEsa'));
         }
       });
       lista.appendChild(b);
@@ -1950,7 +1982,9 @@
       var caja = el('div', { class: 'moraleja' }, [
         el('span', { class: 'moraleja-icono', text: '💡' }),
         el('p', { class: 'moraleja-titulo', text: T.t('moraleja') }),
-        el('p', { class: 'moraleja-texto', text: c.moraleja })
+        el('p', { class: 'moraleja-texto', text: c.moraleja }),
+        T.usarChino() && c.moralejaZh
+          ? el('p', { class: 'moraleja-texto zh', text: c.moralejaZh }) : null
       ]);
       lista.parentNode.appendChild(caja);
       lista.parentNode.appendChild(el('div', { class: 'fila-botones' }, [
@@ -1981,7 +2015,8 @@
       lista
     ]);
 
-    pintar([barra(c.titulo, function () { abrirCuento(c); }), seccion]);
+    pintar([barra(T.usarChino() && c.tituloZh ? c.titulo + '\n' + c.tituloZh : c.titulo,
+                  function () { abrirCuento(c); }), seccion]);
     setTimeout(function () { narrar(p.texto); }, 300);
   }
 
@@ -2025,8 +2060,7 @@
         }));
       });
       vel.appendChild(barras);
-      vel.appendChild(el('p', { class: 'dato', style: 'font-size:.8rem',
-        text: 'Cada barra es una lectura, de la más antigua a la más reciente.' }));
+      vel.appendChild(el('p', { class: 'dato', style: 'font-size:.8rem', text: T.t('cadaBarra') }));
     }
     panel.appendChild(vel);
 
@@ -2059,7 +2093,7 @@
       fal.appendChild(ul);
       if (e.flojas.length) {
         fal.appendChild(el('p', { class: 'dato',
-          text: 'El repaso ya le está trayendo: ' + e.flojas.map(function (f) { return f.id; }).join(', ') }));
+          text: T.t('repasoTrae') + ': ' + e.flojas.map(function (f) { return f.id; }).join(', ') }));
       }
     }
     panel.appendChild(fal);
@@ -2088,9 +2122,9 @@
     try { guardado = global.localStorage.getItem('lectura-es-texto') || ''; } catch (e) {}
 
     var area = el('textarea', {
-      placeholder: T.t('escribeAlgo'),
+      placeholder: T.es('escribeAlgo'),
       spellcheck: 'false',
-      'aria-label': T.t('escribeAlgo')
+      'aria-label': T.es('escribeAlgo')
     });
     area.value = guardado || 'El pingüino pequeño come chocolate con fresas.';
 
@@ -2158,7 +2192,7 @@
         el('div', { class: 'enunciado' }, [
           el('button', {
             class: 'btn btn-icono btn-audio', text: '🔊',
-            onclick: function () { narrar(T.t('tocaPalabra')); }
+            onclick: function () { narrar(T.es('tocaPalabra')); }
           }),
           el('div', { class: 'txt' }, etiqueta('tocaPalabra'))
         ]),
@@ -2235,7 +2269,7 @@
 
     caja.appendChild(el('p', { class: 'dato', style: 'margin-top:18px' }, etiqueta('vienesDeOtro')));
     var campo = el('input', {
-      type: 'text', class: 'campo-codigo', placeholder: T.t('pegaCodigo'),
+      type: 'text', class: 'campo-codigo', placeholder: T.es('pegaCodigo'),
       autocapitalize: 'characters', autocomplete: 'off', spellcheck: 'false'
     });
     caja.appendChild(campo);
@@ -2250,7 +2284,7 @@
   /* Aplica un código, avisando antes de que sustituye lo que haya aquí. */
   function aplicarCodigo(codigo) {
     if (!Progreso.leerCodigo(codigo).ok) {
-      narrar(T.t('codigoMal'));
+      narrar(T.es('codigoMal'));
       return global.alert(T.t('codigoMal'));
     }
     if (!global.confirm(T.t('codigoPisa'))) return;
@@ -2264,7 +2298,7 @@
     document.body.setAttribute('data-may', Progreso.ajuste('mayusculas') ? '1' : '0');
     Voz.velocidad(Progreso.ajuste('velocidad') || 0.85);
     verPortada();
-    narrar(T.t('codigoBien') + ' ' + r.unidades + ' unidades, ' + r.cuentos +
+    narrar(T.es('codigoBien') + ' ' + r.unidades + ' unidades, ' + r.cuentos +
            ' cuentos y ' + r.estrellas + ' estrellas.');
   }
 
@@ -2285,7 +2319,7 @@
     panel.appendChild(el('div', { style: 'text-align:center' }, [
       el('div', { style: 'font-size:3.4rem;line-height:1', text: '📲' }),
       el('h2', { style: 'margin:6px 0 2px' }, etiqueta('instalarApp')),
-      el('p', { class: 'dato', text: 'Un icono propio, ventana propia, y sin buscar el archivo.' })
+      el('p', { class: 'dato', text: T.t('iconoPropio') })
     ]));
 
     if (caso.clave === 'listo') {
@@ -2457,7 +2491,7 @@
           var url = location.href.split('#')[0];
           var datos = {
             title: 'Aprendo a leer en español',
-            text: T.t('queEsEsto'),
+            text: T.es('queEsEsto'),
             url: url
           };
           if (navigator.share) {

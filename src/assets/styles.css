@@ -900,3 +900,12 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 .perfil-nombre {
   max-width: 7ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+
+/* El chino que acompaña a cada texto. Dentro de un botón cabe al lado; en un
+   párrafo baja a su propia línea. */
+.btn > .zh { margin-top: 0; font-size: .85em; }
+.dato > .zh, .truco > .zh, .comentario > .zh, .micro-error > .zh, .pie > .zh {
+  margin-top: 4px;
+}
+.moraleja-texto.zh { margin-top: 8px; font-size: 1rem; opacity: .75; }
+.aviso-ingles .zh { font-weight: 600; }

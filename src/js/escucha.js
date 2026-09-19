@@ -154,20 +154,32 @@
     });
   }
 
-  /* Mensajes en español para cada fallo posible. */
+  /*
+   * Cada fallo, en español y en chino tradicional. Estos mensajes los lee el
+   * niño en pantalla, y si sólo estuvieran en español no se enteraría de por
+   * qué no funciona el micrófono.
+   */
   var MENSAJES = {
-    'no-soportado': 'Este navegador no tiene micrófono para leer en voz alta. Prueba con Chrome, Edge o Safari.',
-    'no-seguro': 'El micrófono necesita una página segura (https). Abre la app desde un enlace https o desde un servidor local.',
-    'not-allowed': 'No me has dado permiso para usar el micrófono. Puedes darlo en el candado de la barra de direcciones.',
-    'service-not-allowed': 'El navegador ha bloqueado el micrófono. Revisa los permisos del sitio.',
-    'audio-capture': 'No encuentro ningún micrófono conectado.',
-    'no-speech': 'No he oído nada. Acerca el micrófono y prueba otra vez.',
-    'sin-voz': 'No he oído nada. Acerca el micrófono y prueba otra vez.',
-    'network': 'El reconocimiento necesita conexión a internet en este navegador.',
-    'aborted': 'Se ha cortado la escucha.',
-    'tiempo': 'He esperado mucho. Prueba otra vez.',
-    'no-arranca': 'No he podido encender el micrófono. Prueba otra vez.'
+    'no-soportado': ['Este navegador no puede escuchar. Prueba con Chrome, Edge o Safari.',
+                     '這個瀏覽器不能聽。請用 Chrome、Edge 或 Safari。'],
+    'no-seguro': ['El micrófono necesita una página segura (https).',
+                  '麥克風需要安全網頁（https）。'],
+    'not-allowed': ['No me has dado permiso para usar el micrófono.',
+                    '你還沒有允許我使用麥克風。'],
+    'service-not-allowed': ['El navegador ha bloqueado el micrófono.', '瀏覽器擋住了麥克風。'],
+    'audio-capture': ['No encuentro ningún micrófono.', '找不到麥克風。'],
+    'no-speech': ['No he oído nada. Acércate y prueba otra vez.', '我沒聽到。靠近一點再試一次。'],
+    'sin-voz': ['No he oído nada. Acércate y prueba otra vez.', '我沒聽到。靠近一點再試一次。'],
+    'network': ['El micrófono necesita internet en este navegador.', '這個瀏覽器的麥克風需要網路。'],
+    'aborted': ['Se ha cortado la escucha.', '收聽中斷了。'],
+    'tiempo': ['He esperado mucho. Prueba otra vez.', '等太久了。再試一次。'],
+    'no-arranca': ['No he podido encender el micrófono.', '我無法開啟麥克風。']
   };
+
+  /* ¿Hay que enseñar también el chino? Lo decide el ajuste del niño. */
+  function conChino() {
+    try { return !!(global.Textos && global.Textos.usarChino()); } catch (e) { return false; }
+  }
 
   global.Escucha = {
     soportado: soportado,
@@ -179,6 +191,14 @@
     /* En modo continuo, el niño decide cuándo ha terminado de leer. */
     terminar: function () { if (detener) detener(); },
     parar: parar,
-    mensaje: function (codigo) { return MENSAJES[codigo] || 'Algo no ha ido bien con el micrófono.'; }
+    /* Para mostrar: las dos lenguas. Para hablar: sólo español. */
+    mensaje: function (codigo) {
+      var m = MENSAJES[codigo] || ['Algo no ha ido bien con el micrófono.', '麥克風出了點問題。'];
+      return conChino() && m[1] ? m[0] + '\n' + m[1] : m[0];
+    },
+    mensajeEs: function (codigo) {
+      var m = MENSAJES[codigo] || ['Algo no ha ido bien con el micrófono.'];
+      return m[0];
+    }
   };
 })(window);

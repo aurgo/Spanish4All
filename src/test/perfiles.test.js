@@ -72,11 +72,18 @@ module.exports = function () {
   if (P.unidadCompleta('p')) fallos.push('  al primer niño se le coló el progreso del segundo');
   if (P.datos().estrellas !== 3) fallos.push(`  el primer niño debería tener 3 estrellas, tiene ${P.datos().estrellas}`);
 
-  /* --- los ajustes también son de cada niño --- */
+  /* --- los ajustes también son de cada niño ---
+     Se comprueba con la velocidad de voz y no con el chino: el chino viene
+     activado por defecto, así que valdría true en los dos y no probaría nada. */
   total++;
-  P.ajuste('chino', true);
+  P.activarPerfil(uno);
+  P.ajuste('velocidad', 0.55);
+  P.ajuste('chino', false);
   P.activarPerfil(dos.id);
-  if (P.ajuste('chino') === true) fallos.push('  los ajustes de un niño se aplicaron al otro');
+  if (P.ajuste('velocidad') === 0.55) fallos.push('  la velocidad de un niño se aplicó al otro');
+  if (P.ajuste('chino') !== true) fallos.push('  el niño nuevo debería arrancar con el chino puesto');
+  P.activarPerfil(uno);
+  if (P.ajuste('velocidad') !== 0.55) fallos.push('  el primer niño perdió su velocidad');
 
   /* --- nunca se queda el aparato sin ningún niño --- */
   total++;

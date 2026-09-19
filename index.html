@@ -915,6 +915,15 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   max-width: 7ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
+/* El chino que acompaña a cada texto. Dentro de un botón cabe al lado; en un
+   párrafo baja a su propia línea. */
+.btn > .zh { margin-top: 0; font-size: .85em; }
+.dato > .zh, .truco > .zh, .comentario > .zh, .micro-error > .zh, .pie > .zh {
+  margin-top: 4px;
+}
+.moraleja-texto.zh { margin-top: 8px; font-size: 1rem; opacity: .75; }
+.aviso-ingles .zh { font-weight: 600; }
+
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icono-apple-180.png">
@@ -1409,14 +1418,21 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
 /* ===== js/textos.js ===== */
 /*!
- * textos.js — Textos de la interfaz en español y chino.
+ * textos.js — Textos de la interfaz en español y chino tradicional.
  *
- * El niño lee chino con soltura pero todavía no español: mientras aprende,
- * poder ver una instrucción en chino es la diferencia entre necesitar a un
- * adulto al lado y poder avanzar solo. Se activa con el botón 中文.
+ * La distinción que lo gobierna todo: el niño ENTIENDE el español hablado
+ * pero no sabe LEERLO. Así que lo que suena va en español, y lo que se ve
+ * escrito tiene que estar también en chino, o no puede usar la app solo.
  *
- * Ojo: los enunciados SIEMPRE se pronuncian en voz alta en español además de
- * mostrarse. El chino es una muleta de apoyo, no el camino principal.
+ *   t(clave)   para MOSTRAR: devuelve las dos lenguas, separadas por un salto
+ *              de línea, cuando el chino está activado.
+ *   es(clave)  para HABLAR y para atributos que no admiten dos líneas
+ *              (placeholder, aria-label): sólo español.
+ *   zh(clave)  sólo chino, para pintarlo con su propio estilo.
+ *
+ * Usar t() donde iba es() haría que el sintetizador intentara pronunciar el
+ * chino con voz española; usar es() donde va t() deja al niño sin poder leer
+ * el botón. Por eso están separadas.
  */
 (function (global) {
   'use strict';
@@ -1541,6 +1557,28 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     codigoBien:     ['¡Listo! Progreso recuperado.', '好了！進度已經找回來。'],
     copiarCodigo:   ['Copiar el código', '複製代碼'],
 
+    /* Frases que antes estaban escritas a pelo dentro de la interfaz */
+    seLlamaAsi:     ['Se llama', '這個字母叫'],
+    suenaAsi:       ['Suena así', '聽起來像這樣'],
+    noEscuchaOtra:  ['No. Escucha otra vez', '不對。再聽一次'],
+    perfectoCorto:  ['¡Perfecto!', '完美！'],
+    escuchaOtraVez: ['Escucha otra vez', '再聽一次'],
+    cambianEn:      ['Cambian en', '差別在'],
+    noEsEsa:        ['Ésa no. Vuelve a leer y fíjate.', '不是那個。再讀一次，看仔細。'],
+    noEsEsta:       ['Ese no. Lee otra vez.', '不是這個。再讀一次。'],
+    cadaBarra:      ['Cada barra es una lectura, de la más antigua a la más reciente.',
+                     '每一條是一次朗讀，從最早到最近。'],
+    repasoTrae:     ['El repaso ya le está trayendo', '複習現在會給他'],
+    iconoPropio:    ['Un icono propio, ventana propia, y sin buscar el archivo.',
+                     '自己的圖示、自己的視窗，不用再找檔案。'],
+    hechoCon:       ['Con la voz del navegador · sin internet, sin cuentas',
+                     '使用瀏覽器語音 · 不需網路，不需帳號'],
+    noEsSino:       ['No es', '不是'],
+    fijateEn:       ['Fíjate en', '注意看'],
+    palabrasCorto:  ['palabras', '個字'],
+    todaviaNoHay:   ['Todavía no hay palabras suficientes para repasar. Aprende una unidad más.',
+                     '還沒有足夠的單字可以複習。再學一課吧。'],
+
     /* Nivel avanzado */
     pasoIngles:     ['Escucha las dos y nota la diferencia', '兩種都聽，注意不一樣的地方'],
     pasoInventadas: ['Lee estas palabras inventadas', '讀這些編出來的詞'],
@@ -1608,10 +1646,16 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   var idioma = 0;   // 0 = español, 1 = chino como apoyo
 
   global.Textos = {
+    /* Para mostrar en pantalla: las dos lenguas, una encima de otra. */
     t: function (clave) {
       var v = T[clave];
       if (!v) return clave;
-      return v[0];
+      return (idioma === 1 && v[1]) ? v[0] + '\n' + v[1] : v[0];
+    },
+    /* Para hablar, y para atributos de una sola línea. */
+    es: function (clave) {
+      var v = T[clave];
+      return v ? v[0] : clave;
     },
     zh: function (clave) {
       var v = T[clave];
@@ -1660,7 +1704,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   var unidades = [
     {
       id: 'vocales', tipo: 'vocales', color: 0, emoji: '🎵',
-      titulo: 'Las cinco vocales',
+      titulo: 'Las cinco vocales', tituloZh: '五個元音',
       letra: 'a e i o u', nombre: 'las vocales',
       fonema: 'a · e · i · o · u',
       truco: 'Las vocales son las cinco letras que puedes cantar sin cerrar la boca. Están en todas las palabras.',
@@ -1679,7 +1723,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'm', tipo: 'letra', color: 1, emoji: '👩',
-      titulo: 'La m', letra: 'm', mayus: 'M', nombre: 'eme', fonema: 'mmm',
+      titulo: 'La m', tituloZh: '字母 m', letra: 'm', mayus: 'M', nombre: 'eme', fonema: 'mmm',
       truco: 'Junta los labios y haz mmm, como cuando algo está muy rico. La eme con la a suena ma.',
       trucoZh: '雙唇閉合發出 mmm 的聲音，像吃到好吃的東西。m 加 a 讀作 ma。',
       silabas: ['ma', 'me', 'mi', 'mo', 'mu'],
@@ -1689,7 +1733,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'p', tipo: 'letra', color: 2, emoji: '👨',
-      titulo: 'La p', letra: 'p', mayus: 'P', nombre: 'pe', fonema: 'p',
+      titulo: 'La p', tituloZh: '字母 p', letra: 'p', mayus: 'P', nombre: 'pe', fonema: 'p',
       truco: 'Junta los labios y suéltalos de golpe, como una pequeña explosión: p. La pe con la a suena pa.',
       trucoZh: '雙唇緊閉然後突然打開，像小爆炸：p。p 加 a 讀作 pa。',
       silabas: ['pa', 'pe', 'pi', 'po', 'pu'],
@@ -1699,7 +1743,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'l', tipo: 'letra', color: 3, emoji: '🌊',
-      titulo: 'La l', letra: 'l', mayus: 'L', nombre: 'ele', fonema: 'lll',
+      titulo: 'La l', tituloZh: '字母 l', letra: 'l', mayus: 'L', nombre: 'ele', fonema: 'lll',
       truco: 'Pon la punta de la lengua detrás de los dientes de arriba y haz lll. La ele con la a suena la.',
       trucoZh: '舌尖抵住上齒背，發出 lll。l 加 a 讀作 la。',
       silabas: ['la', 'le', 'li', 'lo', 'lu'],
@@ -1709,7 +1753,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 's', tipo: 'letra', color: 4, emoji: '🐻',
-      titulo: 'La s', letra: 's', mayus: 'S', nombre: 'ese', fonema: 'sss',
+      titulo: 'La s', tituloZh: '字母 s', letra: 's', mayus: 'S', nombre: 'ese', fonema: 'sss',
       truco: 'Haz sss como una serpiente, con los dientes casi juntos. La ese con la a suena sa.',
       trucoZh: '像蛇一樣發出 sss 的聲音，牙齒幾乎合攏。s 加 a 讀作 sa。',
       silabas: ['sa', 'se', 'si', 'so', 'su'],
@@ -1719,7 +1763,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 't', tipo: 'letra', color: 5, emoji: '🦆',
-      titulo: 'La t', letra: 't', mayus: 'T', nombre: 'te', fonema: 't',
+      titulo: 'La t', tituloZh: '字母 t', letra: 't', mayus: 'T', nombre: 'te', fonema: 't',
       truco: 'Pon la lengua en los dientes de arriba y suéltala: t. La te con la a suena ta.',
       trucoZh: '舌頭抵住上齒然後放開：t。t 加 a 讀作 ta。',
       silabas: ['ta', 'te', 'ti', 'to', 'tu'],
@@ -1729,7 +1773,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'n', tipo: 'letra', color: 6, emoji: '🌙',
-      titulo: 'La n', letra: 'n', mayus: 'N', nombre: 'ene', fonema: 'nnn',
+      titulo: 'La n', tituloZh: '字母 n', letra: 'n', mayus: 'N', nombre: 'ene', fonema: 'nnn',
       truco: 'Pon la lengua arriba y saca el aire por la nariz: nnn. La ene con la a suena na.',
       trucoZh: '舌頭抵住上顎，氣流從鼻子出來：nnn。n 加 a 讀作 na。',
       silabas: ['na', 'ne', 'ni', 'no', 'nu'],
@@ -1739,7 +1783,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'd', tipo: 'letra', color: 7, emoji: '🎲',
-      titulo: 'La d', letra: 'd', mayus: 'D', nombre: 'de', fonema: 'd',
+      titulo: 'La d', tituloZh: '字母 d', letra: 'd', mayus: 'D', nombre: 'de', fonema: 'd',
       truco: 'Toca los dientes de arriba con la lengua y haz d, con voz. La de con la a suena da.',
       trucoZh: '舌尖輕触上齒，帶聲發出 d。d 加 a 讀作 da。',
       silabas: ['da', 'de', 'di', 'do', 'du'],
@@ -1749,7 +1793,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'c-fuerte', tipo: 'letra', color: 0, emoji: '🏠',
-      titulo: 'La c con a, o, u', letra: 'c', mayus: 'C', nombre: 'ce', fonema: 'k',
+      titulo: 'La c con a, o, u', tituloZh: 'c 配 a、o、u', letra: 'c', mayus: 'C', nombre: 'ce', fonema: 'k',
       truco: 'Con la a, la o y la u, la c suena fuerte, como una k: ca, co, cu. Cuidado, con la e y la i suena distinto y eso lo verás más adelante.',
       trucoZh: 'c 在 a、o、u 前面發 k 的音：ca、co、cu。在 e、i 前面發音不同，以後再學。',
       silabas: ['ca', 'co', 'cu'],
@@ -1759,7 +1803,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'b', tipo: 'letra', color: 1, emoji: '👶',
-      titulo: 'La b', letra: 'b', mayus: 'B', nombre: 'be', fonema: 'b',
+      titulo: 'La b', tituloZh: '字母 b', letra: 'b', mayus: 'B', nombre: 'be', fonema: 'b',
       truco: 'Es como la pe, pero con voz: junta los labios y suéltalos haciendo b. La be con la a suena ba.',
       trucoZh: '和 p 一樣雙唇爆破，但要帶聲：b。b 加 a 讀作 ba。',
       silabas: ['ba', 'be', 'bi', 'bo', 'bu'],
@@ -1769,7 +1813,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'v', tipo: 'letra', color: 2, emoji: '🐄',
-      titulo: 'La v', letra: 'v', mayus: 'V', nombre: 'uve', fonema: 'b',
+      titulo: 'La v', tituloZh: '字母 v', letra: 'v', mayus: 'V', nombre: 'uve', fonema: 'b',
       truco: 'Un secreto: en español la uve suena igual que la be. Se escriben distinto, pero suenan igual.',
       trucoZh: '小祕密：西班牙語裡 v 和 b 發音完全一樣，只是寫法不同。',
       silabas: ['va', 've', 'vi', 'vo', 'vu'],
@@ -1779,7 +1823,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'f', tipo: 'letra', color: 3, emoji: '🦭',
-      titulo: 'La f', letra: 'f', mayus: 'F', nombre: 'efe', fonema: 'fff',
+      titulo: 'La f', tituloZh: '字母 f', letra: 'f', mayus: 'F', nombre: 'efe', fonema: 'fff',
       truco: 'Muerde un poco el labio de abajo con los dientes de arriba y sopla: fff. La efe con la a suena fa.',
       trucoZh: '上齒輕咬下唇然後吹氣：fff。f 加 a 讀作 fa。',
       silabas: ['fa', 'fe', 'fi', 'fo', 'fu'],
@@ -1789,7 +1833,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'r-suave', tipo: 'letra', color: 4, emoji: '🦜',
-      titulo: 'La r suave', letra: 'r', mayus: 'R', nombre: 'ere', fonema: 'r (suave)',
+      titulo: 'La r suave', tituloZh: '輕音的 r', letra: 'r', mayus: 'R', nombre: 'ere', fonema: 'r (suave)',
       truco: 'Entre dos vocales, la erre suena suave: un solo golpecito de la lengua arriba. Ca-ra. Pe-ra.',
       trucoZh: '在兩個元音之間，r 是輕音：舌頭只彈一下。ca-ra，pe-ra。',
       silabas: ['ara', 'ere', 'iri', 'oro', 'uru'],
@@ -1799,7 +1843,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'rr', tipo: 'letra', color: 5, emoji: '🐕',
-      titulo: 'La r fuerte y la rr', letra: 'rr', mayus: 'RR', nombre: 'erre', fonema: 'rrr',
+      titulo: 'La r fuerte y la rr', tituloZh: '強音的 r 和 rr', letra: 'rr', mayus: 'RR', nombre: 'erre', fonema: 'rrr',
       truco: 'Al principio de la palabra, y con dos erres, suena fuerte: haz vibrar la lengua, rrr, como un motor.',
       trucoZh: '在詞首或寫成 rr 時是強音：舌頭快速振動 rrr，像馬達。',
       silabas: ['ra', 're', 'ri', 'ro', 'ru', 'rra', 'rre', 'rri', 'rro', 'rru'],
@@ -1809,7 +1853,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'j', tipo: 'letra', color: 6, emoji: '🦒',
-      titulo: 'La j', letra: 'j', mayus: 'J', nombre: 'jota', fonema: 'jjj',
+      titulo: 'La j', tituloZh: '字母 j', letra: 'j', mayus: 'J', nombre: 'jota', fonema: 'jjj',
       truco: 'Sale del fondo de la garganta, como si echaras vaho a un cristal pero más fuerte: jjj.',
       trucoZh: '從喉嚨深處發出，像哈氣但更用力：jjj。',
       silabas: ['ja', 'je', 'ji', 'jo', 'ju'],
@@ -1819,7 +1863,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'g-fuerte', tipo: 'letra', color: 7, emoji: '🐈',
-      titulo: 'La g con a, o, u', letra: 'g', mayus: 'G', nombre: 'ge', fonema: 'g',
+      titulo: 'La g con a, o, u', tituloZh: 'g 配 a、o、u', letra: 'g', mayus: 'G', nombre: 'ge', fonema: 'g',
       truco: 'Con la a, la o y la u, la ge suena fuerte, desde la garganta: ga, go, gu.',
       trucoZh: 'g 在 a、o、u 前面是硬音，從喉嚨發出：ga、go、gu。',
       silabas: ['ga', 'go', 'gu'],
@@ -1829,7 +1873,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'gue-gui', tipo: 'grupo', color: 0, emoji: '🎸',
-      titulo: 'gue, gui', letra: 'gue gui', nombre: 'gue, gui', fonema: 'gue · gui',
+      titulo: 'gue, gui', tituloZh: 'gue、gui', letra: 'gue gui', nombre: 'gue, gui', fonema: 'gue · gui',
       truco: 'Para que la ge suene fuerte con la e y la i, ponemos una u en medio que no se pronuncia. Se escribe gue, pero se lee gue. La u está callada.',
       trucoZh: '為了讓 g 在 e、i 前保持硬音，中間加一個不發音的 u。寫作 gue、gui，u 是不出聲的。',
       silabas: ['gue', 'gui'],
@@ -1839,7 +1883,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'ge-gi', tipo: 'grupo', color: 1, emoji: '🌻',
-      titulo: 'ge, gi', letra: 'ge gi', nombre: 'ge, gi', fonema: 'ge · gi (como la jota)',
+      titulo: 'ge, gi', tituloZh: 'ge、gi', letra: 'ge gi', nombre: 'ge, gi', fonema: 'ge · gi (como la jota)',
       truco: 'Cuidado: la ge con la e y con la i suena como la jota. Gente. Gigante.',
       trucoZh: '注意：g 在 e、i 前面讀音和 j 一樣。gente、gigante。',
       silabas: ['ge', 'gi'],
@@ -1849,7 +1893,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'h', tipo: 'letra', color: 2, emoji: '🤫',
-      titulo: 'La h muda', letra: 'h', mayus: 'H', nombre: 'hache', fonema: '(silencio)',
+      titulo: 'La h muda', tituloZh: '不發音的 h', letra: 'h', mayus: 'H', nombre: 'hache', fonema: '(silencio)',
       truco: 'La hache es la letra callada. Se escribe, pero no suena nada. Hola se lee ola.',
       trucoZh: 'h 是不發音的字母。寫出來但完全不出聲。hola 讀作 ola。',
       silabas: ['ha', 'he', 'hi', 'ho', 'hu'],
@@ -1859,7 +1903,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'ñ', tipo: 'letra', color: 3, emoji: '🍍',
-      titulo: 'La ñ', letra: 'ñ', mayus: 'Ñ', nombre: 'eñe', fonema: 'ñ',
+      titulo: 'La ñ', tituloZh: '字母 ñ', letra: 'ñ', mayus: 'Ñ', nombre: 'eñe', fonema: 'ñ',
       truco: 'Esta letra sólo existe en español. Aplasta la lengua contra el paladar: ña, ñe, ñi, ño, ñu.',
       trucoZh: '這個字母只有西班牙語才有。舌面壓住上顎：ña、ñe、ñi、ño、ñu。',
       silabas: ['ña', 'ñe', 'ñi', 'ño', 'ñu'],
@@ -1869,7 +1913,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'll', tipo: 'letra', color: 4, emoji: '🔑',
-      titulo: 'La ll', letra: 'll', mayus: 'LL', nombre: 'elle', fonema: 'y',
+      titulo: 'La ll', tituloZh: '字母 ll', letra: 'll', mayus: 'LL', nombre: 'elle', fonema: 'y',
       truco: 'Dos eles juntas no suenan como una ele: suenan como la ye. Lla-ve. Si-lla.',
       trucoZh: '兩個 l 在一起不讀 l 的音，讀作 y 的音。lla-ve，si-lla。',
       silabas: ['lla', 'lle', 'lli', 'llo', 'llu'],
@@ -1879,7 +1923,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'ch', tipo: 'letra', color: 5, emoji: '🍫',
-      titulo: 'La ch', letra: 'ch', mayus: 'CH', nombre: 'che', fonema: 'ch',
+      titulo: 'La ch', tituloZh: '字母 ch', letra: 'ch', mayus: 'CH', nombre: 'che', fonema: 'ch',
       truco: 'La ce y la hache juntas hacen un sonido nuevo: ch, como cuando pides silencio. Cho-co-la-te.',
       trucoZh: 'c 和 h 在一起產生新的音：ch，像讓人安靜的聲音。cho-co-la-te。',
       silabas: ['cha', 'che', 'chi', 'cho', 'chu'],
@@ -1889,7 +1933,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'y', tipo: 'letra', color: 6, emoji: '👑',
-      titulo: 'La y', letra: 'y', mayus: 'Y', nombre: 'ye', fonema: 'y / i',
+      titulo: 'La y', tituloZh: '字母 y', letra: 'y', mayus: 'Y', nombre: 'ye', fonema: 'y / i',
       truco: 'Delante de una vocal suena como la elle: ya, ye, yo. Y ella sola, o al final, suena como la i: rey, hoy, y.',
       trucoZh: 'y 在元音前讀作 ll 的音：ya、ye、yo。單獨或在詞尾時讀作 i：rey、hoy、y。',
       silabas: ['ya', 'ye', 'yi', 'yo', 'yu'],
@@ -1899,7 +1943,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'qu', tipo: 'grupo', color: 7, emoji: '🧀',
-      titulo: 'que, qui', letra: 'que qui', nombre: 'que, qui', fonema: 'ke · ki',
+      titulo: 'que, qui', tituloZh: 'que、qui', letra: 'que qui', nombre: 'que, qui', fonema: 'ke · ki',
       truco: 'La cu siempre va con una u callada, y sólo con la e y la i. Se escribe que, pero se lee ke. Que-so.',
       trucoZh: 'q 後面總跟著不發音的 u，而且只跟 e、i。寫作 que，讀作 ke。que-so。',
       silabas: ['que', 'qui'],
@@ -1909,7 +1953,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'z-ce-ci', tipo: 'grupo', color: 0, emoji: '🦊',
-      titulo: 'za, ce, ci, zo, zu', letra: 'z · ce · ci', nombre: 'zeta, ce, ci', fonema: 'z',
+      titulo: 'za, ce, ci, zo, zu', tituloZh: 'za、ce、ci、zo、zu', letra: 'z · ce · ci', nombre: 'zeta, ce, ci', fonema: 'z',
       truco: 'La zeta y la c con e o i suenan igual. En España se pone la lengua entre los dientes. En América suena como una ese. Las dos formas están bien.',
       trucoZh: 'z 和 ce、ci 發音相同。在西班牙舌尖伸到齒間，在拉美讀作 s。兩種都正確。',
       silabas: ['za', 'ce', 'ci', 'zo', 'zu'],
@@ -1919,7 +1963,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'gue-dieresis', tipo: 'grupo', color: 1, emoji: '🐧',
-      titulo: 'güe, güi', letra: 'güe güi', nombre: 'güe, güi', fonema: 'gue · gui (con u sonora)',
+      titulo: 'güe, güi', tituloZh: 'güe、güi', letra: 'güe güi', nombre: 'güe, güi', fonema: 'gue · gui (con u sonora)',
       truco: 'Los dos puntitos encima de la u se llaman diéresis y significan: ¡esta u sí se pronuncia! Pin-güi-no.',
       trucoZh: 'u 上面的兩個點叫分音符，意思是這個 u 要發音！pin-güi-no。',
       silabas: ['güe', 'güi'],
@@ -1929,7 +1973,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'k-w-x', tipo: 'grupo', color: 2, emoji: '🥝',
-      titulo: 'k, w, x', letra: 'k w x', nombre: 'ka, uve doble, equis', fonema: 'k · w · ks',
+      titulo: 'k, w, x', tituloZh: 'k、w、x', letra: 'k w x', nombre: 'ka, uve doble, equis', fonema: 'k · w · ks',
       truco: 'Estas tres letras se usan poco, casi siempre en palabras que vienen de otros idiomas. La ka suena como la c fuerte, la uve doble como la u, y la equis suena ks: ta-ksi.',
       trucoZh: '這三個字母很少用，多出現在外來詞裡。k 讀作硬音 c，w 讀作 u，x 讀作 ks：ta-ksi。',
       silabas: ['ka', 'ke', 'ki', 'wa', 'we', 'xa', 'xi'],
@@ -1939,7 +1983,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'bl-br', tipo: 'grupo', color: 3, emoji: '📕',
-      titulo: 'bl, br', letra: 'bl · br', nombre: 'be con ele, be con erre', fonema: 'bl · br',
+      titulo: 'bl, br', tituloZh: 'bl、br', letra: 'bl · br', nombre: 'be con ele, be con erre', fonema: 'bl · br',
       truco: 'Ahora dos consonantes juntas en la misma sílaba. No hay vocal entre ellas: se dicen de un tirón. Bla, ble, bli, blo, blu. Bra, bre, bri, bro, bru.',
       trucoZh: '現在是兩個輔音在同一個音節裡，中間沒有元音，要一口氣讀出來：bla…、bra…。',
       silabas: ['bla', 'ble', 'bli', 'blo', 'blu', 'bra', 'bre', 'bri', 'bro', 'bru'],
@@ -1949,7 +1993,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'cl-cr', tipo: 'grupo', color: 4, emoji: '🚲',
-      titulo: 'cl, cr', letra: 'cl · cr', nombre: 'ce con ele, ce con erre', fonema: 'cl · cr',
+      titulo: 'cl, cr', tituloZh: 'cl、cr', letra: 'cl · cr', nombre: 'ce con ele, ce con erre', fonema: 'cl · cr',
       truco: 'Cla, cle, cli, clo, clu. Cra, cre, cri, cro, cru. Todo seguido, sin parar en medio.',
       trucoZh: 'cla…、cra… 一口氣讀完，中間不要停。',
       silabas: ['cla', 'cle', 'cli', 'clo', 'clu', 'cra', 'cre', 'cri', 'cro', 'cru'],
@@ -1959,7 +2003,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'fl-fr', tipo: 'grupo', color: 5, emoji: '🍓',
-      titulo: 'fl, fr', letra: 'fl · fr', nombre: 'efe con ele, efe con erre', fonema: 'fl · fr',
+      titulo: 'fl, fr', tituloZh: 'fl、fr', letra: 'fl · fr', nombre: 'efe con ele, efe con erre', fonema: 'fl · fr',
       truco: 'Fla, fle, fli, flo, flu. Fra, fre, fri, fro, fru. Sopla la efe y sigue sin cortar.',
       trucoZh: 'fla…、fra… 吹出 f 的音後不要停頓，直接連下去。',
       silabas: ['fla', 'fle', 'fli', 'flo', 'flu', 'fra', 'fre', 'fri', 'fro', 'fru'],
@@ -1969,7 +2013,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'gl-gr', tipo: 'grupo', color: 6, emoji: '🐯',
-      titulo: 'gl, gr', letra: 'gl · gr', nombre: 'ge con ele, ge con erre', fonema: 'gl · gr',
+      titulo: 'gl, gr', tituloZh: 'gl、gr', letra: 'gl · gr', nombre: 'ge con ele, ge con erre', fonema: 'gl · gr',
       truco: 'Gla, gle, gli, glo, glu. Gra, gre, gri, gro, gru. La ge siempre suena fuerte en estos grupos.',
       trucoZh: 'gla…、gra…。在這些組合裡 g 永遠是硬音。',
       silabas: ['gla', 'gle', 'gli', 'glo', 'glu', 'gra', 'gre', 'gri', 'gro', 'gru'],
@@ -1979,7 +2023,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'pl-pr', tipo: 'grupo', color: 7, emoji: '🍌',
-      titulo: 'pl, pr', letra: 'pl · pr', nombre: 'pe con ele, pe con erre', fonema: 'pl · pr',
+      titulo: 'pl, pr', tituloZh: 'pl、pr', letra: 'pl · pr', nombre: 'pe con ele, pe con erre', fonema: 'pl · pr',
       truco: 'Pla, ple, pli, plo, plu. Pra, pre, pri, pro, pru. Sin vocal en medio, todo junto.',
       trucoZh: 'pla…、pra…。中間沒有元音，要連著讀。',
       silabas: ['pla', 'ple', 'pli', 'plo', 'plu', 'pra', 'pre', 'pri', 'pro', 'pru'],
@@ -1989,7 +2033,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'tr-dr', tipo: 'grupo', color: 0, emoji: '🚆',
-      titulo: 'tr, dr', letra: 'tr · dr', nombre: 'te con erre, de con erre', fonema: 'tr · dr',
+      titulo: 'tr, dr', tituloZh: 'tr、dr', letra: 'tr · dr', nombre: 'te con erre, de con erre', fonema: 'tr · dr',
       truco: 'Tra, tre, tri, tro, tru. Dra, dre, dri, dro, dru. Son los últimos grupos trabados. ¡Ya casi sabes leerlo todo!',
       trucoZh: 'tra…、dra…。這是最後的輔音組合。你幾乎已經會讀所有單字了！',
       silabas: ['tra', 'tre', 'tri', 'tro', 'tru', 'dra', 'dre', 'dri', 'dro', 'dru'],
@@ -1999,7 +2043,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'inversas', tipo: 'inversas', color: 1, emoji: '🌳',
-      titulo: 'Sílabas al revés', letra: 'al · en · ar · es', nombre: 'sílabas inversas',
+      titulo: 'Sílabas al revés', tituloZh: '倒過來的音節', letra: 'al · en · ar · es', nombre: 'sílabas inversas',
       fonema: 'vocal + consonante',
       truco: 'Hasta ahora la consonante iba delante: la, le, li. Ahora va detrás: al, el, il, ol, ul. La vocal manda y la consonante cierra la sílaba. Ár-bol.',
       trucoZh: '之前輔音在前：la、le、li。現在輔音在後：al、el、il、ol、ul，元音在前，輔音收尾。ár-bol。',
@@ -2010,7 +2054,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'diptongos', tipo: 'diptongos', color: 2, emoji: '✈️',
-      titulo: 'Dos vocales juntas', letra: 'ai · ue · io', nombre: 'diptongos',
+      titulo: 'Dos vocales juntas', tituloZh: '兩個元音在一起', letra: 'ai · ue · io', nombre: 'diptongos',
       fonema: 'vocal + vocal',
       truco: 'Cuando dos vocales van juntas, muchas veces se leen de un tirón, en la misma sílaba: ai-re, a-gua, a-vión. Pero si las dos son fuertes, se separan: le-ón, te-a-tro.',
       trucoZh: '兩個元音在一起時常常連讀，屬於同一個音節：ai-re、a-gua。但如果兩個都是強元音，就要分開：le-ón。',
@@ -2021,7 +2065,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'tildes', tipo: 'tildes', color: 3, emoji: '🎵',
-      titulo: 'La tilde y los signos', letra: 'á é í ó ú', nombre: 'la tilde',
+      titulo: 'La tilde y los signos', tituloZh: '重音符號和標點', letra: 'á é í ó ú', nombre: 'la tilde',
       fonema: 'la sílaba más fuerte',
       truco: 'La rayita encima de una vocal se llama tilde. Te dice qué sílaba tienes que decir más fuerte. Pa-PÁ, MÚ-si-ca, ÁR-bol. Y fíjate: en español las preguntas y las exclamaciones llevan signo al principio y al final.',
       trucoZh: '元音上面的小斜線叫重音符，告訴你哪個音節要讀得更重。pa-PÁ、MÚ-si-ca。另外，西班牙語的問句和感嘆句在開頭和結尾都有符號。',
@@ -2032,7 +2076,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'lectura', tipo: 'lectura', color: 4, emoji: '📖',
-      titulo: '¡A leer de verdad!', letra: '📖', nombre: 'lectura',
+      titulo: '¡A leer de verdad!', tituloZh: '真正開始閱讀！', letra: '📖', nombre: 'lectura',
       fonema: 'textos completos',
       truco: 'Ya conoces todas las letras del español. Ahora sólo hay que practicar. Lee despacio, sílaba a sílaba si hace falta, y luego otra vez de corrido.',
       trucoZh: '你已經學會了西班牙語所有的字母。現在只要多練習。先慢慢一個音節一個音節地讀，然後再連起來讀一遍。',
@@ -2078,7 +2122,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'inventadas', tipo: 'inventadas', color: 5, emoji: '👽',
-      titulo: 'Palabras inventadas', letra: '👽', nombre: 'palabras inventadas',
+      titulo: 'Palabras inventadas', tituloZh: '編出來的詞', letra: '👽', nombre: 'palabras inventadas',
       fonema: 'leer sin adivinar',
       truco: 'Estas palabras no existen: me las he inventado. Por eso no puedes acordarte de ellas ni adivinarlas por su forma. Sólo salen si las lees letra a letra. Es el ejercicio que de verdad demuestra que sabes leer.',
       trucoZh: '這些詞是我編出來的，不存在。所以你不能靠記憶或看形狀猜出來，只能一個字母一個字母地讀。這才真正證明你會讀。',
@@ -2087,7 +2131,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'pares', tipo: 'pares', color: 6, emoji: '👀',
-      titulo: 'Parecidas pero distintas', letra: 'pato · pata', nombre: 'pares parecidos',
+      titulo: 'Parecidas pero distintas', tituloZh: '很像但不一樣', letra: 'pato · pata', nombre: 'pares parecidos',
       fonema: 'mirar dentro de la palabra',
       truco: 'Estas parejas se parecen muchísimo: cambian en una letra, o en el orden. Si miras sólo la forma de fuera, caes. Hay que mirar dentro.',
       trucoZh: '這些詞長得很像，只差一個字母或順序不同。只看外形會看錯，要看清楚裡面。',
@@ -2096,7 +2140,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'dictado', tipo: 'dictado', color: 7, emoji: '✍️',
-      titulo: 'Escribe lo que oigas', letra: '✍️', nombre: 'dictado',
+      titulo: 'Escribe lo que oigas', tituloZh: '把聽到的寫下來', letra: '✍️', nombre: 'dictado',
       fonema: 'del sonido a la letra',
       truco: 'Ahora al revés: oyes una palabra y la escribes. Escribir obliga a poner las letras en su orden, una detrás de otra. Es la otra mitad de leer.',
       trucoZh: '現在反過來：聽到一個詞，把它寫出來。寫字必須把字母按順序排好，這是閱讀的另一半。',
@@ -2105,7 +2149,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     {
       id: 'ingles', tipo: 'ingles', color: 0, emoji: '🔀',
-      titulo: 'El inglés y el español', letra: 'A a', nombre: 'los falsos amigos',
+      titulo: 'El inglés y el español', tituloZh: '英文和西班牙語', letra: 'A a', nombre: 'los falsos amigos',
       fonema: 'la misma letra, otro sonido',
       truco: 'Tú aprendiste las letras en inglés, y eso ayuda, pero también engaña: muchas suenan distinto en español. Vamos a oír las dos, una detrás de otra, para que no se te mezclen.',
       trucoZh: '你是從英文學會字母的，這有幫助，但也會混淆：很多字母在西班牙語裡發音不同。我們把兩種發音接連聽一遍，就不會弄混了。',
@@ -2186,33 +2230,47 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
    */
   var ingles = [
     { letra: 'a', muestraEn: 'name', muestraEs: 'ala',
-      nota: 'En inglés la A dice su nombre, /ei/. En español siempre suena a, abriendo la boca.' },
+      nota: 'En inglés la A dice su nombre, /ei/. En español siempre suena a, abriendo la boca.',
+      notaZh: '英文的 A 唸它的名字 /ei/。西班牙語永遠唸 a，嘴巴張開。' },
     { letra: 'e', muestraEn: 'he', muestraEs: 'eso',
-      nota: 'En inglés la E suena /ii/. En español suena e, cortita.' },
+      nota: 'En inglés la E suena /ii/. En español suena e, cortita.',
+      notaZh: '英文的 E 唸 /ii/。西班牙語唸 e，短短的。' },
     { letra: 'i', muestraEn: 'ice', muestraEs: 'isla',
-      nota: 'Ésta es la que más lía: en inglés la I suena /ai/. En español suena i, siempre.' },
+      nota: 'Ésta es la que más lía: en inglés la I suena /ai/. En español suena i, siempre.',
+      notaZh: '這個最容易搞混：英文的 I 唸 /ai/。西班牙語永遠唸 i。' },
     { letra: 'o', muestraEn: 'no', muestraEs: 'oso',
-      nota: 'En inglés la O se alarga y se cierra. En español es una o redonda y limpia.' },
+      nota: 'En inglés la O se alarga y se cierra. En español es una o redonda y limpia.',
+      notaZh: '英文的 O 拉長而且收口。西班牙語是圓圓乾淨的 o。' },
     { letra: 'u', muestraEn: 'use', muestraEs: 'uva',
-      nota: 'En inglés la U suena /iu/. En español suena u, como un beso.' },
+      nota: 'En inglés la U suena /iu/. En español suena u, como un beso.',
+      notaZh: '英文的 U 唸 /iu/。西班牙語唸 u，像親嘴的樣子。' },
     { letra: 'h', muestraEn: 'hat', muestraEs: 'hola',
-      nota: 'En inglés la H sopla. En español no suena nada: hola se lee ola.' },
+      nota: 'En inglés la H sopla. En español no suena nada: hola se lee ola.',
+      notaZh: '英文的 H 要吹氣。西班牙語完全不發音：hola 唸作 ola。' },
     { letra: 'j', muestraEn: 'jam', muestraEs: 'jamón',
-      nota: 'En inglés la J suena /dch/. En español sale del fondo de la garganta.' },
+      nota: 'En inglés la J suena /dch/. En español sale del fondo de la garganta.',
+      notaZh: '英文的 J 唸 /dj/。西班牙語從喉嚨深處發出來。' },
     { letra: 'v', muestraEn: 'very', muestraEs: 'vaca',
-      nota: 'En inglés la V se hace con los dientes en el labio. En español suena igual que la be.' },
+      nota: 'En inglés la V se hace con los dientes en el labio. En español suena igual que la be.',
+      notaZh: '英文的 V 用牙齒咬嘴唇。西班牙語跟 b 完全一樣。' },
     { letra: 'g', muestraEn: 'giant', muestraEs: 'gigante',
-      nota: 'Con e y con i, la G inglesa suena /dch/. La española suena como la jota.' },
+      nota: 'Con e y con i, la G inglesa suena /dch/. La española suena como la jota.',
+      notaZh: '在 e、i 前面，英文的 G 唸 /dj/。西班牙語唸得像 j。' },
     { letra: 'z', muestraEn: 'zoo', muestraEs: 'zapato',
-      nota: 'La Z inglesa zumba. La española no zumba: es una ese, o la lengua entre los dientes.' },
+      nota: 'La Z inglesa zumba. La española no zumba: es una ese, o la lengua entre los dientes.',
+      notaZh: '英文的 Z 會嗡嗡響。西班牙語不會：唸成 s，或舌頭放在牙齒之間。' },
     { letra: 'qu', muestraEn: 'queen', muestraEs: 'queso',
-      nota: 'En inglés qu suena /kw/, con u. En español la u no se oye: que suena ke.' },
+      nota: 'En inglés qu suena /kw/, con u. En español la u no se oye: que suena ke.',
+      notaZh: '英文的 qu 唸 /kw/，有 u 的音。西班牙語聽不到 u：que 唸作 ke。' },
     { letra: 'r', muestraEn: 'red', muestraEs: 'rosa',
-      nota: 'La R inglesa no toca el paladar. La española vibra: rrr.' },
+      nota: 'La R inglesa no toca el paladar. La española vibra: rrr.',
+      notaZh: '英文的 R 不碰上顎。西班牙語會振動：rrr。' },
     { letra: 'll', muestraEn: 'tall', muestraEs: 'llave',
-      nota: 'Dos eles en inglés siguen siendo una ele. En español suenan como la ye.' },
+      nota: 'Dos eles en inglés siguen siendo una ele. En español suenan como la ye.',
+      notaZh: '英文兩個 l 還是 l 的音。西班牙語唸起來像 y。' },
     { letra: 'ñ', muestraEn: 'canyon', muestraEs: 'niño',
-      nota: 'Esta letra no existe en inglés. Es la eñe, y sólo la tiene el español.' }
+      nota: 'Esta letra no existe en inglés. Es la eñe, y sólo la tiene el español.',
+      notaZh: '這個字母英文沒有。它叫 eñe，只有西班牙語才有。' }
   ];
 
   /* ------------------------------------------- palabras inventadas ------ */
@@ -2280,7 +2338,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
    */
   var cuentos = [
     {
-      id: 'hormiga', nivel: 1, titulo: 'La hormiga y la miga', emoji: '🐜',
+      id: 'hormiga', nivel: 1, tituloZh: '螞蟻和麵包屑', titulo: 'La hormiga y la miga', emoji: '🐜',
       lineas: [
         'Una hormiga pequeña encuentra una miga de pan.',
         'La miga es más grande que ella.',
@@ -2289,6 +2347,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         'Entre todas la llevan al hormiguero.'
       ],
       moraleja: 'Lo que no puedes solo, lo puedes con ayuda.',
+      moralejaZh: '一個人做不到的事，大家一起就做得到。',
       pregunta: {
         texto: '¿Cómo llevan la miga al hormiguero?',
         opciones: ['Entre todas las hormigas', 'La hormiga sola', 'La empuja el viento'],
@@ -2296,7 +2355,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       }
     },
     {
-      id: 'sol-viento', nivel: 1, titulo: 'El sol y el viento', emoji: '☀️',
+      id: 'sol-viento', nivel: 1, tituloZh: '太陽和風', titulo: 'El sol y el viento', emoji: '☀️',
       lineas: [
         'El viento dice que es más fuerte que el sol.',
         'Los dos miran a un hombre con abrigo.',
@@ -2305,6 +2364,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         'El hombre tiene calor y se quita el abrigo solo.'
       ],
       moraleja: 'Con calma se consigue lo que a la fuerza no.',
+      moralejaZh: '用平靜可以做到用力氣做不到的事。',
       pregunta: {
         texto: '¿Quién consigue que el hombre se quite el abrigo?',
         opciones: ['El sol', 'El viento', 'Nadie'],
@@ -2312,7 +2372,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       }
     },
     {
-      id: 'pajaro', nivel: 1, titulo: 'El pájaro y la jaula', emoji: '🐦',
+      id: 'pajaro', nivel: 1, tituloZh: '小鳥和籠子', titulo: 'El pájaro y la jaula', emoji: '🐦',
       lineas: [
         'Un pájaro vive en una jaula de oro.',
         'Tiene comida todos los días y nadie le molesta.',
@@ -2321,6 +2381,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         'El de fuera pasa frío, pero va donde quiere.'
       ],
       moraleja: 'No todo lo que brilla vale más que ser libre.',
+      moralejaZh: '會發光的東西不一定比自由更有價值。',
       pregunta: {
         texto: '¿Qué tiene el pájaro de fuera que no tiene el de la jaula?',
         opciones: ['Puede ir donde quiere', 'Come todos los días', 'Una jaula de oro'],
@@ -2328,7 +2389,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       }
     },
     {
-      id: 'zorro-uvas', nivel: 2, titulo: 'El zorro y las uvas', emoji: '🦊',
+      id: 'zorro-uvas', nivel: 2, tituloZh: '狐狸和葡萄', titulo: 'El zorro y las uvas', emoji: '🦊',
       lineas: [
         'Un zorro pasea por el campo y ve unas uvas en lo alto de una parra.',
         'Salta una vez y no llega. Salta otra vez y tampoco.',
@@ -2337,6 +2398,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         'Pero las uvas estaban maduras. El zorro sólo saltaba poco.'
       ],
       moraleja: 'A veces decimos que algo no nos gusta porque no lo conseguimos.',
+      moralejaZh: '有時候我們說不喜歡，只是因為得不到。',
       pregunta: {
         texto: '¿Por qué el zorro dice que las uvas están verdes?',
         opciones: ['Porque no consigue cogerlas', 'Porque las ha probado', 'Porque son verdes'],
@@ -2344,7 +2406,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       }
     },
     {
-      id: 'leon-raton', nivel: 2, titulo: 'El león y el ratón', emoji: '🦁',
+      id: 'leon-raton', nivel: 2, tituloZh: '獅子和老鼠', titulo: 'El león y el ratón', emoji: '🦁',
       lineas: [
         'Un ratón despierta sin querer a un león dormido.',
         'El león lo coge con la pata y va a comérselo.',
@@ -2355,6 +2417,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         'El ratón llega, muerde las cuerdas y lo deja libre.'
       ],
       moraleja: 'Nadie es tan pequeño como para no poder ayudar.',
+      moralejaZh: '沒有人小到不能幫忙。',
       pregunta: {
         texto: '¿Cómo salva el ratón al león?',
         opciones: ['Muerde las cuerdas de la red', 'Llama a otros leones', 'Le da de comer'],
@@ -2362,7 +2425,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       }
     },
     {
-      id: 'lechera', nivel: 2, titulo: 'La niña y la leche', emoji: '🥛',
+      id: 'lechera', nivel: 2, tituloZh: '女孩和牛奶', titulo: 'La niña y la leche', emoji: '🥛',
       lineas: [
         'Una niña lleva un cubo de leche sobre la cabeza.',
         'Mientras anda, va pensando en todo lo que hará.',
@@ -2372,6 +2435,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         'El cubo cae al suelo y la leche se derrama entera.'
       ],
       moraleja: 'Primero se hacen las cosas y después se sueña con ellas.',
+      moralejaZh: '先把事情做好，再去夢想它。',
       pregunta: {
         texto: '¿Por qué se cae el cubo?',
         opciones: ['Porque la niña da un salto', 'Porque tropieza con una piedra', 'Porque pesa mucho'],
@@ -2379,7 +2443,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       }
     },
     {
-      id: 'roble-junco', nivel: 3, titulo: 'El roble y el junco', emoji: '🌳',
+      id: 'roble-junco', nivel: 3, tituloZh: '橡樹和蘆葦', titulo: 'El roble y el junco', emoji: '🌳',
       lineas: [
         'Junto al río crecen un roble enorme y un junco delgado.',
         'El roble se burla del junco: yo soy fuerte y tú te doblas con cualquier cosa.',
@@ -2390,6 +2454,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         'El junco se dobla hasta tocar el agua, y cuando pasa la tormenta se levanta otra vez.'
       ],
       moraleja: 'Saber doblarse a veces es más fuerte que no ceder nunca.',
+      moralejaZh: '懂得彎腰，有時候比永不讓步更堅強。',
       pregunta: {
         texto: '¿Qué le pasa al roble en la tormenta?',
         opciones: ['Se parte por la mitad', 'Se dobla y se levanta', 'No le pasa nada'],
@@ -2397,7 +2462,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       }
     },
     {
-      id: 'dos-amigos', nivel: 3, titulo: 'Los dos amigos y el pozo', emoji: '👬',
+      id: 'dos-amigos', nivel: 3, tituloZh: '兩個朋友和井', titulo: 'Los dos amigos y el pozo', emoji: '👬',
       lineas: [
         'Dos amigos caminan por un camino muy largo y llegan a un pozo seco.',
         'Uno se asoma demasiado y cae dentro.',
@@ -2408,6 +2473,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         'Pero el amigo responde: yo ya estuve aquí antes y sé por dónde se sale.'
       ],
       moraleja: 'Ayudar de verdad no es gritar desde arriba.',
+      moralejaZh: '真正的幫忙，不是在上面大喊。',
       pregunta: {
         texto: '¿Por qué su amigo baja al pozo?',
         opciones: ['Porque conoce la salida', 'Porque también se cae', 'Porque quiere el agua'],
@@ -2552,7 +2618,9 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       ajustes: {
         velocidad: 0.85,
         voz: null,
-        chino: false,
+        /* El público de esta app lee chino: mejor pasarse que quedarse corto.
+           La pantalla de bienvenida lo pregunta igualmente. */
+        chino: true,
         desbloquearTodo: false,
         mayusculas: false,
         micro: true,
@@ -3196,20 +3264,32 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     });
   }
 
-  /* Mensajes en español para cada fallo posible. */
+  /*
+   * Cada fallo, en español y en chino tradicional. Estos mensajes los lee el
+   * niño en pantalla, y si sólo estuvieran en español no se enteraría de por
+   * qué no funciona el micrófono.
+   */
   var MENSAJES = {
-    'no-soportado': 'Este navegador no tiene micrófono para leer en voz alta. Prueba con Chrome, Edge o Safari.',
-    'no-seguro': 'El micrófono necesita una página segura (https). Abre la app desde un enlace https o desde un servidor local.',
-    'not-allowed': 'No me has dado permiso para usar el micrófono. Puedes darlo en el candado de la barra de direcciones.',
-    'service-not-allowed': 'El navegador ha bloqueado el micrófono. Revisa los permisos del sitio.',
-    'audio-capture': 'No encuentro ningún micrófono conectado.',
-    'no-speech': 'No he oído nada. Acerca el micrófono y prueba otra vez.',
-    'sin-voz': 'No he oído nada. Acerca el micrófono y prueba otra vez.',
-    'network': 'El reconocimiento necesita conexión a internet en este navegador.',
-    'aborted': 'Se ha cortado la escucha.',
-    'tiempo': 'He esperado mucho. Prueba otra vez.',
-    'no-arranca': 'No he podido encender el micrófono. Prueba otra vez.'
+    'no-soportado': ['Este navegador no puede escuchar. Prueba con Chrome, Edge o Safari.',
+                     '這個瀏覽器不能聽。請用 Chrome、Edge 或 Safari。'],
+    'no-seguro': ['El micrófono necesita una página segura (https).',
+                  '麥克風需要安全網頁（https）。'],
+    'not-allowed': ['No me has dado permiso para usar el micrófono.',
+                    '你還沒有允許我使用麥克風。'],
+    'service-not-allowed': ['El navegador ha bloqueado el micrófono.', '瀏覽器擋住了麥克風。'],
+    'audio-capture': ['No encuentro ningún micrófono.', '找不到麥克風。'],
+    'no-speech': ['No he oído nada. Acércate y prueba otra vez.', '我沒聽到。靠近一點再試一次。'],
+    'sin-voz': ['No he oído nada. Acércate y prueba otra vez.', '我沒聽到。靠近一點再試一次。'],
+    'network': ['El micrófono necesita internet en este navegador.', '這個瀏覽器的麥克風需要網路。'],
+    'aborted': ['Se ha cortado la escucha.', '收聽中斷了。'],
+    'tiempo': ['He esperado mucho. Prueba otra vez.', '等太久了。再試一次。'],
+    'no-arranca': ['No he podido encender el micrófono.', '我無法開啟麥克風。']
   };
+
+  /* ¿Hay que enseñar también el chino? Lo decide el ajuste del niño. */
+  function conChino() {
+    try { return !!(global.Textos && global.Textos.usarChino()); } catch (e) { return false; }
+  }
 
   global.Escucha = {
     soportado: soportado,
@@ -3221,7 +3301,15 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     /* En modo continuo, el niño decide cuándo ha terminado de leer. */
     terminar: function () { if (detener) detener(); },
     parar: parar,
-    mensaje: function (codigo) { return MENSAJES[codigo] || 'Algo no ha ido bien con el micrófono.'; }
+    /* Para mostrar: las dos lenguas. Para hablar: sólo español. */
+    mensaje: function (codigo) {
+      var m = MENSAJES[codigo] || ['Algo no ha ido bien con el micrófono.', '麥克風出了點問題。'];
+      return conChino() && m[1] ? m[0] + '\n' + m[1] : m[0];
+    },
+    mensajeEs: function (codigo) {
+      var m = MENSAJES[codigo] || ['Algo no ha ido bien con el micrófono.'];
+      return m[0];
+    }
   };
 })(window);
 
@@ -3368,7 +3456,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
    * Sólo señalamos diferencias que son errores de LECTURA de verdad.
    */
   function diagnosticar(esperada, oida) {
-    if (!oida) return { clave: 'falta', texto: 'Te has saltado una palabra.' };
+    if (!oida) return { clave: 'falta', texto: 'Te has saltado una palabra.', zh: '你漏掉了一個字。' };
     var a = esperada.fon, b = oida.fon;
     if (a === b) return null;
 
@@ -3376,29 +3464,37 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     var silB = global.Silabas ? global.Silabas.syllabify(oida.texto).length : 0;
 
     if (a.indexOf('R') !== -1 && b.indexOf('R') === -1 && b.indexOf('r') !== -1) {
-      return { clave: 'rr', texto: 'Ojo con la erre fuerte: hay que hacerla vibrar, rrr.' };
+      return { clave: 'rr', texto: 'Ojo con la erre fuerte: hay que hacerla vibrar, rrr.',
+               zh: '注意強音的 r：舌頭要振動，rrr。' };
     }
     if (a.indexOf('R') === -1 && a.indexOf('r') !== -1 && b.indexOf('R') !== -1) {
-      return { clave: 'r', texto: 'Esa erre es suave: un solo golpecito de lengua.' };
+      return { clave: 'r', texto: 'Esa erre es suave: un solo golpecito de lengua.',
+               zh: '這個 r 是輕音：舌頭只彈一下。' };
     }
     if (silA && silB && silB < silA) {
-      return { clave: 'silabas-menos', texto: 'Te has comido una sílaba. Léela despacio, trozo a trozo.' };
+      return { clave: 'silabas-menos', texto: 'Te has comido una sílaba. Léela despacio, trozo a trozo.',
+               zh: '你少讀了一個音節。慢慢讀，一段一段來。' };
     }
     if (silA && silB && silB > silA) {
-      return { clave: 'silabas-mas', texto: 'Has dicho una sílaba de más. Mira bien los trozos.' };
+      return { clave: 'silabas-mas', texto: 'Has dicho una sílaba de más. Mira bien los trozos.',
+               zh: '你多讀了一個音節。看清楚每一段。' };
     }
     /* Por debajo de este parecido, lo dicho no tiene que ver con lo escrito:
        afinar el diagnóstico sólo produciría pistas absurdas. */
     if (similitud(a, b) < 0.45) {
-      return { clave: 'otra', texto: 'Esa no era. Escucha cómo suena y vuelve a intentarlo.' };
+      return { clave: 'otra', texto: 'Esa no era. Escucha cómo suena y vuelve a intentarlo.',
+               zh: '不是這個。聽聽看怎麼唸，再試一次。' };
     }
     if (a.replace(/[aeiou]/g, '') === b.replace(/[aeiou]/g, '')) {
-      return { clave: 'vocal', texto: 'Las consonantes están bien; falla alguna vocal.' };
+      return { clave: 'vocal', texto: 'Las consonantes están bien; falla alguna vocal.',
+               zh: '子音都對了，元音有一個不對。' };
     }
     if (a.replace(/[^aeiou]/g, '') === b.replace(/[^aeiou]/g, '')) {
-      return { clave: 'consonante', texto: 'Las vocales están bien; repasa alguna consonante.' };
+      return { clave: 'consonante', texto: 'Las vocales están bien; repasa alguna consonante.',
+               zh: '元音都對了，再看一下子音。' };
     }
-    return { clave: 'otra', texto: 'Casi. Escucha cómo suena y vuelve a intentarlo.' };
+    return { clave: 'otra', texto: 'Casi. Escucha cómo suena y vuelve a intentarlo.',
+             zh: '差一點。聽聽看怎麼唸，再試一次。' };
   }
 
   var BIEN = 0.90;
@@ -3470,16 +3566,20 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     return mejor;
   }
 
+  /* Cada ánimo con su versión china: el niño lo LEE en pantalla, y en español
+     todavía no puede. */
   var ANIMOS = {
-    3: ['¡Perfecto!', '¡Muy bien leído!', '¡Clavado!'],
-    2: ['¡Casi perfecto!', '¡Muy bien, casi entero!'],
-    1: ['Vas por buen camino.', 'Poco a poco.'],
-    0: ['Vamos a escucharlo otra vez.', 'Escucha y repite conmigo.']
+    3: [['¡Perfecto!', '完美！'], ['¡Muy bien leído!', '讀得很好！'], ['¡Clavado!', '一模一樣！']],
+    2: [['¡Casi perfecto!', '差一點就完美！'], ['¡Muy bien, casi entero!', '很好，幾乎全對！']],
+    1: [['Vas por buen camino.', '你走在對的路上。'], ['Poco a poco.', '慢慢來。']],
+    0: [['Vamos a escucharlo otra vez.', '我們再聽一次。'], ['Escucha y repite conmigo.', '聽我說，跟著唸。']]
   };
 
+  /* Devuelve { es, zh } para que quien llama decida qué muestra y qué habla. */
   function animo(estrellas) {
     var lista = ANIMOS[estrellas] || ANIMOS[0];
-    return lista[Math.floor(Math.random() * lista.length)];
+    var x = lista[Math.floor(Math.random() * lista.length)];
+    return { es: x[0], zh: x[1] };
   }
 
   global.Evaluar = {
@@ -4268,6 +4368,23 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
   /* ------------------------------------------------------------ utilería */
 
+  /*
+   * Textos.t() devuelve las dos lenguas separadas por un salto de línea cuando
+   * el chino está activado. Aquí se parten en dos nodos, para que el chino
+   * lleve su propio estilo —más pequeño y más tenue— en toda la app sin tener
+   * que tocar cada sitio donde se pinta un texto.
+   */
+  function ponerTexto(nodo, valor) {
+    var texto = String(valor);
+    var corte = texto.indexOf('\n');
+    if (corte === -1) { nodo.textContent = texto; return; }
+    nodo.textContent = texto.slice(0, corte);
+    var zh = document.createElement('span');
+    zh.className = 'zh';
+    zh.textContent = texto.slice(corte + 1).replace(/\n/g, ' ');
+    nodo.appendChild(zh);
+  }
+
   function el(tag, attrs, hijos) {
     var n = document.createElement(tag);
     if (attrs) {
@@ -4275,7 +4392,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         var v = attrs[k];
         if (v === null || v === undefined || v === false) return;
         if (k === 'class') n.className = v;
-        else if (k === 'text') n.textContent = v;
+        else if (k === 'text') ponerTexto(n, v);
         else if (k === 'html') n.innerHTML = v;
         else if (k === 'style') n.setAttribute('style', v);
         else if (k.indexOf('on') === 0) n.addEventListener(k.slice(2), v);
@@ -4314,7 +4431,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
    * otro y el chino saldría aplastado en una columna de un carácter.
    */
   function etiqueta(clave) {
-    var hijos = [el('span', { text: T.t(clave) })];
+    var hijos = [el('span', { text: T.es(clave) })];
     if (T.usarChino()) hijos.push(el('span', { class: 'zh', text: T.zh(clave) }));
     return [el('span', { class: 'etq' }, hijos)];
   }
@@ -4393,13 +4510,19 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     global.scrollTo(0, 0);
   }
 
+  /* El título de la unidad también tiene que poder leerlo. */
+  function tituloUnidad(u) {
+    if (!u) return '';
+    return (T.usarChino() && u.tituloZh) ? u.titulo + '\n' + u.tituloZh : u.titulo;
+  }
+
   function barra(titulo, alVolver, extra) {
     return el('header', { class: 'barra' }, [
       alVolver ? el('button', {
-        class: 'btn btn-icono', 'aria-label': T.t('volver'), onclick: alVolver, text: '←'
+        class: 'btn btn-icono', 'aria-label': T.es('volver'), onclick: alVolver, text: '←'
       }) : null,
       el('h1', { text: titulo }),
-      extra || el('div', { class: 'marcador', title: T.t('estrellas') }, [
+      extra || el('div', { class: 'marcador', title: T.es('estrellas') }, [
         el('span', { text: '★' }),
         el('b', { text: String(Progreso.datos().estrellas) })
       ])
@@ -4414,10 +4537,10 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
    * ejercicio ni cansar con la misma frase cinco veces seguidas.
    */
   function enunciado(clave, textoExtra) {
-    var frase = T.t(clave) + (textoExtra ? '. ' + textoExtra : '');
+    var frase = T.es(clave) + (textoExtra ? '. ' + textoExtra : '');
     var caja = el('div', { class: 'enunciado' }, [
       el('button', {
-        class: 'btn btn-icono btn-audio', 'aria-label': T.t('escuchar'), text: '🔊',
+        class: 'btn btn-icono btn-audio', 'aria-label': T.es('escuchar'), text: '🔊',
         onclick: function () { narrar(frase); }
       }),
       el('div', { class: 'txt' }, etiqueta(clave))
@@ -4451,7 +4574,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     var elegido = perfil.emoji || '🙂';
 
     var campo = el('input', {
-      type: 'text', class: 'campo-nombre', placeholder: T.t('tuNombre'),
+      type: 'text', class: 'campo-nombre', placeholder: T.es('tuNombre'),
       maxlength: '20', autocomplete: 'off', value: perfil.nombre || ''
     });
 
@@ -4611,7 +4734,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         'aria-label': (i + 1) + '. ' + u.titulo + (libre ? '' : ' — ' + T.t('bloqueada')),
         onclick: function () {
           if (!libre) {
-            narrar(T.t('bloqueada'));
+            narrar(T.es('bloqueada'));
             return;
           }
           abrirLeccion(i);
@@ -4627,7 +4750,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     var yo = Progreso.perfilActivo();
     var chapa = el('button', {
-      class: 'marcador marcador-perfil', 'aria-label': T.t('cambiarNino'),
+      class: 'marcador marcador-perfil', 'aria-label': T.es('cambiarNino'),
       onclick: verPerfiles
     }, [
       el('span', { class: 'perfil-mini', text: yo.emoji || '🙂' }),
@@ -4672,7 +4795,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
           : el('button', { class: 'btn', onclick: verInstalar },
                [el('span', { text: '📲' })].concat(etiqueta('instalar')))
       ]),
-      el('p', { class: 'pie', text: 'Hecho con la voz del propio navegador · sin internet, sin cuentas' })
+      el('p', { class: 'pie', text: T.t('hechoCon') })
     ]);
   }
 
@@ -4738,7 +4861,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     var hasta = Progreso.siguienteUnidad(Curriculo.unidades);
     var palabras = Curriculo.palabrasHasta(Math.max(0, hasta));
     if (palabras.length < 4) {
-      narrar('Todavía no hay palabras suficientes para repasar. Aprende una unidad más.');
+      narrar(T.es('todaviaNoHay'));
       return;
     }
 
@@ -4791,10 +4914,10 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     if (!l.repaso) Progreso.completarUnidad(l.unidad.id);
     confeti();
     var hayMas = !l.repaso && l.indice + 1 < Curriculo.unidades.length;
-    setTimeout(function () { narrar(T.t('unidadHecha') + ' ¡Muy bien!'); }, 250);
+    setTimeout(function () { narrar(T.es('unidadHecha') + ' ¡Muy bien!'); }, 250);
 
     pintar([
-      barra(l.unidad.titulo, verPortada),
+      barra(tituloUnidad(l.unidad), verPortada),
       el('section', { class: 'resultado', style: '--u: var(--c' + (l.unidad.color || 0) + ')' }, [
         el('div', { class: 'emo', text: '🏆' }),
         el('h2', {}, etiqueta('unidadHecha')),
@@ -4831,7 +4954,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       indicadorPasos(),
       claveEnunciado ? enunciado(claveEnunciado, extraNarracion) : null
     ].concat(hijos));
-    pintar([barra(l.unidad.titulo, verPortada), seccion]);
+    pintar([barra(tituloUnidad(l.unidad), verPortada), seccion]);
     if (alEntrar) trasNarrar(alEntrar, 320);
     return seccion;
   }
@@ -4917,7 +5040,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       var partes = [];
       if (u.nombre) partes.push({ text: 'Se llama ' + u.nombre, tipo: 'frase', pausa: 400 });
       if (u.silabas && u.silabas.length) {
-        partes.push({ text: 'Suena así', tipo: 'frase', pausa: 320 });
+        partes.push({ text: T.es('suenaAsi'), tipo: 'frase', pausa: 320 });
         u.silabas.slice(0, 6).forEach(function (s) {
           partes.push({ text: s, tipo: 'silaba', pausa: 300 });
         });
@@ -4930,7 +5053,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       el('div', { class: 'tarjeta' }, [
         titular,
         u.nombre ? el('p', { class: 'dato' }, [
-          document.createTextNode(T.t('seLlama') + ' '),
+          document.createTextNode(T.es('seLlama') + ' '),
           el('b', { text: u.nombre })
         ]) : null,
         u.fonema ? el('p', { class: 'dato' }, [
@@ -4962,6 +5085,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       el('span', { text: '🇬🇧' }),
       el('div', {}, [
         el('p', { text: f.nota }),
+        T.usarChino() && f.notaZh ? el('p', { class: 'zh', text: f.notaZh }) : null,
         el('button', {
           class: 'btn', text: '🔊 ' + f.muestraEn + ' → ' + f.muestraEs,
           onclick: function () {
@@ -4995,7 +5119,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
           b.classList.add('tocada');
           if (Object.keys(tocadas).length === silabas.length) {
             siguiente.removeAttribute('disabled');
-            setTimeout(function () { narrar(T.t('muyBien')); }, 500);
+            setTimeout(function () { narrar(T.es('muyBien')); }, 500);
           }
         }
       });
@@ -5059,7 +5183,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
             b.classList.add('mal');
             setTimeout(function () { b.classList.remove('mal'); }, 500);
             Voz.secuencia([
-              { text: 'No. Escucha otra vez', tipo: 'frase', pausa: 300 },
+              { text: T.es('noEscuchaOtra'), tipo: 'frase', pausa: 300 },
               { text: objetivo, tipo: 'silaba' }
             ]);
           }
@@ -5272,7 +5396,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
           } else {
             b.classList.add('mal');
             setTimeout(function () { b.classList.remove('mal'); }, 500);
-            narrar('Ese no. Lee otra vez.');
+            narrar(T.es('noEsEsta'));
           }
         });
         rejilla.appendChild(b);
@@ -5325,7 +5449,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     function botonMicro(clase) {
       return el('button', {
         class: 'micro-btn' + (clase ? ' ' + clase : ''),
-        'aria-label': T.t('tocaYLee')
+        'aria-label': T.es('tocaYLee')
       }, [el('span', { class: 'micro-icono', text: '🎤' })]);
     }
 
@@ -5378,9 +5502,8 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         onParcial: function (t) { eco.textContent = t; }
       }).then(function (r) {
         if (!r.ok) {
-          var m = Escucha.mensaje(r.error);
-          reposo(m);
-          narrar(m);
+          reposo(Escucha.mensaje(r.error));
+          narrar(Escucha.mensajeEs(r.error));
           return;
         }
         mostrar(Evaluar.puntuar(objetivo, r.textos), r.segundos);
@@ -5410,7 +5533,12 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         marcada.appendChild(el('span', { class: 'pal-' + p.estado, text: p.texto }));
       });
 
-      var base = Evaluar.animo(res.estrellas) + (res.pista ? ' ' + res.pista.texto : '');
+      /* Lo que se HABLA va en español; lo que se LEE, en las dos lenguas. */
+      var an = Evaluar.animo(res.estrellas);
+      var base = an.es + (res.pista ? ' ' + res.pista.texto : '');
+      var baseVer = T.usarChino()
+        ? base + '\n' + an.zh + (res.pista && res.pista.zh ? ' ' + res.pista.zh : '')
+        : base;
 
       /* En un par mínimo, decir la otra palabra no es un fallo cualquiera:
          conviene nombrarlo, que es justo lo que el ejercicio entrena. */
@@ -5419,7 +5547,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
           Evaluar.similitud(Evaluar.fonetica(res.oido), Evaluar.fonetica(objetivo))) {
         base = 'Has dicho «' + opciones.rival + '», pero pone «' + objetivo + '». Mira bien la diferencia.';
       }
-      var comentario = el('p', { class: 'comentario', text: base });
+      var comentario = el('p', { class: 'comentario', text: baseVer });
 
       var marcaPpm = null;
       if (ppm) {
@@ -5468,7 +5596,9 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         var texto = base;
         if (delModelo && caja.contains(comentario)) {
           texto = delModelo;
-          comentario.textContent = delModelo;
+          /* El modelo sólo escribe español: la pista china se conserva debajo. */
+          comentario.textContent = T.usarChino() && res.pista && res.pista.zh
+            ? delModelo + '\n' + res.pista.zh : delModelo;
           comentario.appendChild(el('span', { class: 'sello-modelo', text: ' ✨' }));
         }
         return narrar(texto);
@@ -5763,6 +5893,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
             ])
           ]),
           el('p', { class: 'truco', text: f.nota }),
+          T.usarChino() && f.notaZh ? el('p', { class: 'truco zh', text: f.notaZh }) : null,
           hayIngles ? null : el('p', { class: 'dato', text: T.t('sinVozInglesa') }),
           el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
         ]),
@@ -5874,7 +6005,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
             setTimeout(function () { b.classList.remove('mal'); }, 500);
             Progreso.apuntarFallo('par-minimo', 'pares');
             Voz.secuencia([
-              { text: 'No. Cambian en ' + par.diferencia, tipo: 'frase', pausa: 300 },
+              { text: T.es('noEscuchaOtra') + '. ' + T.es('cambianEn') + ' ' + par.diferencia, tipo: 'frase', pausa: 300 },
               { text: objetivo, tipo: 'palabra' }
             ]);
           }
@@ -5912,7 +6043,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       var tarjeta = el('div', { class: 'palabra-tarjeta' }, [
         el('div', { class: 'palabra-emoji', text: par[cual][1] }),
         el('div', { class: 'palabra-entera', text: objetivo }),
-        el('p', { class: 'dato', text: 'No es "' + otra + '". Fíjate en ' + par.diferencia + '.' }),
+        el('p', { class: 'dato', text: T.t('noEsSino') + ' «' + otra + '». ' + T.t('fijateEn') + ' ' + par.diferencia + '.' }),
         el('p', { class: 'dato', text: (i + 1) + ' / ' + lista.length })
       ]);
 
@@ -5958,7 +6089,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       var palabra = lista[i];
 
       var campo = el('input', {
-        type: 'text', class: 'campo-codigo campo-dictado', placeholder: T.t('escribeAqui'),
+        type: 'text', class: 'campo-codigo campo-dictado', placeholder: T.es('escribeAqui'),
         autocomplete: 'off', autocorrect: 'off', spellcheck: 'false', autocapitalize: 'off'
       });
       var veredicto = el('div', {});
@@ -5976,7 +6107,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
           Progreso.apuntarAcierto('dictado');
           veredicto.appendChild(el('div', { class: 'veredicto v3' }, [
             el('div', { class: 'estrellas-ganadas', text: '★★★' }),
-            el('p', { class: 'comentario', text: '¡Perfecto! ' + palabra })
+            el('p', { class: 'comentario', text: T.t('perfectoCorto') + ' ' + palabra })
           ]));
           narrar('¡Perfecto!');
           confeti();
@@ -5992,7 +6123,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
             ]),
             el('p', { class: 'comentario', text: T.t('ortografia') + '.' })
           ]));
-          narrar(T.t('ortografia') + '. Se escribe ' + palabra);
+          narrar(T.es('ortografia') + '. Se escribe ' + palabra);
         } else {
           Progreso.apuntarFallo('dictado-mal', 'dictado');
           veredicto.appendChild(el('div', { class: 'veredicto v0' }, [
@@ -6004,7 +6135,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
             ])
           ]));
           Voz.secuencia([
-            { text: 'Escucha otra vez', tipo: 'frase', pausa: 260 },
+            { text: T.es('escuchaOtraVez'), tipo: 'frase', pausa: 260 },
             { text: palabra, tipo: 'palabra' }
           ]);
         }
@@ -6060,7 +6191,8 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         }, [
           el('span', { class: 'cuento-emo', text: c.emoji }),
           el('span', { class: 'cuento-titulo', text: c.titulo }),
-          el('span', { class: 'cuento-dato', text: palabras + ' palabras' +
+          T.usarChino() && c.tituloZh ? el('span', { class: 'zh', text: c.tituloZh }) : null,
+          el('span', { class: 'cuento-dato', text: palabras + ' ' + T.es('palabrasCorto') +
             (mejor ? ' · ' + mejor + ' ppm' : '') }),
           leidoCuento(c) ? el('span', { class: 'hecha', text: '✓' }) : null
         ]));
@@ -6127,12 +6259,12 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     ]);
 
     pintar([
-      barra(c.titulo, verBiblioteca),
+      barra(T.usarChino() && c.tituloZh ? c.titulo + '\n' + c.tituloZh : c.titulo, verBiblioteca),
       el('section', { style: '--u: var(--c4)' }, [
         el('div', { class: 'enunciado' }, [
           el('button', {
             class: 'btn btn-icono btn-audio', text: '🔊',
-            onclick: function () { narrar(T.t('tocaPalabra')); }
+            onclick: function () { narrar(T.es('tocaPalabra')); }
           }),
           el('div', { class: 'txt' }, etiqueta('tocaPalabra'))
         ]),
@@ -6170,7 +6302,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         } else {
           b.classList.add('mal');
           Progreso.apuntarFallo('comprension', 'lectura');
-          narrar('Ésa no. Vuelve a leer el cuento y fíjate.');
+          narrar(T.es('noEsEsa'));
         }
       });
       lista.appendChild(b);
@@ -6180,7 +6312,9 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       var caja = el('div', { class: 'moraleja' }, [
         el('span', { class: 'moraleja-icono', text: '💡' }),
         el('p', { class: 'moraleja-titulo', text: T.t('moraleja') }),
-        el('p', { class: 'moraleja-texto', text: c.moraleja })
+        el('p', { class: 'moraleja-texto', text: c.moraleja }),
+        T.usarChino() && c.moralejaZh
+          ? el('p', { class: 'moraleja-texto zh', text: c.moralejaZh }) : null
       ]);
       lista.parentNode.appendChild(caja);
       lista.parentNode.appendChild(el('div', { class: 'fila-botones' }, [
@@ -6211,7 +6345,8 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       lista
     ]);
 
-    pintar([barra(c.titulo, function () { abrirCuento(c); }), seccion]);
+    pintar([barra(T.usarChino() && c.tituloZh ? c.titulo + '\n' + c.tituloZh : c.titulo,
+                  function () { abrirCuento(c); }), seccion]);
     setTimeout(function () { narrar(p.texto); }, 300);
   }
 
@@ -6255,8 +6390,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         }));
       });
       vel.appendChild(barras);
-      vel.appendChild(el('p', { class: 'dato', style: 'font-size:.8rem',
-        text: 'Cada barra es una lectura, de la más antigua a la más reciente.' }));
+      vel.appendChild(el('p', { class: 'dato', style: 'font-size:.8rem', text: T.t('cadaBarra') }));
     }
     panel.appendChild(vel);
 
@@ -6289,7 +6423,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
       fal.appendChild(ul);
       if (e.flojas.length) {
         fal.appendChild(el('p', { class: 'dato',
-          text: 'El repaso ya le está trayendo: ' + e.flojas.map(function (f) { return f.id; }).join(', ') }));
+          text: T.t('repasoTrae') + ': ' + e.flojas.map(function (f) { return f.id; }).join(', ') }));
       }
     }
     panel.appendChild(fal);
@@ -6318,9 +6452,9 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     try { guardado = global.localStorage.getItem('lectura-es-texto') || ''; } catch (e) {}
 
     var area = el('textarea', {
-      placeholder: T.t('escribeAlgo'),
+      placeholder: T.es('escribeAlgo'),
       spellcheck: 'false',
-      'aria-label': T.t('escribeAlgo')
+      'aria-label': T.es('escribeAlgo')
     });
     area.value = guardado || 'El pingüino pequeño come chocolate con fresas.';
 
@@ -6388,7 +6522,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
         el('div', { class: 'enunciado' }, [
           el('button', {
             class: 'btn btn-icono btn-audio', text: '🔊',
-            onclick: function () { narrar(T.t('tocaPalabra')); }
+            onclick: function () { narrar(T.es('tocaPalabra')); }
           }),
           el('div', { class: 'txt' }, etiqueta('tocaPalabra'))
         ]),
@@ -6465,7 +6599,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
 
     caja.appendChild(el('p', { class: 'dato', style: 'margin-top:18px' }, etiqueta('vienesDeOtro')));
     var campo = el('input', {
-      type: 'text', class: 'campo-codigo', placeholder: T.t('pegaCodigo'),
+      type: 'text', class: 'campo-codigo', placeholder: T.es('pegaCodigo'),
       autocapitalize: 'characters', autocomplete: 'off', spellcheck: 'false'
     });
     caja.appendChild(campo);
@@ -6480,7 +6614,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
   /* Aplica un código, avisando antes de que sustituye lo que haya aquí. */
   function aplicarCodigo(codigo) {
     if (!Progreso.leerCodigo(codigo).ok) {
-      narrar(T.t('codigoMal'));
+      narrar(T.es('codigoMal'));
       return global.alert(T.t('codigoMal'));
     }
     if (!global.confirm(T.t('codigoPisa'))) return;
@@ -6494,7 +6628,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     document.body.setAttribute('data-may', Progreso.ajuste('mayusculas') ? '1' : '0');
     Voz.velocidad(Progreso.ajuste('velocidad') || 0.85);
     verPortada();
-    narrar(T.t('codigoBien') + ' ' + r.unidades + ' unidades, ' + r.cuentos +
+    narrar(T.es('codigoBien') + ' ' + r.unidades + ' unidades, ' + r.cuentos +
            ' cuentos y ' + r.estrellas + ' estrellas.');
   }
 
@@ -6515,7 +6649,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
     panel.appendChild(el('div', { style: 'text-align:center' }, [
       el('div', { style: 'font-size:3.4rem;line-height:1', text: '📲' }),
       el('h2', { style: 'margin:6px 0 2px' }, etiqueta('instalarApp')),
-      el('p', { class: 'dato', text: 'Un icono propio, ventana propia, y sin buscar el archivo.' })
+      el('p', { class: 'dato', text: T.t('iconoPropio') })
     ]));
 
     if (caso.clave === 'listo') {
@@ -6687,7 +6821,7 @@ body[data-may="1"] .vocal-btn .v { text-transform: uppercase; }
           var url = location.href.split('#')[0];
           var datos = {
             title: 'Aprendo a leer en español',
-            text: T.t('queEsEsto'),
+            text: T.es('queEsEsto'),
             url: url
           };
           if (navigator.share) {

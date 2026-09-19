@@ -1,12 +1,19 @@
 /*!
- * textos.js — Textos de la interfaz en español y chino.
+ * textos.js — Textos de la interfaz en español y chino tradicional.
  *
- * El niño lee chino con soltura pero todavía no español: mientras aprende,
- * poder ver una instrucción en chino es la diferencia entre necesitar a un
- * adulto al lado y poder avanzar solo. Se activa con el botón 中文.
+ * La distinción que lo gobierna todo: el niño ENTIENDE el español hablado
+ * pero no sabe LEERLO. Así que lo que suena va en español, y lo que se ve
+ * escrito tiene que estar también en chino, o no puede usar la app solo.
  *
- * Ojo: los enunciados SIEMPRE se pronuncian en voz alta en español además de
- * mostrarse. El chino es una muleta de apoyo, no el camino principal.
+ *   t(clave)   para MOSTRAR: devuelve las dos lenguas, separadas por un salto
+ *              de línea, cuando el chino está activado.
+ *   es(clave)  para HABLAR y para atributos que no admiten dos líneas
+ *              (placeholder, aria-label): sólo español.
+ *   zh(clave)  sólo chino, para pintarlo con su propio estilo.
+ *
+ * Usar t() donde iba es() haría que el sintetizador intentara pronunciar el
+ * chino con voz española; usar es() donde va t() deja al niño sin poder leer
+ * el botón. Por eso están separadas.
  */
 (function (global) {
   'use strict';
@@ -131,6 +138,28 @@
     codigoBien:     ['¡Listo! Progreso recuperado.', '好了！進度已經找回來。'],
     copiarCodigo:   ['Copiar el código', '複製代碼'],
 
+    /* Frases que antes estaban escritas a pelo dentro de la interfaz */
+    seLlamaAsi:     ['Se llama', '這個字母叫'],
+    suenaAsi:       ['Suena así', '聽起來像這樣'],
+    noEscuchaOtra:  ['No. Escucha otra vez', '不對。再聽一次'],
+    perfectoCorto:  ['¡Perfecto!', '完美！'],
+    escuchaOtraVez: ['Escucha otra vez', '再聽一次'],
+    cambianEn:      ['Cambian en', '差別在'],
+    noEsEsa:        ['Ésa no. Vuelve a leer y fíjate.', '不是那個。再讀一次，看仔細。'],
+    noEsEsta:       ['Ese no. Lee otra vez.', '不是這個。再讀一次。'],
+    cadaBarra:      ['Cada barra es una lectura, de la más antigua a la más reciente.',
+                     '每一條是一次朗讀，從最早到最近。'],
+    repasoTrae:     ['El repaso ya le está trayendo', '複習現在會給他'],
+    iconoPropio:    ['Un icono propio, ventana propia, y sin buscar el archivo.',
+                     '自己的圖示、自己的視窗，不用再找檔案。'],
+    hechoCon:       ['Con la voz del navegador · sin internet, sin cuentas',
+                     '使用瀏覽器語音 · 不需網路，不需帳號'],
+    noEsSino:       ['No es', '不是'],
+    fijateEn:       ['Fíjate en', '注意看'],
+    palabrasCorto:  ['palabras', '個字'],
+    todaviaNoHay:   ['Todavía no hay palabras suficientes para repasar. Aprende una unidad más.',
+                     '還沒有足夠的單字可以複習。再學一課吧。'],
+
     /* Nivel avanzado */
     pasoIngles:     ['Escucha las dos y nota la diferencia', '兩種都聽，注意不一樣的地方'],
     pasoInventadas: ['Lee estas palabras inventadas', '讀這些編出來的詞'],
@@ -198,10 +227,16 @@
   var idioma = 0;   // 0 = español, 1 = chino como apoyo
 
   global.Textos = {
+    /* Para mostrar en pantalla: las dos lenguas, una encima de otra. */
     t: function (clave) {
       var v = T[clave];
       if (!v) return clave;
-      return v[0];
+      return (idioma === 1 && v[1]) ? v[0] + '\n' + v[1] : v[0];
+    },
+    /* Para hablar, y para atributos de una sola línea. */
+    es: function (clave) {
+      var v = T[clave];
+      return v ? v[0] : clave;
     },
     zh: function (clave) {
       var v = T[clave];
